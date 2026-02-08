@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -38,9 +39,13 @@ export default function LandingPage() {
       {/* Desktop Navigation */}
       <header className="hidden lg:flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold text-lg">FI</span>
-          </div>
+          <Image 
+            src="/logo.png" 
+            alt="FIT-INN Logo" 
+            width={44} 
+            height={44} 
+            className="rounded-xl"
+          />
           <span className="font-bold text-xl text-gray-900">FIT-INN Nutrition</span>
         </div>
         <a 
@@ -59,8 +64,16 @@ export default function LandingPage() {
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 lg:py-0 lg:px-16">
           {/* Logo */}
           <div className="mb-8 lg:mb-12">
-            <div className="w-24 h-24 lg:w-32 lg:h-32 bg-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-4xl lg:text-5xl font-black text-white">FI</span>
+            <div className="relative">
+              <Image 
+                src="/logo.png" 
+                alt="FIT-INN Logo" 
+                width={120} 
+                height={120} 
+                className="rounded-2xl shadow-2xl shadow-teal-500/20 lg:w-[160px] lg:h-[160px]"
+              />
+              {/* Glow effect */}
+              <div className="absolute inset-0 bg-teal-500/20 blur-3xl rounded-full -z-10 scale-150" />
             </div>
           </div>
 
@@ -77,10 +90,10 @@ export default function LandingPage() {
             {[
               { icon: '🎯', text: 'Personalisiert', desc: 'Auf dich zugeschnitten' },
               { icon: '📊', text: 'Kalorienziele', desc: 'Präzise berechnet' },
-              { icon: '🥗', text: '500+ Rezepte', desc: 'Abwechslungsreich' },
+              { icon: '🥗', text: '500+ Rezepte', desc: 'Von Chefkoch.de' },
               { icon: '🛒', text: 'Einkaufsliste', desc: 'Automatisch generiert' },
             ].map((benefit, i) => (
-              <div key={i} className="bg-white rounded-xl p-4 lg:p-5 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+              <div key={i} className="bg-white rounded-xl p-4 lg:p-5 text-center border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
                 <span className="text-2xl lg:text-3xl mb-2 block">{benefit.icon}</span>
                 <span className="text-sm lg:text-base text-gray-900 font-semibold block">{benefit.text}</span>
                 <span className="text-xs lg:text-sm text-gray-500 hidden lg:block">{benefit.desc}</span>
@@ -124,7 +137,7 @@ export default function LandingPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02]"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -135,7 +148,7 @@ export default function LandingPage() {
                     Anmelden...
                   </span>
                 ) : (
-                  'Jetzt starten'
+                  'Jetzt starten 🚀'
                 )}
               </button>
             </form>
@@ -189,7 +202,7 @@ export default function LandingPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-lg shadow-lg shadow-teal-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02]"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -200,7 +213,7 @@ export default function LandingPage() {
                     Anmelden...
                   </span>
                 ) : (
-                  'Jetzt starten'
+                  'Jetzt starten 🚀'
                 )}
               </button>
             </form>
@@ -218,8 +231,27 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="py-6 px-6 text-center text-gray-400 text-sm bg-white border-t border-gray-100">
-        <p>© 2026 FIT-INN Trier • Ernährungsplan powered by AI</p>
+      <footer className="py-6 px-6 text-center bg-white border-t border-gray-100">
+        <div className="flex items-center justify-center gap-3 mb-3">
+          <Image 
+            src="/logo.png" 
+            alt="FIT-INN" 
+            width={28} 
+            height={28} 
+            className="rounded-lg"
+          />
+          <span className="font-semibold text-gray-700">Powered by FIT-INN Trier</span>
+        </div>
+        <p className="text-gray-400 text-sm">
+          © 2026 FIT-INN Trier • Ernährungsplan powered by AI
+        </p>
+        <div className="mt-2 flex items-center justify-center gap-4 text-xs text-gray-400">
+          <a href="https://fitinn-trier.de/impressum" className="hover:text-teal-600 transition-colors">Impressum</a>
+          <span>•</span>
+          <a href="https://fitinn-trier.de/datenschutz" className="hover:text-teal-600 transition-colors">Datenschutz</a>
+          <span>•</span>
+          <a href="mailto:info@fitinn-trier.de" className="hover:text-teal-600 transition-colors">Kontakt</a>
+        </div>
       </footer>
     </div>
   );

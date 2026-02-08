@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import BottomNav from '@/components/BottomNav';
 import WaterTracker from '@/components/WaterTracker';
 import { loadProfile, loadDayPlan, saveDayPlan, saveFavorite, removeFavorite, isFavorite } from '@/lib/storage';
@@ -540,13 +541,17 @@ export default function PlanPage() {
       <div className="sticky top-0 bg-white z-20 shadow-sm">
         {/* Top Bar with Logo & Actions */}
         <div className="px-4 lg:px-8 py-3 flex items-center justify-between border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">FI</span>
-            </div>
+          <Link href="/" className="flex items-center gap-3">
+            <Image 
+              src="/logo.png" 
+              alt="FIT-INN" 
+              width={40} 
+              height={40} 
+              className="rounded-xl"
+            />
             <span className="font-bold text-xl text-gray-900 hidden sm:block">FIT-INN Nutrition</span>
             <span className="font-bold text-lg text-gray-900 sm:hidden">FIT-INN</span>
-          </div>
+          </Link>
           
           <div className="flex items-center gap-1 sm:gap-3">
             {/* Calorie Goal - Desktop */}
