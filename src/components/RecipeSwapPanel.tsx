@@ -57,7 +57,7 @@ interface RecipeSwapPanelProps {
 
 export default function RecipeSwapPanel({ isOpen, onClose, onSelect, mealType, currentRecipeId }: RecipeSwapPanelProps) {
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'quick' | 'lowcal' | 'highprotein' | 'vegetarian' | 'vegan'>('all');
+  const [filter, setFilter] = useState<'all' | 'quick' | 'lowcal' | 'highprotein' | 'vegetarian' | 'vegan' | 'lowcarb'>('all');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   useEffect(() => {
     const p = loadProfile();
@@ -110,6 +110,7 @@ export default function RecipeSwapPanel({ isOpen, onClose, onSelect, mealType, c
     if (filter === 'highprotein') recipes = recipes.filter(r => r.nutrition.protein >= 25);
     if (filter === 'vegetarian') recipes = recipes.filter(r => r.dietaryFlags?.includes('vegetarian') || r.dietaryFlags?.includes('vegan'));
     if (filter === 'vegan') recipes = recipes.filter(r => r.dietaryFlags?.includes('vegan'));
+    if (filter === 'lowcarb') recipes = recipes.filter(r => r.dietaryFlags?.includes('low-carb') || r.nutrition.carbs < 20);
 
     // Apply search
     if (search.trim()) {
@@ -187,6 +188,7 @@ export default function RecipeSwapPanel({ isOpen, onClose, onSelect, mealType, c
               { key: 'highprotein', label: '💪 High Protein' },
               { key: 'vegetarian', label: '🥬 Vegetarisch' },
               { key: 'vegan', label: '🌱 Vegan' },
+              { key: 'lowcarb', label: '🥑 Low Carb' },
             ].map(f => (
               <button
                 key={f.key}

@@ -6,8 +6,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import BottomNav from '@/components/BottomNav';
 import WaterTracker from '@/components/WaterTracker';
-import { loadProfile, loadDayPlan, saveDayPlan, saveFavorite, removeFavorite, isFavorite } from '@/lib/storage';
-import { generateDayPlan, scaleRecipe } from '@/lib/mealPlanGenerator';
+import { loadProfile, loadDayPlan, saveDayPlan, loadAllPlans, saveFavorite, removeFavorite, isFavorite } from '@/lib/storage';
+import { generateDayPlan, scaleRecipe, generateShoppingList } from '@/lib/mealPlanGenerator';
 import { calculateWaterGoal } from '@/lib/calculations';
 import { UserProfile, DayPlan, Recipe, MealPlan } from '@/types';
 import RecipeSwapPanel from '@/components/RecipeSwapPanel';
@@ -385,6 +385,16 @@ export default function PlanPage() {
     
   }, [router]);
 
+  const regeneratePlan = () => {
+    if (!profile) return;
+    if (!confirm('Neuen Plan generieren? Der alte wird überschrieben.')) return;
+    const dateStr = getDateString(currentDate);
+    const plan = generateDayPlan(dateStr, profile);
+    saveDayPlan(dateStr, plan);
+    setDayPlan(plan);
+    setActiveMealIndex(0);
+  };
+
   useEffect(() => {
     if (!profile) return;
 
@@ -399,6 +409,65 @@ export default function PlanPage() {
     setIsLoading(false);
     setActiveMealIndex(0);
   }, [profile, currentDate]);
+
+  const exportPDF = () => {
+    if (!profile || !dayPlan) return;
+    // Collect all week plans
+    const plans: { date: string; plan: DayPlan }[] = [];
+    for (const date of weekDates) {
+      const dateStr = getDateString(date);
+      const plan = loadDayPlan(dateStr);
+      if (plan) plans.push({ date: date.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }), plan });
+    }
+
+    const printContent = `<!DOCTYPE html><html><head><title>FIT-INN Wochenplan</title>
+<style>
+body{font-family:Arial,sans-serif;padding:20px;font-size:12px;color:#333}
+h1{color:#0d9488;font-size:20px;margin-bottom:4px}
+h2{color:#374151;font-size:14px;margin-top:16px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+.meal{padding:6px 0;display:flex;justify-content:space-between}
+.meal-name{font-weight:600}
+.kcal{color:#6b7280}
+.ingredients{color:#9ca3af;font-size:11px;margin-top:2px}
+.page-break{page-break-before:always}
+.shopping h3{margin-top:12px;font-size:12px;text-transform:uppercase;color:#6b7280}
+.shopping .item{padding:4px 0;display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6}
+</style></head><body>
+<h1>🏋️ FIT-INN Wochenplan</h1>
+<p style="color:#6b7280">Kalorienziel: ${profile.targetCalories} kcal/Tag</p>
+${plans.map(({ date, plan }) => `
+<h2>${date}</h2>
+${plan.meals.map(m => `
+<div class="meal">
+  <div>
+    <span class="meal-name">${m.recipe.name}</span>
+    <div class="ingredients">${m.recipe.ingredients.slice(0, 5).map(i => `${i.amount} ${i.unit} ${i.name}`).join(', ')}</div>
+  </div>
+  <span class="kcal">${m.recipe.nutrition.calories} kcal</span>
+</div>`).join('')}
+<div class="meal"><strong>Gesamt: ${plan.totalCalories} kcal</strong></div>
+`).join('')}
+<div class="page-break shopping">
+<h1>🛒 Einkaufsliste</h1>
+${(() => {
+  const allPlans = plans.map(p => p.plan);
+  const shoppingMap = generateShoppingList(allPlans);
+  const grouped: Record<string, { name: string; amount: number; unit: string }[]> = {};
+  shoppingMap.forEach((v, k) => {
+    const cat = v.category || 'Sonstiges';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push({ name: k.charAt(0).toUpperCase() + k.slice(1), amount: Math.round(v.amount * 10) / 10, unit: v.unit });
+  });
+  return Object.entries(grouped).map(([cat, items]) =>
+    `<h3>${cat}</h3>${items.map(i => `<div class="item"><span>☐ ${i.name}</span><span>${i.amount} ${i.unit}</span></div>`).join('')}`
+  ).join('');
+})()}
+</div>
+</body></html>`;
+
+    const w = window.open('', '_blank');
+    if (w) { w.document.write(printContent); w.document.close(); w.print(); }
+  };
 
   const toggleMealEaten = (mealIndex: number) => {
     if (!dayPlan) return;
@@ -567,9 +636,17 @@ export default function PlanPage() {
             </p>
             {isToday && <span className="text-xs text-teal-600 font-medium">Heute</span>}
           </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-500">Tagesziel</p>
-            <p className="font-semibold text-gray-900">{profile.targetCalories} kcal</p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => regeneratePlan()} className="px-3 py-1.5 rounded-lg bg-teal-50 text-teal-600 font-medium text-xs hover:bg-teal-100 transition-colors">
+              🔄
+            </button>
+            <button onClick={exportPDF} className="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-600 font-medium text-xs hover:bg-gray-100 transition-colors">
+              📄
+            </button>
+            <div className="text-right">
+              <p className="text-sm text-gray-500">Tagesziel</p>
+              <p className="font-semibold text-gray-900">{profile.targetCalories} kcal</p>
+            </div>
           </div>
         </div>
       </div>
@@ -588,11 +665,14 @@ export default function PlanPage() {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span>Aktuell:</span>
-            <span className="font-bold text-gray-900">{dayPlan.totalCalories} kcal</span>
-            <span>von</span>
-            <span className="font-bold text-teal-600">{profile.targetCalories} kcal</span>
+          <div className="flex items-center gap-3 text-sm text-gray-500">
+            <span>Aktuell: <span className="font-bold text-gray-900">{dayPlan.totalCalories} kcal</span> von <span className="font-bold text-teal-600">{profile.targetCalories} kcal</span></span>
+            <button onClick={() => regeneratePlan()} className="px-3 py-1.5 rounded-xl bg-teal-50 text-teal-600 font-medium hover:bg-teal-100 transition-colors text-sm">
+              🔄 Neuer Plan
+            </button>
+            <button onClick={exportPDF} className="px-3 py-1.5 rounded-xl bg-gray-50 text-gray-600 font-medium hover:bg-gray-100 transition-colors text-sm">
+              📄 Plan als PDF
+            </button>
           </div>
         </div>
 
@@ -708,6 +788,7 @@ export default function PlanPage() {
         currentRecipeId={swapPanel.mealIndex >= 0 && dayPlan?.meals[swapPanel.mealIndex] ? dayPlan.meals[swapPanel.mealIndex].recipe.id : undefined}
       />
 
+      {/* Regenerate Confirmation Modal */}
       <BottomNav />
     </div>
   );
