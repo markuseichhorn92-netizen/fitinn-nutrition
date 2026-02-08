@@ -44,7 +44,7 @@ function filterRecipesForUser(recipes: Recipe[], profile: UserProfile): Recipe[]
 }
 
 // Scale a recipe to target calories
-function scaleRecipe(recipe: Recipe, targetCals: number): Recipe {
+export function scaleRecipe(recipe: Recipe, targetCals: number): Recipe {
   if (!targetCals || targetCals <= 0 || recipe.nutrition.calories <= 0) return recipe;
   const scale = targetCals / recipe.nutrition.calories;
   // Don't scale more than 3x or less than 0.3x (would be weird portions)

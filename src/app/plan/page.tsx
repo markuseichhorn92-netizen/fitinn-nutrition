@@ -7,7 +7,7 @@ import Image from 'next/image';
 import BottomNav from '@/components/BottomNav';
 import WaterTracker from '@/components/WaterTracker';
 import { loadProfile, loadDayPlan, saveDayPlan, saveFavorite, removeFavorite, isFavorite } from '@/lib/storage';
-import { generateDayPlan } from '@/lib/mealPlanGenerator';
+import { generateDayPlan, scaleRecipe } from '@/lib/mealPlanGenerator';
 import { calculateWaterGoal } from '@/lib/calculations';
 import { UserProfile, DayPlan, Recipe, MealPlan } from '@/types';
 import RecipeSwapPanel from '@/components/RecipeSwapPanel';
@@ -419,9 +419,11 @@ export default function PlanPage() {
 
     const updatedMeals = [...dayPlan.meals];
     const oldRecipe = updatedMeals[mealIndex].recipe;
+    // Scale the new recipe to match the calorie target of the old one
+    const scaledRecipe = scaleRecipe(newRecipe, oldRecipe.nutrition.calories);
     updatedMeals[mealIndex] = {
       ...updatedMeals[mealIndex],
-      recipe: newRecipe,
+      recipe: scaledRecipe,
       alternatives: [oldRecipe, ...updatedMeals[mealIndex].alternatives.filter(r => r.id !== newRecipe.id)].slice(0, 2),
     };
 
