@@ -107,7 +107,7 @@ export default function RecipeSwapPanel({ isOpen, onClose, onSelect, mealType, c
     // Apply quick filters
     if (filter === 'quick') recipes = recipes.filter(r => r.totalTime <= 15);
     if (filter === 'lowcal') recipes = recipes.filter(r => r.nutrition.calories <= 400);
-    if (filter === 'highprotein') recipes = recipes.filter(r => r.nutrition.protein >= 25);
+    if (filter === 'highprotein') recipes = recipes.filter(r => r.dietaryFlags?.includes('high-protein') || r.tags?.includes('high-protein') || r.nutrition.protein >= 25);
     if (filter === 'vegetarian') recipes = recipes.filter(r => r.dietaryFlags?.includes('vegetarian') || r.dietaryFlags?.includes('vegan'));
     if (filter === 'vegan') recipes = recipes.filter(r => r.dietaryFlags?.includes('vegan'));
     if (filter === 'lowcarb') recipes = recipes.filter(r => r.dietaryFlags?.includes('low-carb') || r.nutrition.carbs < 20);
