@@ -83,7 +83,6 @@ function DesktopMealCard({ meal, onToggleEaten, onSwap, onOpenSwapPanel }: Deskt
   const [favorite, setFavorite] = useState(() => isFavorite(meal.recipe.id));
   const { label } = mealTypeLabels[meal.type] || { label: meal.type.toUpperCase() };
   const recipe = meal.recipe;
-  const imageUrl = recipe.image && recipe.image.startsWith('http') ? recipe.image : getMealImage(recipe.category, recipe.id);
   
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -103,18 +102,27 @@ function DesktopMealCard({ meal, onToggleEaten, onSwap, onOpenSwapPanel }: Deskt
         <span className="text-xs font-bold tracking-wider text-gray-500">{label}</span>
       </div>
 
-      {/* Image */}
+      {/* Icon Banner */}
       <Link href={`/plan/recipe/${recipe.id}`} className="block relative">
-        <div className="relative aspect-video bg-gray-100">
-          <img 
-            src={imageUrl} 
-            alt={recipe.name}
-            className="w-full h-full object-cover"
-          />
-          {/* Favorite Button */}
+        <div className={`flex items-center justify-between px-4 py-3 ${
+          recipe.category === 'breakfast' ? 'bg-amber-50' :
+          recipe.category === 'lunch' ? 'bg-emerald-50' :
+          recipe.category === 'dinner' ? 'bg-indigo-50' : 'bg-orange-50'
+        }`}>
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">{
+              recipe.category === 'breakfast' ? '🥣' :
+              recipe.category === 'lunch' ? '🥗' :
+              recipe.category === 'dinner' ? '🍲' : '🥜'
+            }</span>
+            <div>
+              <span className="text-sm font-semibold text-gray-800">{recipe.nutrition.calories} kcal</span>
+              <span className="text-xs text-gray-500 ml-2">⏱ {recipe.totalTime} min</span>
+            </div>
+          </div>
           <button
             onClick={handleFavorite}
-            className="absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm hover:bg-white transition-colors"
+            className="p-2 rounded-full hover:bg-white/60 transition-colors"
           >
             <svg
               className={`w-5 h-5 ${favorite ? 'text-red-500 fill-current' : 'text-gray-400'}`}
@@ -224,7 +232,6 @@ function MobileMealCard({ meal, onToggleEaten, onSwap, onOpenSwapPanel }: Mobile
   const [favorite, setFavorite] = useState(() => isFavorite(meal.recipe.id));
   const { label } = mealTypeLabels[meal.type] || { label: meal.type.toUpperCase() };
   const recipe = meal.recipe;
-  const imageUrl = recipe.image && recipe.image.startsWith('http') ? recipe.image : getMealImage(recipe.category, recipe.id);
   
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -240,18 +247,27 @@ function MobileMealCard({ meal, onToggleEaten, onSwap, onOpenSwapPanel }: Mobile
   return (
     <div className="min-w-[300px] max-w-[340px] snap-center shrink-0">
       <div className={`bg-white rounded-2xl overflow-hidden shadow-sm ${meal.eaten ? 'opacity-60' : ''}`}>
-        {/* Image Section */}
+        {/* Icon Banner */}
         <Link href={`/plan/recipe/${recipe.id}`}>
-          <div className="relative h-44 bg-gray-100">
-            <img 
-              src={imageUrl} 
-              alt={recipe.name}
-              className="w-full h-full object-cover"
-            />
-            {/* Favorite Button */}
+          <div className={`flex items-center justify-between px-4 py-3 ${
+            recipe.category === 'breakfast' ? 'bg-amber-50' :
+            recipe.category === 'lunch' ? 'bg-emerald-50' :
+            recipe.category === 'dinner' ? 'bg-indigo-50' : 'bg-orange-50'
+          }`}>
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">{
+                recipe.category === 'breakfast' ? '🥣' :
+                recipe.category === 'lunch' ? '🥗' :
+                recipe.category === 'dinner' ? '🍲' : '🥜'
+              }</span>
+              <div>
+                <span className="text-sm font-semibold text-gray-800">{recipe.nutrition.calories} kcal</span>
+                <span className="text-xs text-gray-500 ml-2">⏱ {recipe.totalTime} min</span>
+              </div>
+            </div>
             <button
               onClick={handleFavorite}
-              className="absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm hover:bg-white transition-colors"
+              className="p-2 rounded-full hover:bg-white/60 transition-colors"
             >
               <svg
                 className={`w-5 h-5 ${favorite ? 'text-red-500 fill-current' : 'text-gray-400'}`}
