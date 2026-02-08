@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-// import Image from 'next/image';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -35,21 +34,21 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       {/* Hero Section */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         {/* Logo */}
         <div className="mb-8">
-          <div className="w-24 h-24 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
+          <div className="w-24 h-24 bg-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
             <span className="text-4xl font-black text-white">FI</span>
           </div>
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl sm:text-4xl font-bold text-center mb-3">
-          <span className="text-primary-400">FIT-INN</span> Ernährungsplan
+        <h1 className="text-3xl sm:text-4xl font-bold text-center mb-3 text-gray-900">
+          <span className="text-teal-600">FIT-INN</span> Nutrition
         </h1>
-        <p className="text-dark-300 text-center text-lg mb-8 max-w-md">
+        <p className="text-gray-500 text-center text-lg mb-8 max-w-md">
           Dein persönlicher Ernährungsplan – abgestimmt auf deine Ziele
         </p>
 
@@ -61,9 +60,9 @@ export default function LandingPage() {
             { icon: '🥗', text: '500+ Rezepte' },
             { icon: '🛒', text: 'Einkaufsliste' },
           ].map((benefit, i) => (
-            <div key={i} className="glass rounded-xl p-4 text-center">
+            <div key={i} className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100">
               <span className="text-2xl mb-2 block">{benefit.icon}</span>
-              <span className="text-sm text-dark-200">{benefit.text}</span>
+              <span className="text-sm text-gray-700 font-medium">{benefit.text}</span>
             </div>
           ))}
         </div>
@@ -71,39 +70,39 @@ export default function LandingPage() {
         {/* Login Form */}
         <form onSubmit={handleLogin} className="w-full max-w-md space-y-4">
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               E-Mail Adresse
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-dark-800 border border-dark-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none text-white placeholder-dark-400"
+              className="w-full px-4 py-3 rounded-xl bg-white border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none text-gray-900 placeholder-gray-400"
               placeholder="deine@email.de"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Mitgliedsnummer
             </label>
             <input
               type="text"
               value={memberNumber}
               onChange={(e) => setMemberNumber(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-dark-800 border border-dark-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none text-white placeholder-dark-400"
+              className="w-full px-4 py-3 rounded-xl bg-white border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none text-gray-900 placeholder-gray-400"
               placeholder="z.B. M-12345"
             />
           </div>
 
           {error && (
-            <p className="text-red-400 text-sm text-center">{error}</p>
+            <p className="text-red-500 text-sm text-center">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-semibold text-lg shadow-lg shadow-accent-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full py-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
@@ -119,16 +118,16 @@ export default function LandingPage() {
           </button>
         </form>
 
-        <p className="text-dark-400 text-sm mt-6 text-center">
+        <p className="text-gray-500 text-sm mt-6 text-center">
           Noch kein Mitglied?{' '}
-          <a href="https://fitinn-trier.de" className="text-primary-400 hover:underline">
+          <a href="https://fitinn-trier.de" className="text-teal-600 hover:underline font-medium">
             Jetzt bei FIT-INN anmelden
           </a>
         </p>
       </div>
 
       {/* Footer */}
-      <footer className="py-6 px-6 text-center text-dark-500 text-sm">
+      <footer className="py-6 px-6 text-center text-gray-400 text-sm">
         <p>© 2026 FIT-INN Trier • Ernährungsplan powered by AI</p>
       </footer>
     </div>

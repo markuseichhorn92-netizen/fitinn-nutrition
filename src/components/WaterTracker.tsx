@@ -33,34 +33,34 @@ export default function WaterTracker({ goal, date }: WaterTrackerProps) {
   const percentage = Math.min((intake / goal) * 100, 100);
 
   return (
-    <div className="glass rounded-2xl p-4">
+    <div className="bg-white rounded-2xl p-4 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="text-xl">💧</span>
-          <span className="font-semibold">Trinken</span>
+          <span className="font-semibold text-gray-900">Wasser trinken</span>
         </div>
-        <span className="text-sm text-dark-300">
+        <span className="text-sm text-gray-500">
           {intake.toFixed(1)} / {goal.toFixed(1)} L
         </span>
       </div>
 
       {/* Progress Bar */}
-      <div className="h-3 bg-dark-700 rounded-full overflow-hidden mb-4">
+      <div className="h-3 bg-gray-100 rounded-full overflow-hidden mb-4">
         <div
-          className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-500"
+          className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-500"
           style={{ width: `${percentage}%` }}
         />
       </div>
 
       {/* Water Glasses */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {Array.from({ length: glasses }).map((_, i) => (
+        {Array.from({ length: Math.min(glasses, 12) }).map((_, i) => (
           <div
             key={i}
             className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
               i < filledGlasses
-                ? 'bg-blue-500/20 text-blue-400'
-                : 'bg-dark-700 text-dark-500'
+                ? 'bg-blue-100 text-blue-500'
+                : 'bg-gray-100 text-gray-300'
             }`}
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -75,13 +75,13 @@ export default function WaterTracker({ goal, date }: WaterTrackerProps) {
         <button
           onClick={removeWater}
           disabled={intake === 0}
-          className="flex-1 py-2 rounded-xl bg-dark-700 text-dark-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-dark-600 transition-colors"
+          className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 transition-colors"
         >
           − 250ml
         </button>
         <button
           onClick={addWater}
-          className="flex-1 py-2 rounded-xl bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors"
+          className="flex-1 py-2.5 rounded-xl bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors"
         >
           + 250ml
         </button>

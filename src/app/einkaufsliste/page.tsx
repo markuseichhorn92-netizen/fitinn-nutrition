@@ -35,6 +35,30 @@ const categoryOrder = [
   'Sonstiges',
 ];
 
+const categoryEmojis: Record<string, string> = {
+  'Obst': '🍎',
+  'Gemüse': '🥬',
+  'Fleisch': '🥩',
+  'Fisch': '🐟',
+  'Milchprodukte': '🥛',
+  'Eier': '🥚',
+  'Getreide': '🌾',
+  'Hülsenfrüchte': '🫘',
+  'Nüsse': '🥜',
+  'Samen': '🌱',
+  'Fette': '🫒',
+  'Gewürze': '🧂',
+  'Kräuter': '🌿',
+  'Saucen': '🥫',
+  'Aufstriche': '🍯',
+  'Süßungsmittel': '🍬',
+  'Nahrungsergänzung': '💊',
+  'Backzutaten': '🧁',
+  'Soja': '🫛',
+  'Süßes': '🍫',
+  'Sonstiges': '📦',
+};
+
 export default function ShoppingListPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -103,25 +127,29 @@ export default function ShoppingListPage() {
   };
 
   const exportPDF = () => {
-    // Create printable HTML
     const printContent = `
       <!DOCTYPE html>
       <html>
       <head>
         <title>FIT-INN Einkaufsliste</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          h1 { color: #0d9488; }
-          h2 { color: #666; margin-top: 20px; }
-          .item { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
-          .amount { color: #666; }
+          body { font-family: 'Inter', Arial, sans-serif; padding: 20px; background: white; }
+          h1 { color: #0d9488; font-size: 24px; }
+          h2 { color: #374151; margin-top: 24px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
+          .item { padding: 12px 0; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; }
+          .amount { color: #6b7280; }
+          .header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+          .logo { width: 32px; height: 32px; background: #0d9488; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
         </style>
       </head>
       <body>
-        <h1>🛒 FIT-INN Einkaufsliste</h1>
-        <p>Für die nächsten 7 Tage</p>
+        <div class="header">
+          <div class="logo">FI</div>
+          <h1>FIT-INN Einkaufsliste</h1>
+        </div>
+        <p style="color: #6b7280; margin-bottom: 24px;">Für die nächsten 7 Tage</p>
         ${Object.entries(groupByCategory(items)).map(([category, categoryItems]) => `
-          <h2>${category}</h2>
+          <h2>${categoryEmojis[category] || '📦'} ${category}</h2>
           ${(categoryItems as ShoppingItem[]).map(item => `
             <div class="item">
               <span>☐ ${item.name}</span>
@@ -160,8 +188,8 @@ export default function ShoppingListPage() {
 
   if (isLoading || !profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full" />
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-spin w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -170,45 +198,51 @@ export default function ShoppingListPage() {
   const uncheckedCount = items.length - checkedItems.size;
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
-      <div className="sticky top-0 bg-dark-900/95 backdrop-blur-lg z-10 px-6 py-4 border-b border-dark-800">
+      <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-gray-100 shadow-sm">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-bold">🛒 Einkaufsliste</h1>
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🛒</span>
+            <h1 className="text-xl font-bold text-gray-900">Einkaufsliste</h1>
+          </div>
           <button
             onClick={exportPDF}
-            className="px-4 py-2 rounded-xl bg-primary-500 text-white text-sm font-medium"
+            className="px-4 py-2 rounded-xl bg-teal-600 text-white text-sm font-medium hover:bg-teal-700 transition-colors"
           >
-            📄 PDF
+            📄 Drucken
           </button>
         </div>
-        <p className="text-dark-400 text-sm">
+        <p className="text-gray-500 text-sm">
           Für die nächsten 7 Tage • {uncheckedCount} von {items.length} offen
         </p>
       </div>
 
       {/* Shopping List */}
-      <div className="px-6 py-4">
+      <div className="px-4 py-4">
         {Object.entries(groupedItems).map(([category, categoryItems]) => (
           <div key={category} className="mb-6">
-            <h2 className="text-sm font-semibold text-dark-400 mb-2 uppercase tracking-wider">
-              {category}
-            </h2>
-            <div className="glass rounded-2xl divide-y divide-dark-700">
+            <div className="flex items-center gap-2 mb-2 px-2">
+              <span className="text-lg">{categoryEmojis[category] || '📦'}</span>
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                {category}
+              </h2>
+            </div>
+            <div className="bg-white rounded-2xl divide-y divide-gray-100 shadow-sm">
               {(categoryItems as ShoppingItem[]).map((item) => (
                 <button
                   key={item.name}
                   onClick={() => toggleItem(item.name)}
                   className={`w-full p-4 flex items-center justify-between text-left transition-all ${
-                    checkedItems.has(item.name) ? 'opacity-50' : ''
+                    checkedItems.has(item.name) ? 'bg-gray-50' : ''
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-colors ${
                         checkedItems.has(item.name)
-                          ? 'bg-primary-500 border-primary-500'
-                          : 'border-dark-500'
+                          ? 'bg-teal-500 border-teal-500'
+                          : 'border-gray-300'
                       }`}
                     >
                       {checkedItems.has(item.name) && (
@@ -217,11 +251,11 @@ export default function ShoppingListPage() {
                         </svg>
                       )}
                     </div>
-                    <span className={checkedItems.has(item.name) ? 'line-through' : ''}>
+                    <span className={`text-gray-700 ${checkedItems.has(item.name) ? 'line-through text-gray-400' : ''}`}>
                       {item.name}
                     </span>
                   </div>
-                  <span className="text-dark-400">
+                  <span className="text-gray-400 text-sm">
                     {formatAmount(item.amount)} {item.unit}
                   </span>
                 </button>

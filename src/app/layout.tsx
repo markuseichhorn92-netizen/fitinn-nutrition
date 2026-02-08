@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FIT-INN Ernährungsplan | Dein persönlicher Plan",
+  title: "FIT-INN Nutrition | Dein persönlicher Ernährungsplan",
   description: "Personalisierte Ernährungspläne für FIT-INN Mitglieder. Abnehmen, Muskelaufbau oder Gewicht halten - wir erstellen deinen individuellen Plan.",
   manifest: "/manifest.json",
   icons: {
@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
-      <body className="font-sans antialiased bg-dark-950 text-white min-h-screen">
+      <body className="font-sans antialiased bg-white text-gray-900 min-h-screen">
         {children}
       </body>
     </html>
