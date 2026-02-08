@@ -1,0 +1,1208 @@
+[
+  {
+    "id": "1",
+    "name": "Protein-Overnight-Oats mit Beeren",
+    "category": "breakfast",
+    "tags": ["quick", "meal-prep", "high-protein", "vegetarian"],
+    "prepTime": 5,
+    "cookTime": 0,
+    "totalTime": 5,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/overnight-oats.jpg",
+    "ingredients": [
+      { "name": "Haferflocken", "amount": 60, "unit": "g", "category": "Getreide" },
+      { "name": "Proteinpulver Vanille", "amount": 30, "unit": "g", "category": "Nahrungsergänzung" },
+      { "name": "Griechischer Joghurt", "amount": 150, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Milch", "amount": 100, "unit": "ml", "category": "Milchprodukte" },
+      { "name": "Blaubeeren", "amount": 80, "unit": "g", "category": "Obst" }
+    ],
+    "nutrition": {
+      "calories": 480,
+      "protein": 35,
+      "carbs": 52,
+      "fat": 14,
+      "fiber": 6
+    },
+    "instructions": [
+      "Haferflocken und Proteinpulver in ein Glas geben.",
+      "Griechischen Joghurt und Milch hinzufügen.",
+      "Alles gut verrühren bis keine Klumpen mehr sind.",
+      "Blaubeeren oben drauf verteilen.",
+      "Glas abdecken und über Nacht im Kühlschrank ziehen lassen.",
+      "Am Morgen genießen – kalt oder kurz in der Mikrowelle erwärmen."
+    ],
+    "allergens": ["gluten", "lactose"],
+    "dietaryFlags": ["vegetarian"],
+    "mealPrepable": true,
+    "storageDays": 2
+  },
+  {
+    "id": "2",
+    "name": "Rührei mit Avocado-Toast",
+    "category": "breakfast",
+    "tags": ["quick", "high-protein", "vegetarian"],
+    "prepTime": 5,
+    "cookTime": 5,
+    "totalTime": 10,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/scrambled-eggs.jpg",
+    "ingredients": [
+      { "name": "Eier", "amount": 3, "unit": "Stück", "category": "Eier" },
+      { "name": "Vollkornbrot", "amount": 2, "unit": "Scheiben", "category": "Getreide" },
+      { "name": "Avocado", "amount": 0.5, "unit": "Stück", "category": "Obst" },
+      { "name": "Butter", "amount": 10, "unit": "g", "category": "Fette" },
+      { "name": "Salz & Pfeffer", "amount": 1, "unit": "Prise", "category": "Gewürze" },
+      { "name": "Schnittlauch", "amount": 5, "unit": "g", "category": "Kräuter" }
+    ],
+    "nutrition": {
+      "calories": 520,
+      "protein": 28,
+      "carbs": 35,
+      "fat": 32,
+      "fiber": 8
+    },
+    "instructions": [
+      "Eier in einer Schüssel verquirlen und mit Salz und Pfeffer würzen.",
+      "Butter in einer Pfanne bei mittlerer Hitze schmelzen.",
+      "Eier in die Pfanne geben und unter ständigem Rühren stocken lassen.",
+      "Brot toasten.",
+      "Avocado halbieren, entkernen und auf den Toast streichen.",
+      "Rührei auf dem Avocado-Toast anrichten und mit Schnittlauch garnieren."
+    ],
+    "allergens": ["gluten", "eggs"],
+    "dietaryFlags": ["vegetarian"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "3",
+    "name": "Griechischer Joghurt mit Nüssen und Honig",
+    "category": "breakfast",
+    "tags": ["quick", "vegetarian", "no-cook"],
+    "prepTime": 3,
+    "cookTime": 0,
+    "totalTime": 3,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/greek-yogurt.jpg",
+    "ingredients": [
+      { "name": "Griechischer Joghurt (2%)", "amount": 200, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Walnüsse", "amount": 20, "unit": "g", "category": "Nüsse" },
+      { "name": "Mandeln", "amount": 15, "unit": "g", "category": "Nüsse" },
+      { "name": "Honig", "amount": 15, "unit": "g", "category": "Süßungsmittel" },
+      { "name": "Zimt", "amount": 1, "unit": "Prise", "category": "Gewürze" }
+    ],
+    "nutrition": {
+      "calories": 380,
+      "protein": 22,
+      "carbs": 28,
+      "fat": 20,
+      "fiber": 2
+    },
+    "instructions": [
+      "Griechischen Joghurt in eine Schüssel geben.",
+      "Walnüsse und Mandeln grob hacken.",
+      "Nüsse über den Joghurt streuen.",
+      "Mit Honig beträufeln.",
+      "Mit einer Prise Zimt garnieren."
+    ],
+    "allergens": ["lactose", "nuts"],
+    "dietaryFlags": ["vegetarian"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "4",
+    "name": "Protein-Smoothie Bowl",
+    "category": "breakfast",
+    "tags": ["quick", "high-protein", "vegetarian"],
+    "prepTime": 5,
+    "cookTime": 0,
+    "totalTime": 5,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/smoothie-bowl.jpg",
+    "ingredients": [
+      { "name": "Gefrorene Beeren", "amount": 150, "unit": "g", "category": "Obst" },
+      { "name": "Banane (gefroren)", "amount": 1, "unit": "Stück", "category": "Obst" },
+      { "name": "Proteinpulver Vanille", "amount": 30, "unit": "g", "category": "Nahrungsergänzung" },
+      { "name": "Mandelmilch", "amount": 100, "unit": "ml", "category": "Milchprodukte" },
+      { "name": "Chiasamen", "amount": 10, "unit": "g", "category": "Samen" },
+      { "name": "Granola", "amount": 30, "unit": "g", "category": "Getreide" }
+    ],
+    "nutrition": {
+      "calories": 450,
+      "protein": 32,
+      "carbs": 55,
+      "fat": 12,
+      "fiber": 10
+    },
+    "instructions": [
+      "Gefrorene Beeren, Banane, Proteinpulver und Mandelmilch in einen Mixer geben.",
+      "Alles zu einer dickflüssigen Creme mixen.",
+      "In eine Schüssel füllen.",
+      "Mit Chiasamen und Granola toppen.",
+      "Sofort servieren."
+    ],
+    "allergens": ["gluten", "nuts"],
+    "dietaryFlags": ["vegetarian"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "5",
+    "name": "Hähnchenbrust mit Quinoa-Salat",
+    "category": "lunch",
+    "tags": ["high-protein", "meal-prep", "healthy"],
+    "prepTime": 10,
+    "cookTime": 20,
+    "totalTime": 30,
+    "difficulty": "medium",
+    "servings": 2,
+    "image": "/images/recipes/chicken-quinoa.jpg",
+    "ingredients": [
+      { "name": "Hähnchenbrust", "amount": 300, "unit": "g", "category": "Fleisch" },
+      { "name": "Quinoa", "amount": 150, "unit": "g", "category": "Getreide" },
+      { "name": "Gurke", "amount": 1, "unit": "Stück", "category": "Gemüse" },
+      { "name": "Kirschtomaten", "amount": 150, "unit": "g", "category": "Gemüse" },
+      { "name": "Feta", "amount": 50, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Olivenöl", "amount": 20, "unit": "ml", "category": "Fette" },
+      { "name": "Zitronensaft", "amount": 30, "unit": "ml", "category": "Sonstiges" },
+      { "name": "Salz & Pfeffer", "amount": 1, "unit": "Prise", "category": "Gewürze" }
+    ],
+    "nutrition": {
+      "calories": 580,
+      "protein": 48,
+      "carbs": 42,
+      "fat": 22,
+      "fiber": 6
+    },
+    "instructions": [
+      "Quinoa nach Packungsanleitung kochen und abkühlen lassen.",
+      "Hähnchenbrust mit Salz und Pfeffer würzen.",
+      "In einer Pfanne mit etwas Öl bei mittlerer Hitze 6-7 Minuten pro Seite braten.",
+      "Gurke würfeln und Tomaten halbieren.",
+      "Quinoa mit Gurke und Tomaten mischen.",
+      "Dressing aus Olivenöl, Zitronensaft, Salz und Pfeffer anrühren.",
+      "Salat mit Dressing vermengen.",
+      "Hähnchenbrust in Streifen schneiden und auf dem Salat anrichten.",
+      "Mit zerbröseltem Feta toppen."
+    ],
+    "allergens": ["lactose"],
+    "dietaryFlags": [],
+    "mealPrepable": true,
+    "storageDays": 3
+  },
+  {
+    "id": "6",
+    "name": "Buddha Bowl mit Kichererbsen",
+    "category": "lunch",
+    "tags": ["vegan", "high-fiber", "healthy"],
+    "prepTime": 15,
+    "cookTime": 25,
+    "totalTime": 40,
+    "difficulty": "medium",
+    "servings": 2,
+    "image": "/images/recipes/buddha-bowl.jpg",
+    "ingredients": [
+      { "name": "Kichererbsen (Dose)", "amount": 400, "unit": "g", "category": "Hülsenfrüchte" },
+      { "name": "Süßkartoffel", "amount": 300, "unit": "g", "category": "Gemüse" },
+      { "name": "Brokkoli", "amount": 200, "unit": "g", "category": "Gemüse" },
+      { "name": "Rotkohl", "amount": 100, "unit": "g", "category": "Gemüse" },
+      { "name": "Avocado", "amount": 1, "unit": "Stück", "category": "Obst" },
+      { "name": "Tahini", "amount": 30, "unit": "g", "category": "Nüsse" },
+      { "name": "Olivenöl", "amount": 15, "unit": "ml", "category": "Fette" },
+      { "name": "Kreuzkümmel", "amount": 5, "unit": "g", "category": "Gewürze" },
+      { "name": "Paprikapulver", "amount": 5, "unit": "g", "category": "Gewürze" }
+    ],
+    "nutrition": {
+      "calories": 620,
+      "protein": 22,
+      "carbs": 68,
+      "fat": 28,
+      "fiber": 18
+    },
+    "instructions": [
+      "Backofen auf 200°C vorheizen.",
+      "Süßkartoffel würfeln und mit Olivenöl, Kreuzkümmel und Paprika mischen.",
+      "Kichererbsen abtropfen und ebenfalls mit Gewürzen vermengen.",
+      "Süßkartoffel und Kichererbsen auf einem Backblech verteilen.",
+      "25 Minuten backen bis alles goldbraun ist.",
+      "Brokkoli in Röschen teilen und 5 Minuten dämpfen.",
+      "Rotkohl fein hobeln.",
+      "Avocado in Scheiben schneiden.",
+      "Alles in einer Schüssel anrichten.",
+      "Mit Tahini-Dressing servieren."
+    ],
+    "allergens": ["sesame"],
+    "dietaryFlags": ["vegan", "vegetarian"],
+    "mealPrepable": true,
+    "storageDays": 2
+  },
+  {
+    "id": "7",
+    "name": "Thunfisch-Wrap",
+    "category": "lunch",
+    "tags": ["quick", "high-protein", "low-carb"],
+    "prepTime": 10,
+    "cookTime": 0,
+    "totalTime": 10,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/tuna-wrap.jpg",
+    "ingredients": [
+      { "name": "Thunfisch (Dose in Wasser)", "amount": 150, "unit": "g", "category": "Fisch" },
+      { "name": "Vollkorn-Tortilla", "amount": 1, "unit": "Stück", "category": "Getreide" },
+      { "name": "Joghurt (fettarm)", "amount": 30, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Mais", "amount": 50, "unit": "g", "category": "Gemüse" },
+      { "name": "Paprika rot", "amount": 0.5, "unit": "Stück", "category": "Gemüse" },
+      { "name": "Salat", "amount": 30, "unit": "g", "category": "Gemüse" },
+      { "name": "Senf", "amount": 5, "unit": "g", "category": "Saucen" }
+    ],
+    "nutrition": {
+      "calories": 420,
+      "protein": 42,
+      "carbs": 38,
+      "fat": 10,
+      "fiber": 5
+    },
+    "instructions": [
+      "Thunfisch abtropfen lassen.",
+      "Mit Joghurt und Senf vermischen.",
+      "Paprika in feine Streifen schneiden.",
+      "Mais abtropfen lassen.",
+      "Tortilla ausbreiten und mit Salat belegen.",
+      "Thunfischmischung, Paprika und Mais darauf verteilen.",
+      "Wrap einrollen und diagonal halbieren."
+    ],
+    "allergens": ["gluten", "fish", "lactose"],
+    "dietaryFlags": [],
+    "mealPrepable": true,
+    "storageDays": 1
+  },
+  {
+    "id": "8",
+    "name": "Asiatische Reis-Bowl mit Tofu",
+    "category": "lunch",
+    "tags": ["vegan", "asian", "high-protein"],
+    "prepTime": 15,
+    "cookTime": 20,
+    "totalTime": 35,
+    "difficulty": "medium",
+    "servings": 2,
+    "image": "/images/recipes/tofu-bowl.jpg",
+    "ingredients": [
+      { "name": "Tofu (fest)", "amount": 300, "unit": "g", "category": "Soja" },
+      { "name": "Basmatireis", "amount": 150, "unit": "g", "category": "Getreide" },
+      { "name": "Edamame", "amount": 100, "unit": "g", "category": "Hülsenfrüchte" },
+      { "name": "Karotten", "amount": 100, "unit": "g", "category": "Gemüse" },
+      { "name": "Sojasauce", "amount": 30, "unit": "ml", "category": "Saucen" },
+      { "name": "Sesamöl", "amount": 15, "unit": "ml", "category": "Fette" },
+      { "name": "Ingwer", "amount": 10, "unit": "g", "category": "Gewürze" },
+      { "name": "Sesam", "amount": 10, "unit": "g", "category": "Samen" }
+    ],
+    "nutrition": {
+      "calories": 550,
+      "protein": 32,
+      "carbs": 58,
+      "fat": 20,
+      "fiber": 8
+    },
+    "instructions": [
+      "Reis nach Packungsanleitung kochen.",
+      "Tofu in Würfel schneiden und mit Küchenpapier trocken tupfen.",
+      "Sesamöl in einer Pfanne erhitzen.",
+      "Tofu goldbraun anbraten (ca. 8-10 Minuten).",
+      "Ingwer fein reiben und zum Tofu geben.",
+      "Mit Sojasauce ablöschen.",
+      "Karotten in Stifte schneiden.",
+      "Edamame und Karotten kurz mitbraten.",
+      "Reis in Schüsseln anrichten, Tofu und Gemüse darauf verteilen.",
+      "Mit Sesam bestreuen."
+    ],
+    "allergens": ["soy", "sesame"],
+    "dietaryFlags": ["vegan", "vegetarian"],
+    "mealPrepable": true,
+    "storageDays": 3
+  },
+  {
+    "id": "9",
+    "name": "Lachs mit Ofengemüse",
+    "category": "dinner",
+    "tags": ["high-protein", "omega-3", "healthy"],
+    "prepTime": 15,
+    "cookTime": 25,
+    "totalTime": 40,
+    "difficulty": "medium",
+    "servings": 2,
+    "image": "/images/recipes/salmon-veggies.jpg",
+    "ingredients": [
+      { "name": "Lachsfilet", "amount": 300, "unit": "g", "category": "Fisch" },
+      { "name": "Zucchini", "amount": 200, "unit": "g", "category": "Gemüse" },
+      { "name": "Paprika (bunt)", "amount": 200, "unit": "g", "category": "Gemüse" },
+      { "name": "Kirschtomaten", "amount": 150, "unit": "g", "category": "Gemüse" },
+      { "name": "Olivenöl", "amount": 25, "unit": "ml", "category": "Fette" },
+      { "name": "Knoblauch", "amount": 2, "unit": "Zehen", "category": "Gemüse" },
+      { "name": "Rosmarin", "amount": 5, "unit": "g", "category": "Kräuter" },
+      { "name": "Zitrone", "amount": 1, "unit": "Stück", "category": "Obst" }
+    ],
+    "nutrition": {
+      "calories": 520,
+      "protein": 42,
+      "carbs": 18,
+      "fat": 32,
+      "fiber": 5
+    },
+    "instructions": [
+      "Backofen auf 200°C vorheizen.",
+      "Gemüse in mundgerechte Stücke schneiden.",
+      "Gemüse mit Olivenöl, gehacktem Knoblauch und Rosmarin vermengen.",
+      "Auf einem Backblech verteilen.",
+      "Lachsfilet mit Salz und Pfeffer würzen.",
+      "Nach 10 Minuten den Lachs auf das Gemüse legen.",
+      "Weitere 15 Minuten backen.",
+      "Mit Zitronenscheiben servieren."
+    ],
+    "allergens": ["fish"],
+    "dietaryFlags": [],
+    "mealPrepable": true,
+    "storageDays": 2
+  },
+  {
+    "id": "10",
+    "name": "Putenbrust mit Süßkartoffelpüree",
+    "category": "dinner",
+    "tags": ["high-protein", "comfort-food", "gluten-free"],
+    "prepTime": 15,
+    "cookTime": 25,
+    "totalTime": 40,
+    "difficulty": "medium",
+    "servings": 2,
+    "image": "/images/recipes/turkey-mash.jpg",
+    "ingredients": [
+      { "name": "Putenbrust", "amount": 300, "unit": "g", "category": "Fleisch" },
+      { "name": "Süßkartoffeln", "amount": 400, "unit": "g", "category": "Gemüse" },
+      { "name": "Grüne Bohnen", "amount": 200, "unit": "g", "category": "Gemüse" },
+      { "name": "Butter", "amount": 20, "unit": "g", "category": "Fette" },
+      { "name": "Milch", "amount": 50, "unit": "ml", "category": "Milchprodukte" },
+      { "name": "Olivenöl", "amount": 15, "unit": "ml", "category": "Fette" },
+      { "name": "Muskatnuss", "amount": 1, "unit": "Prise", "category": "Gewürze" }
+    ],
+    "nutrition": {
+      "calories": 540,
+      "protein": 45,
+      "carbs": 48,
+      "fat": 18,
+      "fiber": 8
+    },
+    "instructions": [
+      "Süßkartoffeln schälen und in Würfel schneiden.",
+      "In Salzwasser 15-20 Minuten weich kochen.",
+      "Putenbrust in Medaillons schneiden und plattieren.",
+      "Mit Salz und Pfeffer würzen.",
+      "In Olivenöl von beiden Seiten je 4 Minuten braten.",
+      "Bohnen in Salzwasser 5 Minuten blanchieren.",
+      "Süßkartoffeln abgießen und mit Butter und Milch stampfen.",
+      "Mit Muskatnuss abschmecken.",
+      "Alles zusammen anrichten."
+    ],
+    "allergens": ["lactose"],
+    "dietaryFlags": ["gluten-free"],
+    "mealPrepable": true,
+    "storageDays": 2
+  },
+  {
+    "id": "11",
+    "name": "Vegetarische Zucchini-Lasagne",
+    "category": "dinner",
+    "tags": ["vegetarian", "low-carb", "comfort-food"],
+    "prepTime": 20,
+    "cookTime": 40,
+    "totalTime": 60,
+    "difficulty": "medium",
+    "servings": 4,
+    "image": "/images/recipes/zucchini-lasagna.jpg",
+    "ingredients": [
+      { "name": "Zucchini", "amount": 600, "unit": "g", "category": "Gemüse" },
+      { "name": "Ricotta", "amount": 250, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Mozzarella", "amount": 150, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Passierte Tomaten", "amount": 400, "unit": "g", "category": "Gemüse" },
+      { "name": "Zwiebel", "amount": 1, "unit": "Stück", "category": "Gemüse" },
+      { "name": "Knoblauch", "amount": 2, "unit": "Zehen", "category": "Gemüse" },
+      { "name": "Basilikum", "amount": 10, "unit": "g", "category": "Kräuter" },
+      { "name": "Parmesan", "amount": 30, "unit": "g", "category": "Milchprodukte" }
+    ],
+    "nutrition": {
+      "calories": 380,
+      "protein": 24,
+      "carbs": 18,
+      "fat": 24,
+      "fiber": 4
+    },
+    "instructions": [
+      "Backofen auf 180°C vorheizen.",
+      "Zucchini in dünne Längsscheiben schneiden.",
+      "Zwiebel und Knoblauch fein hacken und anbraten.",
+      "Passierte Tomaten hinzufügen und 10 Minuten köcheln lassen.",
+      "Mit Basilikum, Salz und Pfeffer abschmecken.",
+      "Auflaufform mit etwas Tomatensoße ausstreichen.",
+      "Abwechselnd Zucchini, Ricotta und Tomatensoße schichten.",
+      "Mit Mozzarella und Parmesan bestreuen.",
+      "40 Minuten backen bis der Käse goldbraun ist."
+    ],
+    "allergens": ["lactose"],
+    "dietaryFlags": ["vegetarian", "gluten-free"],
+    "mealPrepable": true,
+    "storageDays": 3
+  },
+  {
+    "id": "12",
+    "name": "Garnelen-Pfanne mit Vollkornreis",
+    "category": "dinner",
+    "tags": ["high-protein", "quick", "seafood"],
+    "prepTime": 10,
+    "cookTime": 15,
+    "totalTime": 25,
+    "difficulty": "easy",
+    "servings": 2,
+    "image": "/images/recipes/shrimp-rice.jpg",
+    "ingredients": [
+      { "name": "Garnelen (geschält)", "amount": 300, "unit": "g", "category": "Fisch" },
+      { "name": "Vollkornreis", "amount": 150, "unit": "g", "category": "Getreide" },
+      { "name": "Brokkoli", "amount": 200, "unit": "g", "category": "Gemüse" },
+      { "name": "Knoblauch", "amount": 3, "unit": "Zehen", "category": "Gemüse" },
+      { "name": "Chili", "amount": 1, "unit": "Stück", "category": "Gewürze" },
+      { "name": "Olivenöl", "amount": 20, "unit": "ml", "category": "Fette" },
+      { "name": "Zitrone", "amount": 1, "unit": "Stück", "category": "Obst" }
+    ],
+    "nutrition": {
+      "calories": 480,
+      "protein": 38,
+      "carbs": 52,
+      "fat": 14,
+      "fiber": 6
+    },
+    "instructions": [
+      "Vollkornreis nach Packungsanleitung kochen.",
+      "Brokkoli in Röschen teilen.",
+      "Knoblauch fein hacken, Chili in Ringe schneiden.",
+      "Olivenöl in einer großen Pfanne erhitzen.",
+      "Knoblauch und Chili kurz anbraten.",
+      "Garnelen hinzufügen und 3-4 Minuten braten bis sie rosa sind.",
+      "Brokkoli hinzufügen und 3 Minuten mitbraten.",
+      "Mit Zitronensaft beträufeln.",
+      "Mit Reis servieren."
+    ],
+    "allergens": ["shellfish"],
+    "dietaryFlags": [],
+    "mealPrepable": true,
+    "storageDays": 1
+  },
+  {
+    "id": "13",
+    "name": "Banane mit Mandelbutter",
+    "category": "snack",
+    "tags": ["quick", "no-cook", "vegetarian"],
+    "prepTime": 2,
+    "cookTime": 0,
+    "totalTime": 2,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/banana-almond.jpg",
+    "ingredients": [
+      { "name": "Banane", "amount": 1, "unit": "Stück", "category": "Obst" },
+      { "name": "Mandelbutter", "amount": 20, "unit": "g", "category": "Nüsse" }
+    ],
+    "nutrition": {
+      "calories": 220,
+      "protein": 5,
+      "carbs": 28,
+      "fat": 12,
+      "fiber": 4
+    },
+    "instructions": [
+      "Banane schälen und in Scheiben schneiden.",
+      "Mandelbutter darüber geben oder zum Dippen verwenden."
+    ],
+    "allergens": ["nuts"],
+    "dietaryFlags": ["vegetarian", "vegan", "gluten-free"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "14",
+    "name": "Protein-Quark mit Beeren",
+    "category": "snack",
+    "tags": ["quick", "high-protein", "vegetarian"],
+    "prepTime": 3,
+    "cookTime": 0,
+    "totalTime": 3,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/quark-berries.jpg",
+    "ingredients": [
+      { "name": "Magerquark", "amount": 200, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Gemischte Beeren", "amount": 100, "unit": "g", "category": "Obst" },
+      { "name": "Honig", "amount": 10, "unit": "g", "category": "Süßungsmittel" }
+    ],
+    "nutrition": {
+      "calories": 200,
+      "protein": 25,
+      "carbs": 22,
+      "fat": 1,
+      "fiber": 3
+    },
+    "instructions": [
+      "Magerquark in eine Schüssel geben.",
+      "Mit Beeren toppen.",
+      "Mit Honig beträufeln."
+    ],
+    "allergens": ["lactose"],
+    "dietaryFlags": ["vegetarian"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "15",
+    "name": "Gemüsesticks mit Hummus",
+    "category": "snack",
+    "tags": ["quick", "vegan", "healthy"],
+    "prepTime": 5,
+    "cookTime": 0,
+    "totalTime": 5,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/veggies-hummus.jpg",
+    "ingredients": [
+      { "name": "Karotten", "amount": 100, "unit": "g", "category": "Gemüse" },
+      { "name": "Gurke", "amount": 100, "unit": "g", "category": "Gemüse" },
+      { "name": "Paprika", "amount": 100, "unit": "g", "category": "Gemüse" },
+      { "name": "Hummus", "amount": 50, "unit": "g", "category": "Aufstriche" }
+    ],
+    "nutrition": {
+      "calories": 180,
+      "protein": 7,
+      "carbs": 22,
+      "fat": 8,
+      "fiber": 7
+    },
+    "instructions": [
+      "Gemüse waschen und in Sticks schneiden.",
+      "Hummus in eine kleine Schüssel geben.",
+      "Gemüsesticks zum Dippen verwenden."
+    ],
+    "allergens": ["sesame"],
+    "dietaryFlags": ["vegan", "vegetarian", "gluten-free"],
+    "mealPrepable": true,
+    "storageDays": 2
+  },
+  {
+    "id": "16",
+    "name": "Gekochte Eier",
+    "category": "snack",
+    "tags": ["quick", "meal-prep", "high-protein"],
+    "prepTime": 2,
+    "cookTime": 10,
+    "totalTime": 12,
+    "difficulty": "easy",
+    "servings": 2,
+    "image": "/images/recipes/boiled-eggs.jpg",
+    "ingredients": [
+      { "name": "Eier", "amount": 2, "unit": "Stück", "category": "Eier" },
+      { "name": "Salz", "amount": 1, "unit": "Prise", "category": "Gewürze" }
+    ],
+    "nutrition": {
+      "calories": 140,
+      "protein": 12,
+      "carbs": 1,
+      "fat": 10,
+      "fiber": 0
+    },
+    "instructions": [
+      "Wasser in einem Topf zum Kochen bringen.",
+      "Eier vorsichtig hinzugeben.",
+      "Für hartgekochte Eier 10 Minuten kochen.",
+      "Mit kaltem Wasser abschrecken.",
+      "Schälen und mit etwas Salz genießen."
+    ],
+    "allergens": ["eggs"],
+    "dietaryFlags": ["vegetarian", "gluten-free"],
+    "mealPrepable": true,
+    "storageDays": 5
+  },
+  {
+    "id": "17",
+    "name": "Apfel mit Erdnussbutter",
+    "category": "snack",
+    "tags": ["quick", "vegetarian", "no-cook"],
+    "prepTime": 3,
+    "cookTime": 0,
+    "totalTime": 3,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/apple-peanut.jpg",
+    "ingredients": [
+      { "name": "Apfel", "amount": 1, "unit": "Stück", "category": "Obst" },
+      { "name": "Erdnussbutter", "amount": 25, "unit": "g", "category": "Nüsse" }
+    ],
+    "nutrition": {
+      "calories": 250,
+      "protein": 7,
+      "carbs": 28,
+      "fat": 14,
+      "fiber": 5
+    },
+    "instructions": [
+      "Apfel waschen und in Spalten schneiden.",
+      "Mit Erdnussbutter servieren."
+    ],
+    "allergens": ["peanuts"],
+    "dietaryFlags": ["vegetarian", "vegan", "gluten-free"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "18",
+    "name": "Haferflocken-Energiebällchen",
+    "category": "snack",
+    "tags": ["meal-prep", "vegetarian", "no-bake"],
+    "prepTime": 15,
+    "cookTime": 0,
+    "totalTime": 15,
+    "difficulty": "easy",
+    "servings": 10,
+    "image": "/images/recipes/energy-balls.jpg",
+    "ingredients": [
+      { "name": "Haferflocken", "amount": 100, "unit": "g", "category": "Getreide" },
+      { "name": "Erdnussbutter", "amount": 80, "unit": "g", "category": "Nüsse" },
+      { "name": "Honig", "amount": 50, "unit": "g", "category": "Süßungsmittel" },
+      { "name": "Zartbitterschokolade (Chips)", "amount": 40, "unit": "g", "category": "Süßes" },
+      { "name": "Chiasamen", "amount": 15, "unit": "g", "category": "Samen" }
+    ],
+    "nutrition": {
+      "calories": 120,
+      "protein": 4,
+      "carbs": 14,
+      "fat": 6,
+      "fiber": 2
+    },
+    "instructions": [
+      "Alle Zutaten in einer Schüssel vermischen.",
+      "Gut durchkneten bis eine klebrige Masse entsteht.",
+      "Zu kleinen Bällchen formen (ca. 10 Stück).",
+      "30 Minuten im Kühlschrank fest werden lassen.",
+      "In einem luftdichten Behälter aufbewahren."
+    ],
+    "allergens": ["gluten", "peanuts"],
+    "dietaryFlags": ["vegetarian"],
+    "mealPrepable": true,
+    "storageDays": 7
+  },
+  {
+    "id": "19",
+    "name": "Omelett mit Spinat und Feta",
+    "category": "breakfast",
+    "tags": ["high-protein", "low-carb", "vegetarian"],
+    "prepTime": 5,
+    "cookTime": 8,
+    "totalTime": 13,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/spinach-omelette.jpg",
+    "ingredients": [
+      { "name": "Eier", "amount": 3, "unit": "Stück", "category": "Eier" },
+      { "name": "Baby-Spinat", "amount": 50, "unit": "g", "category": "Gemüse" },
+      { "name": "Feta", "amount": 30, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Butter", "amount": 10, "unit": "g", "category": "Fette" },
+      { "name": "Salz & Pfeffer", "amount": 1, "unit": "Prise", "category": "Gewürze" }
+    ],
+    "nutrition": {
+      "calories": 380,
+      "protein": 26,
+      "carbs": 3,
+      "fat": 30,
+      "fiber": 1
+    },
+    "instructions": [
+      "Eier in einer Schüssel verquirlen und würzen.",
+      "Butter in einer Pfanne bei mittlerer Hitze schmelzen.",
+      "Spinat kurz anwelken lassen.",
+      "Eier darüber gießen.",
+      "Bei niedriger Hitze stocken lassen.",
+      "Feta über eine Hälfte krümeln.",
+      "Omelett zusammenklappen und servieren."
+    ],
+    "allergens": ["eggs", "lactose"],
+    "dietaryFlags": ["vegetarian", "gluten-free", "low-carb"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "20",
+    "name": "Rinderfilet mit Spargel",
+    "category": "dinner",
+    "tags": ["high-protein", "premium", "low-carb"],
+    "prepTime": 10,
+    "cookTime": 20,
+    "totalTime": 30,
+    "difficulty": "medium",
+    "servings": 2,
+    "image": "/images/recipes/beef-asparagus.jpg",
+    "ingredients": [
+      { "name": "Rinderfilet", "amount": 300, "unit": "g", "category": "Fleisch" },
+      { "name": "Grüner Spargel", "amount": 300, "unit": "g", "category": "Gemüse" },
+      { "name": "Kirschtomaten", "amount": 150, "unit": "g", "category": "Gemüse" },
+      { "name": "Olivenöl", "amount": 20, "unit": "ml", "category": "Fette" },
+      { "name": "Knoblauch", "amount": 2, "unit": "Zehen", "category": "Gemüse" },
+      { "name": "Rosmarin", "amount": 5, "unit": "g", "category": "Kräuter" },
+      { "name": "Balsamico", "amount": 15, "unit": "ml", "category": "Saucen" }
+    ],
+    "nutrition": {
+      "calories": 450,
+      "protein": 45,
+      "carbs": 12,
+      "fat": 24,
+      "fiber": 4
+    },
+    "instructions": [
+      "Rinderfilet 30 Minuten vor dem Braten aus dem Kühlschrank nehmen.",
+      "Mit Salz und Pfeffer würzen.",
+      "In einer heißen Pfanne mit Olivenöl von jeder Seite 3-4 Minuten braten.",
+      "Ruhen lassen.",
+      "Spargel putzen und die holzigen Enden entfernen.",
+      "Mit Knoblauch und Rosmarin in der Pfanne anbraten.",
+      "Tomaten hinzufügen.",
+      "Fleisch in Scheiben schneiden.",
+      "Mit Gemüse anrichten und mit Balsamico beträufeln."
+    ],
+    "allergens": [],
+    "dietaryFlags": ["gluten-free", "low-carb"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "21",
+    "name": "Mediterraner Couscous-Salat",
+    "category": "lunch",
+    "tags": ["vegetarian", "meal-prep", "mediterranean"],
+    "prepTime": 15,
+    "cookTime": 5,
+    "totalTime": 20,
+    "difficulty": "easy",
+    "servings": 2,
+    "image": "/images/recipes/couscous-salad.jpg",
+    "ingredients": [
+      { "name": "Couscous", "amount": 150, "unit": "g", "category": "Getreide" },
+      { "name": "Kirschtomaten", "amount": 150, "unit": "g", "category": "Gemüse" },
+      { "name": "Gurke", "amount": 150, "unit": "g", "category": "Gemüse" },
+      { "name": "Oliven (schwarz)", "amount": 50, "unit": "g", "category": "Gemüse" },
+      { "name": "Feta", "amount": 80, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Rote Zwiebel", "amount": 0.5, "unit": "Stück", "category": "Gemüse" },
+      { "name": "Olivenöl", "amount": 30, "unit": "ml", "category": "Fette" },
+      { "name": "Zitronensaft", "amount": 20, "unit": "ml", "category": "Sonstiges" },
+      { "name": "Frische Minze", "amount": 10, "unit": "g", "category": "Kräuter" }
+    ],
+    "nutrition": {
+      "calories": 480,
+      "protein": 15,
+      "carbs": 52,
+      "fat": 24,
+      "fiber": 5
+    },
+    "instructions": [
+      "Couscous nach Packungsanleitung zubereiten und abkühlen lassen.",
+      "Tomaten halbieren, Gurke und Zwiebel würfeln.",
+      "Oliven halbieren.",
+      "Alles in einer großen Schüssel mischen.",
+      "Dressing aus Olivenöl, Zitronensaft, Salz und Pfeffer anrühren.",
+      "Über den Salat geben und vermengen.",
+      "Feta darüber bröseln.",
+      "Mit frischer Minze garnieren."
+    ],
+    "allergens": ["gluten", "lactose"],
+    "dietaryFlags": ["vegetarian"],
+    "mealPrepable": true,
+    "storageDays": 2
+  },
+  {
+    "id": "22",
+    "name": "Linsen-Dal mit Naan",
+    "category": "dinner",
+    "tags": ["vegan", "indian", "comfort-food"],
+    "prepTime": 10,
+    "cookTime": 30,
+    "totalTime": 40,
+    "difficulty": "medium",
+    "servings": 3,
+    "image": "/images/recipes/lentil-dal.jpg",
+    "ingredients": [
+      { "name": "Rote Linsen", "amount": 200, "unit": "g", "category": "Hülsenfrüchte" },
+      { "name": "Kokosmilch", "amount": 200, "unit": "ml", "category": "Milchprodukte" },
+      { "name": "Passierte Tomaten", "amount": 200, "unit": "g", "category": "Gemüse" },
+      { "name": "Zwiebel", "amount": 1, "unit": "Stück", "category": "Gemüse" },
+      { "name": "Knoblauch", "amount": 3, "unit": "Zehen", "category": "Gemüse" },
+      { "name": "Ingwer", "amount": 20, "unit": "g", "category": "Gewürze" },
+      { "name": "Kurkuma", "amount": 5, "unit": "g", "category": "Gewürze" },
+      { "name": "Garam Masala", "amount": 5, "unit": "g", "category": "Gewürze" },
+      { "name": "Naan-Brot", "amount": 3, "unit": "Stück", "category": "Getreide" }
+    ],
+    "nutrition": {
+      "calories": 520,
+      "protein": 22,
+      "carbs": 65,
+      "fat": 18,
+      "fiber": 12
+    },
+    "instructions": [
+      "Zwiebel, Knoblauch und Ingwer fein hacken.",
+      "In einem großen Topf mit etwas Öl anbraten.",
+      "Kurkuma und Garam Masala hinzufügen.",
+      "Linsen, Tomaten und 400ml Wasser hinzugeben.",
+      "20 Minuten köcheln lassen.",
+      "Kokosmilch einrühren und weitere 10 Minuten köcheln.",
+      "Mit Salz und Pfeffer abschmecken.",
+      "Naan-Brot erwärmen.",
+      "Dal mit Naan servieren."
+    ],
+    "allergens": ["gluten"],
+    "dietaryFlags": ["vegan", "vegetarian"],
+    "mealPrepable": true,
+    "storageDays": 4
+  },
+  {
+    "id": "23",
+    "name": "Protein-Pancakes",
+    "category": "breakfast",
+    "tags": ["high-protein", "vegetarian", "weekend"],
+    "prepTime": 10,
+    "cookTime": 15,
+    "totalTime": 25,
+    "difficulty": "easy",
+    "servings": 2,
+    "image": "/images/recipes/protein-pancakes.jpg",
+    "ingredients": [
+      { "name": "Haferflocken", "amount": 80, "unit": "g", "category": "Getreide" },
+      { "name": "Proteinpulver Vanille", "amount": 30, "unit": "g", "category": "Nahrungsergänzung" },
+      { "name": "Banane", "amount": 1, "unit": "Stück", "category": "Obst" },
+      { "name": "Eier", "amount": 2, "unit": "Stück", "category": "Eier" },
+      { "name": "Milch", "amount": 100, "unit": "ml", "category": "Milchprodukte" },
+      { "name": "Backpulver", "amount": 5, "unit": "g", "category": "Backzutaten" },
+      { "name": "Blaubeeren", "amount": 50, "unit": "g", "category": "Obst" },
+      { "name": "Ahornsirup", "amount": 20, "unit": "ml", "category": "Süßungsmittel" }
+    ],
+    "nutrition": {
+      "calories": 420,
+      "protein": 32,
+      "carbs": 48,
+      "fat": 12,
+      "fiber": 6
+    },
+    "instructions": [
+      "Haferflocken im Mixer zu Mehl verarbeiten.",
+      "Mit Proteinpulver und Backpulver mischen.",
+      "Banane zerdrücken und mit Eiern und Milch verrühren.",
+      "Trockene und feuchte Zutaten vermengen.",
+      "Pfanne bei mittlerer Hitze erhitzen.",
+      "Kleine Portionen Teig in die Pfanne geben.",
+      "Von beiden Seiten goldbraun backen.",
+      "Mit Blaubeeren und Ahornsirup servieren."
+    ],
+    "allergens": ["gluten", "eggs", "lactose"],
+    "dietaryFlags": ["vegetarian"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "24",
+    "name": "Griechischer Salat mit Hähnchen",
+    "category": "lunch",
+    "tags": ["high-protein", "low-carb", "mediterranean"],
+    "prepTime": 15,
+    "cookTime": 15,
+    "totalTime": 30,
+    "difficulty": "easy",
+    "servings": 2,
+    "image": "/images/recipes/greek-salad.jpg",
+    "ingredients": [
+      { "name": "Hähnchenbrust", "amount": 250, "unit": "g", "category": "Fleisch" },
+      { "name": "Römersalat", "amount": 200, "unit": "g", "category": "Gemüse" },
+      { "name": "Gurke", "amount": 150, "unit": "g", "category": "Gemüse" },
+      { "name": "Kirschtomaten", "amount": 150, "unit": "g", "category": "Gemüse" },
+      { "name": "Feta", "amount": 100, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Kalamata-Oliven", "amount": 50, "unit": "g", "category": "Gemüse" },
+      { "name": "Rote Zwiebel", "amount": 0.5, "unit": "Stück", "category": "Gemüse" },
+      { "name": "Olivenöl", "amount": 30, "unit": "ml", "category": "Fette" },
+      { "name": "Oregano", "amount": 5, "unit": "g", "category": "Gewürze" }
+    ],
+    "nutrition": {
+      "calories": 520,
+      "protein": 42,
+      "carbs": 15,
+      "fat": 34,
+      "fiber": 4
+    },
+    "instructions": [
+      "Hähnchenbrust mit Oregano, Salz und Pfeffer würzen.",
+      "In einer Pfanne von beiden Seiten je 6 Minuten braten.",
+      "Ruhen lassen und dann in Streifen schneiden.",
+      "Salat waschen und in mundgerechte Stücke zupfen.",
+      "Gurke und Tomaten schneiden.",
+      "Zwiebel in dünne Ringe schneiden.",
+      "Alles in einer großen Schüssel anrichten.",
+      "Feta darüber würfeln, Oliven verteilen.",
+      "Hähnchen darauf legen und mit Olivenöl beträufeln."
+    ],
+    "allergens": ["lactose"],
+    "dietaryFlags": ["gluten-free", "low-carb"],
+    "mealPrepable": true,
+    "storageDays": 1
+  },
+  {
+    "id": "25",
+    "name": "Avocado-Ei-Brot",
+    "category": "breakfast",
+    "tags": ["quick", "vegetarian", "trendy"],
+    "prepTime": 5,
+    "cookTime": 5,
+    "totalTime": 10,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/avocado-toast.jpg",
+    "ingredients": [
+      { "name": "Vollkornbrot", "amount": 2, "unit": "Scheiben", "category": "Getreide" },
+      { "name": "Avocado", "amount": 1, "unit": "Stück", "category": "Obst" },
+      { "name": "Eier", "amount": 2, "unit": "Stück", "category": "Eier" },
+      { "name": "Chiliflocken", "amount": 1, "unit": "Prise", "category": "Gewürze" },
+      { "name": "Zitronensaft", "amount": 5, "unit": "ml", "category": "Sonstiges" },
+      { "name": "Salz & Pfeffer", "amount": 1, "unit": "Prise", "category": "Gewürze" }
+    ],
+    "nutrition": {
+      "calories": 480,
+      "protein": 20,
+      "carbs": 35,
+      "fat": 30,
+      "fiber": 12
+    },
+    "instructions": [
+      "Brot toasten.",
+      "Avocado halbieren, entkernen und das Fruchtfleisch zerdrücken.",
+      "Mit Zitronensaft, Salz und Pfeffer würzen.",
+      "Eier pochieren oder als Spiegelei braten.",
+      "Avocado auf das Brot streichen.",
+      "Eier darauf setzen.",
+      "Mit Chiliflocken bestreuen."
+    ],
+    "allergens": ["gluten", "eggs"],
+    "dietaryFlags": ["vegetarian"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "26",
+    "name": "Hüttenkäse mit Früchten",
+    "category": "snack",
+    "tags": ["quick", "high-protein", "vegetarian"],
+    "prepTime": 3,
+    "cookTime": 0,
+    "totalTime": 3,
+    "difficulty": "easy",
+    "servings": 1,
+    "image": "/images/recipes/cottage-cheese.jpg",
+    "ingredients": [
+      { "name": "Hüttenkäse", "amount": 200, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Pfirsich", "amount": 1, "unit": "Stück", "category": "Obst" },
+      { "name": "Honig", "amount": 10, "unit": "g", "category": "Süßungsmittel" }
+    ],
+    "nutrition": {
+      "calories": 220,
+      "protein": 24,
+      "carbs": 22,
+      "fat": 4,
+      "fiber": 2
+    },
+    "instructions": [
+      "Hüttenkäse in eine Schüssel geben.",
+      "Pfirsich waschen und in Spalten schneiden.",
+      "Auf dem Hüttenkäse anrichten.",
+      "Mit Honig beträufeln."
+    ],
+    "allergens": ["lactose"],
+    "dietaryFlags": ["vegetarian", "gluten-free"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "27",
+    "name": "Gebratener Reis mit Gemüse und Ei",
+    "category": "lunch",
+    "tags": ["quick", "meal-prep", "asian"],
+    "prepTime": 10,
+    "cookTime": 15,
+    "totalTime": 25,
+    "difficulty": "easy",
+    "servings": 2,
+    "image": "/images/recipes/fried-rice.jpg",
+    "ingredients": [
+      { "name": "Reis (gekocht)", "amount": 300, "unit": "g", "category": "Getreide" },
+      { "name": "Eier", "amount": 2, "unit": "Stück", "category": "Eier" },
+      { "name": "Erbsen", "amount": 100, "unit": "g", "category": "Gemüse" },
+      { "name": "Karotten", "amount": 100, "unit": "g", "category": "Gemüse" },
+      { "name": "Frühlingszwiebeln", "amount": 3, "unit": "Stück", "category": "Gemüse" },
+      { "name": "Sojasauce", "amount": 30, "unit": "ml", "category": "Saucen" },
+      { "name": "Sesamöl", "amount": 15, "unit": "ml", "category": "Fette" },
+      { "name": "Knoblauch", "amount": 2, "unit": "Zehen", "category": "Gemüse" }
+    ],
+    "nutrition": {
+      "calories": 420,
+      "protein": 16,
+      "carbs": 58,
+      "fat": 14,
+      "fiber": 5
+    },
+    "instructions": [
+      "Karotten würfeln und Frühlingszwiebeln in Ringe schneiden.",
+      "Sesamöl in einem Wok erhitzen.",
+      "Knoblauch kurz anbraten.",
+      "Karotten und Erbsen 3-4 Minuten braten.",
+      "Zur Seite schieben und Eier einrühren.",
+      "Gekochten Reis hinzufügen.",
+      "Alles gut vermengen.",
+      "Mit Sojasauce ablöschen.",
+      "Frühlingszwiebeln unterheben."
+    ],
+    "allergens": ["eggs", "soy", "sesame"],
+    "dietaryFlags": ["vegetarian"],
+    "mealPrepable": true,
+    "storageDays": 2
+  },
+  {
+    "id": "28",
+    "name": "Thunfisch-Steaks mit Sesam",
+    "category": "dinner",
+    "tags": ["high-protein", "premium", "quick"],
+    "prepTime": 10,
+    "cookTime": 6,
+    "totalTime": 16,
+    "difficulty": "medium",
+    "servings": 2,
+    "image": "/images/recipes/tuna-steak.jpg",
+    "ingredients": [
+      { "name": "Thunfischsteak", "amount": 300, "unit": "g", "category": "Fisch" },
+      { "name": "Sesam (schwarz & weiß)", "amount": 30, "unit": "g", "category": "Samen" },
+      { "name": "Sojasauce", "amount": 30, "unit": "ml", "category": "Saucen" },
+      { "name": "Pak Choi", "amount": 200, "unit": "g", "category": "Gemüse" },
+      { "name": "Sesamöl", "amount": 15, "unit": "ml", "category": "Fette" },
+      { "name": "Ingwer", "amount": 10, "unit": "g", "category": "Gewürze" },
+      { "name": "Limette", "amount": 1, "unit": "Stück", "category": "Obst" }
+    ],
+    "nutrition": {
+      "calories": 420,
+      "protein": 48,
+      "carbs": 8,
+      "fat": 22,
+      "fiber": 3
+    },
+    "instructions": [
+      "Thunfischsteaks mit Sojasauce marinieren.",
+      "Sesam auf einen Teller geben.",
+      "Thunfisch im Sesam wenden.",
+      "Pfanne mit Sesamöl sehr heiß erhitzen.",
+      "Thunfisch von jeder Seite 1-2 Minuten scharf anbraten.",
+      "Pak Choi halbieren und in der Pfanne anbraten.",
+      "Mit geriebenem Ingwer würzen.",
+      "Thunfisch aufschneiden und mit Limette servieren."
+    ],
+    "allergens": ["fish", "soy", "sesame"],
+    "dietaryFlags": ["gluten-free"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "29",
+    "name": "Shakshuka",
+    "category": "breakfast",
+    "tags": ["vegetarian", "comfort-food", "middle-eastern"],
+    "prepTime": 10,
+    "cookTime": 20,
+    "totalTime": 30,
+    "difficulty": "medium",
+    "servings": 2,
+    "image": "/images/recipes/shakshuka.jpg",
+    "ingredients": [
+      { "name": "Eier", "amount": 4, "unit": "Stück", "category": "Eier" },
+      { "name": "Passierte Tomaten", "amount": 400, "unit": "g", "category": "Gemüse" },
+      { "name": "Paprika rot", "amount": 1, "unit": "Stück", "category": "Gemüse" },
+      { "name": "Zwiebel", "amount": 1, "unit": "Stück", "category": "Gemüse" },
+      { "name": "Knoblauch", "amount": 2, "unit": "Zehen", "category": "Gemüse" },
+      { "name": "Kreuzkümmel", "amount": 5, "unit": "g", "category": "Gewürze" },
+      { "name": "Paprikapulver", "amount": 5, "unit": "g", "category": "Gewürze" },
+      { "name": "Feta", "amount": 50, "unit": "g", "category": "Milchprodukte" },
+      { "name": "Petersilie", "amount": 10, "unit": "g", "category": "Kräuter" }
+    ],
+    "nutrition": {
+      "calories": 380,
+      "protein": 22,
+      "carbs": 24,
+      "fat": 22,
+      "fiber": 5
+    },
+    "instructions": [
+      "Zwiebel und Paprika würfeln, Knoblauch hacken.",
+      "In einer großen Pfanne in Olivenöl anbraten.",
+      "Gewürze hinzufügen und kurz mit anrösten.",
+      "Passierte Tomaten hinzugeben und 10 Minuten köcheln.",
+      "Mit Salz und Pfeffer abschmecken.",
+      "4 Mulden in die Sauce drücken.",
+      "Eier vorsichtig in die Mulden gleiten lassen.",
+      "Deckel drauf und 5-7 Minuten garen bis Eier gestockt sind.",
+      "Mit Feta und Petersilie garnieren."
+    ],
+    "allergens": ["eggs", "lactose"],
+    "dietaryFlags": ["vegetarian", "gluten-free"],
+    "mealPrepable": false,
+    "storageDays": 0
+  },
+  {
+    "id": "30",
+    "name": "Protein-Müsli-Riegel",
+    "category": "snack",
+    "tags": ["meal-prep", "vegetarian", "no-bake"],
+    "prepTime": 15,
+    "cookTime": 0,
+    "totalTime": 15,
+    "difficulty": "easy",
+    "servings": 8,
+    "image": "/images/recipes/protein-bars.jpg",
+    "ingredients": [
+      { "name": "Haferflocken", "amount": 100, "unit": "g", "category": "Getreide" },
+      { "name": "Proteinpulver", "amount": 60, "unit": "g", "category": "Nahrungsergänzung" },
+      { "name": "Erdnussbutter", "amount": 100, "unit": "g", "category": "Nüsse" },
+      { "name": "Honig", "amount": 60, "unit": "g", "category": "Süßungsmittel" },
+      { "name": "Zartbitterschokolade", "amount": 50, "unit": "g", "category": "Süßes" },
+      { "name": "Mandeln (gehackt)", "amount": 30, "unit": "g", "category": "Nüsse" }
+    ],
+    "nutrition": {
+      "calories": 210,
+      "protein": 10,
+      "carbs": 22,
+      "fat": 10,
+      "fiber": 3
+    },
+    "instructions": [
+      "Haferflocken und Proteinpulver in einer Schüssel mischen.",
+      "Erdnussbutter und Honig in einem kleinen Topf leicht erwärmen.",
+      "Flüssige Mischung zu den trockenen Zutaten geben.",
+      "Mandeln unterheben.",
+      "Masse in eine mit Backpapier ausgelegte Form drücken.",
+      "Schokolade schmelzen und darüber gießen.",
+      "2 Stunden im Kühlschrank fest werden lassen.",
+      "In Riegel schneiden."
+    ],
+    "allergens": ["gluten", "peanuts", "nuts"],
+    "dietaryFlags": ["vegetarian"],
+    "mealPrepable": true,
+    "storageDays": 10
+  }
+]
