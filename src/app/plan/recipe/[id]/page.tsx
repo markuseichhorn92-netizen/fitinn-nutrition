@@ -93,7 +93,6 @@ export default function RecipeDetailPage() {
     );
   }
 
-  const imageUrl = recipe.image && recipe.image.startsWith('http') ? recipe.image : getMealImage(recipe.category, recipe.id);
 
   return (
     <div className={`min-h-screen pb-24 lg:pb-8 ${cookMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -150,18 +149,40 @@ export default function RecipeDetailPage() {
         </div>
       </div>
 
-      {/* Mobile Header Image */}
-      <div className="relative h-56 bg-gray-100 lg:hidden">
-        <img 
-          src={imageUrl} 
-          alt={recipe.name}
-          className="w-full h-full object-cover"
-        />
+      {/* Mobile Header Banner */}
+      <div className={`relative lg:hidden ${
+        recipe.category === 'breakfast' ? 'bg-gradient-to-br from-amber-100 to-amber-50' :
+        recipe.category === 'lunch' ? 'bg-gradient-to-br from-emerald-100 to-emerald-50' :
+        recipe.category === 'dinner' ? 'bg-gradient-to-br from-indigo-100 to-indigo-50' : 'bg-gradient-to-br from-orange-100 to-orange-50'
+      }`}>
+        <div className="flex flex-col items-center justify-center py-10 px-4">
+          <span className="text-6xl mb-3">{
+            recipe.category === 'breakfast' ? '🥣' :
+            recipe.category === 'lunch' ? '🥗' :
+            recipe.category === 'dinner' ? '🍲' : '🥜'
+          }</span>
+          <div className="flex items-center gap-4 text-sm">
+            <span className="font-semibold text-gray-700">{recipe.nutrition.calories} kcal</span>
+            <span className="text-gray-400">•</span>
+            <span className="text-gray-600">⏱ {recipe.totalTime} min</span>
+            <span className="text-gray-400">•</span>
+            <span className="text-gray-600">{recipe.difficulty === 'easy' ? 'Einfach' : recipe.difficulty === 'medium' ? 'Mittel' : 'Anspruchsvoll'}</span>
+          </div>
+          {recipe.dietaryFlags?.length > 0 && (
+            <div className="flex gap-2 mt-2">
+              {recipe.dietaryFlags.slice(0, 3).map(flag => (
+                <span key={flag} className="text-xs px-2 py-0.5 bg-white/60 rounded-full text-gray-600">
+                  {flag === 'vegetarian' ? '🌿 Vegetarisch' : flag === 'vegan' ? '🌱 Vegan' : flag === 'high-protein' ? '💪 High Protein' : flag === 'low-carb' ? '📉 Low Carb' : flag === 'gluten-free' ? 'Glutenfrei' : flag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
         
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className="absolute top-4 left-4 p-2 rounded-full bg-white shadow-md"
+          className="absolute top-4 left-4 p-2 rounded-full bg-white/80 shadow-sm"
         >
           <svg className="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -171,7 +192,7 @@ export default function RecipeDetailPage() {
         {/* Favorite Button */}
         <button
           onClick={handleFavorite}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white shadow-md"
+          className="absolute top-4 right-4 p-2 rounded-full bg-white/80 shadow-sm"
         >
           <svg
             className={`w-6 h-6 ${favorite ? 'text-red-500 fill-current' : 'text-gray-400'}`}
@@ -196,13 +217,33 @@ export default function RecipeDetailPage() {
           {/* Left Column - Image & Nutrition */}
           <div className="lg:col-span-2">
             <div className="sticky top-24 space-y-6">
-              {/* Image */}
-              <div className="rounded-2xl overflow-hidden shadow-lg">
-                <img 
-                  src={imageUrl} 
-                  alt={recipe.name}
-                  className="w-full aspect-[4/3] object-cover"
-                />
+              {/* Category Banner */}
+              <div className={`rounded-2xl overflow-hidden shadow-sm flex flex-col items-center justify-center py-12 ${
+                recipe.category === 'breakfast' ? 'bg-gradient-to-br from-amber-100 to-amber-50' :
+                recipe.category === 'lunch' ? 'bg-gradient-to-br from-emerald-100 to-emerald-50' :
+                recipe.category === 'dinner' ? 'bg-gradient-to-br from-indigo-100 to-indigo-50' : 'bg-gradient-to-br from-orange-100 to-orange-50'
+              }`}>
+                <span className="text-7xl mb-4">{
+                  recipe.category === 'breakfast' ? '🥣' :
+                  recipe.category === 'lunch' ? '🥗' :
+                  recipe.category === 'dinner' ? '🍲' : '🥜'
+                }</span>
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="font-bold text-gray-700">{recipe.nutrition.calories} kcal</span>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-600">⏱ {recipe.totalTime} min</span>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-600">{recipe.difficulty === 'easy' ? 'Einfach' : recipe.difficulty === 'medium' ? 'Mittel' : 'Anspruchsvoll'}</span>
+                </div>
+                {recipe.dietaryFlags?.length > 0 && (
+                  <div className="flex gap-2 mt-3 flex-wrap justify-center">
+                    {recipe.dietaryFlags.slice(0, 4).map(flag => (
+                      <span key={flag} className="text-xs px-2.5 py-1 bg-white/60 rounded-full text-gray-600 font-medium">
+                        {flag === 'vegetarian' ? '🌿 Vegetarisch' : flag === 'vegan' ? '🌱 Vegan' : flag === 'high-protein' ? '💪 High Protein' : flag === 'low-carb' ? '📉 Low Carb' : flag === 'gluten-free' ? 'Glutenfrei' : flag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Nutrition Facts */}
