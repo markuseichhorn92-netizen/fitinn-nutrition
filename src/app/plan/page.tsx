@@ -363,6 +363,7 @@ export default function PlanPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
+      <div className="max-w-lg mx-auto bg-white min-h-screen shadow-lg">
       {/* Header */}
       <div className="sticky top-0 bg-white z-10 shadow-sm">
         {/* Top Bar with Logo & Actions */}
@@ -521,6 +522,7 @@ export default function PlanPage() {
         <WaterTracker goal={waterGoal} date={getDateString(currentDate)} />
       </div>
 
+            </div>
       <BottomNav />
     </div>
   );

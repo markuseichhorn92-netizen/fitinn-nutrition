@@ -85,9 +85,10 @@ export default function RecipeDetailPage() {
   const imageUrl = getMealImage(recipe.category, recipe.id);
 
   return (
-    <div className={`min-h-screen pb-24 ${cookMode ? 'bg-gray-900' : 'bg-white'}`}>
+    <div className={`min-h-screen pb-24 ${cookMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className="max-w-lg mx-auto bg-white min-h-screen shadow-lg">
       {/* Header Image */}
-      <div className="relative h-48 sm:h-56 bg-gray-100">
+      <div className="relative h-44 bg-gray-100">
         <img 
           src={imageUrl} 
           alt={recipe.name}
@@ -267,6 +268,7 @@ export default function RecipeDetailPage() {
         )}
       </div>
 
+      </div>
       <BottomNav />
     </div>
   );
