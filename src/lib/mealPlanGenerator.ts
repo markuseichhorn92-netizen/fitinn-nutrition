@@ -71,9 +71,9 @@ export function generateDayPlan(date: string, profile: UserProfile): DayPlan {
   const snacks = filterRecipesForUser(getRecipesByCategory('snack'), profile);
 
   // Calculate target calories per meal
-  const totalMeals = Object.values(profile.meals || {}).filter(v => v === true).length;
-  const mainMealRatio = 0.3;
-  const snackRatio = 0.1;
+  const _totalMeals = Object.values(profile.meals || {}).filter(v => v === true).length;
+  const _mainMealRatio = 0.3;
+  const _snackRatio = 0.1;
 
   if (profile.meals?.breakfast) {
     const recipe = selectRecipe(breakfasts, usedIds);
