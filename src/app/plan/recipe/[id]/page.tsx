@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getRecipeById } from '@/lib/mealPlanGenerator';
-import { saveFavorite, removeFavorite, isFavorite } from '@/lib/storage';
+import { saveFavorite, removeFavorite, isFavorite, loadAllPlans } from '@/lib/storage';
 import { Recipe } from '@/types';
 import BottomNav from '@/components/BottomNav';
 
@@ -53,7 +53,20 @@ export default function RecipeDetailPage() {
   useEffect(() => {
     const id = params.id as string;
     
-    // Try local/cached first
+    // First: Try to find the SCALED version from saved day plans
+    const allPlans = loadAllPlans();
+    for (const plan of Object.values(allPlans)) {
+      const meal = plan.meals?.find(m => m.recipe.id === id);
+      if (meal) {
+        // Found the scaled recipe in a saved plan — use this one
+        setRecipe(meal.recipe);
+        setServings(meal.recipe.servings);
+        setFavorite(isFavorite(id));
+        return;
+      }
+    }
+    
+    // Fallback: load unscaled original
     const foundRecipe = getRecipeById(id);
     if (foundRecipe) {
       setRecipe(foundRecipe);
