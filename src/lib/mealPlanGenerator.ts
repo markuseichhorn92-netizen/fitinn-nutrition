@@ -43,6 +43,44 @@ function filterRecipesForUser(recipes: Recipe[], profile: UserProfile): Recipe[]
   });
 }
 
+// Scale a recipe to target calories
+function scaleRecipe(recipe: Recipe, targetCals: number): Recipe {
+  if (!targetCals || targetCals <= 0 || recipe.nutrition.calories <= 0) return recipe;
+  const scale = targetCals / recipe.nutrition.calories;
+  // Don't scale more than 3x or less than 0.3x (would be weird portions)
+  const clampedScale = Math.max(0.3, Math.min(3.0, scale));
+  return {
+    ...recipe,
+    servings: Math.round(recipe.servings * clampedScale * 10) / 10,
+    ingredients: recipe.ingredients.map(ing => ({
+      ...ing,
+      amount: Math.round(ing.amount * clampedScale * 10) / 10,
+    })),
+    nutrition: {
+      calories: Math.round(recipe.nutrition.calories * clampedScale),
+      protein: Math.round(recipe.nutrition.protein * clampedScale),
+      carbs: Math.round(recipe.nutrition.carbs * clampedScale),
+      fat: Math.round(recipe.nutrition.fat * clampedScale),
+      fiber: Math.round(recipe.nutrition.fiber * clampedScale),
+    },
+  };
+}
+
+// Select best recipe closest to target calories
+function selectRecipeForTarget(recipes: Recipe[], usedIds: string[], targetCals: number): Recipe | null {
+  const available = recipes.filter(r => !usedIds.includes(r.id));
+  if (available.length === 0) return recipes[0] || null;
+  // Sort by how close to target (prefer recipes that need less scaling)
+  available.sort((a, b) => {
+    const diffA = Math.abs(a.nutrition.calories - targetCals);
+    const diffB = Math.abs(b.nutrition.calories - targetCals);
+    return diffA - diffB;
+  });
+  // Pick from top 3 closest (some randomness)
+  const top = available.slice(0, Math.min(3, available.length));
+  return top[Math.floor(Math.random() * top.length)];
+}
+
 // Select a random recipe from filtered list
 function selectRecipe(recipes: Recipe[], usedIds: string[] = []): Recipe | null {
   const available = recipes.filter(r => !usedIds.includes(r.id));
@@ -84,97 +122,113 @@ export function generateDayPlan(date: string, profile: UserProfile): DayPlan {
   const dinners = filterRecipesForUser(getRecipesByCategory(recipes, 'dinner'), profile);
   const snacks = filterRecipesForUser(getRecipesByCategory(recipes, 'snack'), profile);
 
-  // Calculate target calories per meal
-  const _totalMeals = Object.values(profile.meals || {}).filter(v => v === true).length;
-  const _mainMealRatio = 0.3;
-  const _snackRatio = 0.1;
+  // Calculate target calories per meal type
+  const targetCalories = profile.targetCalories || profile.tdee || 2000;
+  const activeMeals = Object.entries(profile.meals || {}).filter(([, v]) => v === true);
+  const mainMealTypes = ['breakfast', 'lunch', 'dinner'];
+  const mainMealCount = activeMeals.filter(([k]) => mainMealTypes.includes(k)).length;
+  const snackCount = activeMeals.length - mainMealCount;
+  // Main meals get ~30% each, snacks ~10% each (adjusted to fill 100%)
+  const totalRatio = mainMealCount * 0.3 + snackCount * 0.1;
+  const mainCalTarget = (targetCalories * 0.3) / (totalRatio || 1) * (totalRatio);
+  const snackCalTarget = (targetCalories * 0.1) / (totalRatio || 1) * (totalRatio);
+
+  // Per-meal calorie targets
+  const mainTarget = targetCalories * 0.3 / (totalRatio || 1);
+  const snackTarget = targetCalories * 0.1 / (totalRatio || 1);
 
   if (profile.meals?.breakfast) {
-    const recipe = selectRecipe(breakfasts, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
+    const raw = selectRecipeForTarget(breakfasts, usedIds, mainTarget);
+    if (raw) {
+      const recipe = scaleRecipe(raw, mainTarget);
+      usedIds.push(raw.id);
       meals.push({
         type: 'breakfast',
         time: '07:30',
         recipe,
         eaten: false,
         favorite: false,
-        alternatives: getAlternatives(recipe, breakfasts),
+        alternatives: getAlternatives(raw, breakfasts),
       });
     }
   }
 
   if (profile.meals?.morningSnack) {
-    const recipe = selectRecipe(snacks, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
+    const raw = selectRecipeForTarget(snacks, usedIds, snackTarget);
+    if (raw) {
+      const recipe = scaleRecipe(raw, snackTarget);
+      usedIds.push(raw.id);
       meals.push({
         type: 'morningSnack',
         time: '10:00',
         recipe,
         eaten: false,
         favorite: false,
-        alternatives: getAlternatives(recipe, snacks),
+        alternatives: getAlternatives(raw, snacks),
       });
     }
   }
 
   if (profile.meals?.lunch) {
-    const recipe = selectRecipe(lunches, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
+    const raw = selectRecipeForTarget(lunches, usedIds, mainTarget);
+    if (raw) {
+      const recipe = scaleRecipe(raw, mainTarget);
+      usedIds.push(raw.id);
       meals.push({
         type: 'lunch',
         time: '12:30',
         recipe,
         eaten: false,
         favorite: false,
-        alternatives: getAlternatives(recipe, lunches),
+        alternatives: getAlternatives(raw, lunches),
       });
     }
   }
 
   if (profile.meals?.afternoonSnack) {
-    const recipe = selectRecipe(snacks, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
+    const raw = selectRecipeForTarget(snacks, usedIds, snackTarget);
+    if (raw) {
+      const recipe = scaleRecipe(raw, snackTarget);
+      usedIds.push(raw.id);
       meals.push({
         type: 'afternoonSnack',
         time: '15:30',
         recipe,
         eaten: false,
         favorite: false,
-        alternatives: getAlternatives(recipe, snacks),
+        alternatives: getAlternatives(raw, snacks),
       });
     }
   }
 
   if (profile.meals?.dinner) {
-    const recipe = selectRecipe(dinners, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
+    const raw = selectRecipeForTarget(dinners, usedIds, mainTarget);
+    if (raw) {
+      const recipe = scaleRecipe(raw, mainTarget);
+      usedIds.push(raw.id);
       meals.push({
         type: 'dinner',
         time: '19:00',
         recipe,
         eaten: false,
         favorite: false,
-        alternatives: getAlternatives(recipe, dinners),
+        alternatives: getAlternatives(raw, dinners),
       });
     }
   }
 
   if (profile.meals?.lateSnack) {
-    const recipe = selectRecipe(snacks, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
+    const raw = selectRecipeForTarget(snacks, usedIds, snackTarget);
+    if (raw) {
+      const recipe = scaleRecipe(raw, snackTarget);
+      usedIds.push(raw.id);
       meals.push({
         type: 'lateSnack',
         time: '21:00',
         recipe,
         eaten: false,
         favorite: false,
-        alternatives: getAlternatives(recipe, snacks),
+        alternatives: getAlternatives(raw, snacks),
       });
     }
   }
