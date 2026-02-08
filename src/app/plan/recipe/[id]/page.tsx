@@ -75,6 +75,10 @@ export default function RecipeDetailPage() {
     return adjusted % 1 === 0 ? adjusted.toString() : adjusted.toFixed(1);
   };
 
+  const adjustNutrition = (value: number): number => {
+    return Math.round((value / (recipe?.servings || 1)) * servings);
+  };
+
   if (!recipe) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -198,23 +202,23 @@ export default function RecipeDetailPage() {
               {/* Nutrition Facts */}
               <div className={`rounded-2xl p-5 ${cookMode ? 'bg-gray-800' : 'bg-white shadow-sm'}`}>
                 <h3 className={`font-semibold mb-4 text-lg ${cookMode ? 'text-white' : 'text-gray-900'}`}>
-                  Nährwerte pro Portion
+                  Nährwerte gesamt
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className={`p-4 rounded-xl ${cookMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                    <p className="text-2xl font-bold text-teal-500">{recipe.nutrition.calories}</p>
+                    <p className="text-2xl font-bold text-teal-500">{adjustNutrition(recipe.nutrition.calories)}</p>
                     <p className={`text-sm ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>Kalorien</p>
                   </div>
                   <div className={`p-4 rounded-xl ${cookMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                    <p className="text-2xl font-bold text-red-500">{recipe.nutrition.protein}g</p>
+                    <p className="text-2xl font-bold text-red-500">{adjustNutrition(recipe.nutrition.protein)}g</p>
                     <p className={`text-sm ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>Protein</p>
                   </div>
                   <div className={`p-4 rounded-xl ${cookMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                    <p className="text-2xl font-bold text-yellow-500">{recipe.nutrition.carbs}g</p>
+                    <p className="text-2xl font-bold text-yellow-500">{adjustNutrition(recipe.nutrition.carbs)}g</p>
                     <p className={`text-sm ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>Kohlenhydrate</p>
                   </div>
                   <div className={`p-4 rounded-xl ${cookMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                    <p className="text-2xl font-bold text-blue-500">{recipe.nutrition.fat}g</p>
+                    <p className="text-2xl font-bold text-blue-500">{adjustNutrition(recipe.nutrition.fat)}g</p>
                     <p className={`text-sm ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>Fett</p>
                   </div>
                 </div>
@@ -222,7 +226,7 @@ export default function RecipeDetailPage() {
                   <div className={`mt-4 p-3 rounded-xl ${cookMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
                     <div className="flex justify-between items-center">
                       <span className={cookMode ? 'text-gray-300' : 'text-gray-600'}>Ballaststoffe</span>
-                      <span className={`font-semibold ${cookMode ? 'text-white' : 'text-gray-900'}`}>{recipe.nutrition.fiber}g</span>
+                      <span className={`font-semibold ${cookMode ? 'text-white' : 'text-gray-900'}`}>{adjustNutrition(recipe.nutrition.fiber)}g</span>
                     </div>
                   </div>
                 )}
@@ -385,22 +389,22 @@ export default function RecipeDetailPage() {
 
           {/* Nutrition Facts */}
           <div className={`rounded-2xl p-4 mb-4 ${cookMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
-            <h3 className={`font-semibold mb-3 ${cookMode ? 'text-white' : 'text-gray-900'}`}>Nährwerte pro Portion</h3>
+            <h3 className={`font-semibold mb-3 ${cookMode ? 'text-white' : 'text-gray-900'}`}>Nährwerte gesamt</h3>
             <div className="grid grid-cols-4 gap-3 text-center">
               <div>
-                <p className="text-xl font-bold text-teal-500">{recipe.nutrition.calories}</p>
+                <p className="text-xl font-bold text-teal-500">{adjustNutrition(recipe.nutrition.calories)}</p>
                 <p className={`text-xs ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>kcal</p>
               </div>
               <div>
-                <p className="text-xl font-bold text-red-500">{recipe.nutrition.protein}g</p>
+                <p className="text-xl font-bold text-red-500">{adjustNutrition(recipe.nutrition.protein)}g</p>
                 <p className={`text-xs ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>Protein</p>
               </div>
               <div>
-                <p className="text-xl font-bold text-yellow-500">{recipe.nutrition.carbs}g</p>
+                <p className="text-xl font-bold text-yellow-500">{adjustNutrition(recipe.nutrition.carbs)}g</p>
                 <p className={`text-xs ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>Carbs</p>
               </div>
               <div>
-                <p className="text-xl font-bold text-blue-500">{recipe.nutrition.fat}g</p>
+                <p className="text-xl font-bold text-blue-500">{adjustNutrition(recipe.nutrition.fat)}g</p>
                 <p className={`text-xs ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>Fett</p>
               </div>
             </div>
