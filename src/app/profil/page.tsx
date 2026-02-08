@@ -4,33 +4,50 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
-import { loadProfile, saveProfile, clearAllData, loadFavorites } from '@/lib/storage';
+import { loadProfile, saveProfile, clearAllData } from '@/lib/storage';
+import { saveUserProfile, loadUserProfile } from '@/lib/supabase-data';
 import { getGoalLabel, getDietLabel, calculateWaterGoal, calculateTDEE, calculateTargetCalories } from '@/lib/calculations';
 import { UserProfile } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { user, signOut, isLoading: authLoading } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [weightInput, setWeightInput] = useState('');
   const [showWeightSaved, setShowWeightSaved] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedProfile = loadProfile();
-    if (!storedProfile) {
-      router.push('/onboarding');
-      return;
+    const loadData = async () => {
+      // Try to load from Supabase first (if authenticated), then localStorage
+      const storedProfile = await loadUserProfile();
+      if (!storedProfile) {
+        router.push('/onboarding');
+        return;
+      }
+      setProfile(storedProfile);
+      setWeightInput(storedProfile.weight.toString());
+      setIsLoading(false);
+    };
+    
+    if (!authLoading) {
+      loadData();
     }
-    setProfile(storedProfile);
-    setWeightInput(storedProfile.weight.toString());
-  }, [router]);
+  }, [router, authLoading]);
 
   const handleDeleteData = () => {
     clearAllData();
     router.push('/');
   };
 
-  const handleUpdateWeight = () => {
+  const handleSignOut = async () => {
+    await signOut();
+    router.push('/');
+  };
+
+  const handleUpdateWeight = async () => {
     if (!profile) return;
     const newWeight = parseFloat(weightInput);
     if (isNaN(newWeight) || newWeight < 30 || newWeight > 300) return;
@@ -42,13 +59,16 @@ export default function ProfilePage() {
     updatedProfile.tdee = tdee;
     updatedProfile.targetCalories = targetCalories;
     
+    // Save to both localStorage and Supabase
     saveProfile(updatedProfile);
+    await saveUserProfile(updatedProfile);
+    
     setProfile(updatedProfile);
     setShowWeightSaved(true);
     setTimeout(() => setShowWeightSaved(false), 2000);
   };
 
-  if (!profile) {
+  if (isLoading || authLoading || !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full" />
@@ -58,7 +78,6 @@ export default function ProfilePage() {
 
   const waterGoal = calculateWaterGoal(profile.weight, profile.sportsFrequency);
   const bmi = (profile.weight / Math.pow(profile.height / 100, 2)).toFixed(1);
-  const weightDiff = profile.weight - profile.targetWeight;
   const tdee = profile.tdee || calculateTDEE(profile);
   const targetCalories = profile.targetCalories || calculateTargetCalories(tdee, profile.goal);
 
@@ -84,7 +103,14 @@ export default function ProfilePage() {
             </div>
             <div>
               <h1 className="text-2xl lg:text-xl font-bold mb-1 text-gray-900">Dein Profil</h1>
-              <p className="text-gray-500 text-sm">FIT-INN Mitglied</p>
+              {user ? (
+                <p className="text-gray-500 text-sm flex items-center justify-center lg:justify-start gap-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  {user.email}
+                </p>
+              ) : (
+                <p className="text-gray-500 text-sm">FIT-INN Mitglied (lokal)</p>
+              )}
             </div>
           </div>
           <button
@@ -97,6 +123,29 @@ export default function ProfilePage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 lg:px-6 py-4 lg:py-6">
+        {/* Cloud Sync Status */}
+        {!user && (
+          <div className="bg-gradient-to-r from-teal-50 to-emerald-50 rounded-2xl p-4 mb-6 border border-teal-200">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+                <svg className="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-gray-800">Daten in der Cloud sichern</p>
+                <p className="text-sm text-gray-600">Melde dich an, um deine Pläne geräteübergreifend zu synchronisieren.</p>
+              </div>
+              <Link
+                href="/login"
+                className="px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors"
+              >
+                Anmelden
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* TDEE & Kalorienziel - Prominent */}
         <div className="bg-white rounded-2xl p-5 shadow-sm mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">🔥 Dein Energiebedarf</h2>
@@ -255,12 +304,27 @@ export default function ProfilePage() {
                 ❤️ Meine Favoriten
               </Link>
 
-              <button
-                onClick={() => router.push('/')}
-                className="w-full py-4 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
-              >
-                Abmelden
-              </button>
+              {user ? (
+                <button
+                  onClick={handleSignOut}
+                  className="w-full py-4 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Abmelden
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  className="w-full py-4 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  Anmelden
+                </Link>
+              )}
 
               <button
                 onClick={() => setShowDeleteConfirm(true)}

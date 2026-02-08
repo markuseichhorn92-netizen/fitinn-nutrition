@@ -4,17 +4,20 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
-import { loadFavorites, removeFavorite } from '@/lib/storage';
+import { getFavorites, removeFavorite as removeSupabaseFavorite } from '@/lib/supabase-data';
 import { getRecipeById } from '@/lib/mealPlanGenerator';
 import { Recipe } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 
 export default function FavoritenPage() {
   const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadFavoriteRecipes = () => {
-    const favoriteIds = loadFavorites();
+  const loadFavoriteRecipes = async () => {
+    // Load favorites from Supabase (or localStorage if not authenticated)
+    const favoriteIds = await getFavorites();
     const favoriteRecipes: Recipe[] = [];
     for (const id of favoriteIds) {
       const recipe = getRecipeById(id);
@@ -25,15 +28,18 @@ export default function FavoritenPage() {
   };
 
   useEffect(() => {
-    loadFavoriteRecipes();
-  }, []);
+    if (!authLoading) {
+      loadFavoriteRecipes();
+    }
+  }, [authLoading, user]);
 
-  const handleRemove = (recipeId: string) => {
-    removeFavorite(recipeId);
+  const handleRemove = async (recipeId: string) => {
+    // Remove from Supabase (and localStorage)
+    await removeSupabaseFavorite(recipeId);
     setRecipes(prev => prev.filter(r => r.id !== recipeId));
   };
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full" />
@@ -66,9 +72,12 @@ export default function FavoritenPage() {
             </svg>
           </Link>
           <span className="text-2xl">❤️</span>
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl font-bold text-gray-900">Meine Favoriten</h1>
-            <p className="text-sm text-gray-500">{recipes.length} Rezept{recipes.length !== 1 ? 'e' : ''}</p>
+            <p className="text-sm text-gray-500">
+              {recipes.length} Rezept{recipes.length !== 1 ? 'e' : ''}
+              {user && <span className="text-teal-600 ml-1">• Synchronisiert</span>}
+            </p>
           </div>
         </div>
       </div>

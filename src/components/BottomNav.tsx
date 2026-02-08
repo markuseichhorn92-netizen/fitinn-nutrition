@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 const navItems = [
   {
@@ -44,6 +45,7 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { user, isLoading } = useAuth();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-pb lg:hidden z-50">
@@ -65,6 +67,44 @@ export default function BottomNav() {
             </Link>
           );
         })}
+        
+        {/* Auth Button */}
+        {!isLoading && (
+          user ? (
+            <Link
+              href="/profil"
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+                pathname === '/profil' ? 'text-teal-600' : 'text-gray-400 hover:text-gray-600'
+              }`}
+              title={user.email || 'Eingeloggt'}
+            >
+              <div className="relative">
+                <svg className={`w-6 h-6 ${pathname === '/profil' ? 'text-teal-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {/* Green dot indicating logged in */}
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
+              </div>
+              <span className={`text-[10px] mt-1 font-medium ${pathname === '/profil' ? 'text-teal-600' : 'text-gray-400'}`}>
+                Konto
+              </span>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+                pathname === '/login' ? 'text-teal-600' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <svg className={`w-6 h-6 ${pathname === '/login' ? 'text-teal-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              <span className={`text-[10px] mt-1 font-medium ${pathname === '/login' ? 'text-teal-600' : 'text-gray-400'}`}>
+                Anmelden
+              </span>
+            </Link>
+          )
+        )}
       </div>
     </nav>
   );

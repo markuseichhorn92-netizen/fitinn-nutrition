@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
   title: "FIT-INN Nutrition | Dein persönlicher Ernährungsplan",
@@ -49,7 +50,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="FIT-INN Nutrition" />
       </head>
       <body className="font-sans antialiased bg-white text-gray-900 min-h-screen">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
