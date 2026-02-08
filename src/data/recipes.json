@@ -13,7 +13,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-001.jpg",
+    "image": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Haferflocken",
@@ -85,7 +85,7 @@
     "totalTime": 3,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-002.jpg",
+    "image": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Griechischer Joghurt",
@@ -150,7 +150,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-003.jpg",
+    "image": "https://images.unsplash.com/photo-1494597564530-871f2b93ac55?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Açaí-Pulver",
@@ -224,7 +224,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-004.jpg",
+    "image": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Haferflocken",
@@ -297,7 +297,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-005.jpg",
+    "image": "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Eier",
@@ -370,7 +370,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-006.jpg",
+    "image": "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Magerquark",
@@ -441,7 +441,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-007.jpg",
+    "image": "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Vollkorntoast",
@@ -518,7 +518,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-008.jpg",
+    "image": "https://images.unsplash.com/photo-1549395156-e0c1fe31d2a0?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Chiasamen",
@@ -579,7 +579,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-009.jpg",
+    "image": "https://images.unsplash.com/photo-1506084868230-bb9d95c24759?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Gefrorene Banane",
@@ -655,7 +655,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-010.jpg",
+    "image": "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Vollkornbrötchen",
@@ -719,7 +719,7 @@
     "totalTime": 30,
     "difficulty": "easy",
     "servings": 6,
-    "image": "/images/recipes/recipe-011.jpg",
+    "image": "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Haferflocken",
@@ -794,7 +794,7 @@
     "totalTime": 20,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-012.jpg",
+    "image": "https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Eier",
@@ -870,7 +870,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-013.jpg",
+    "image": "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Erdbeeren",
@@ -931,7 +931,7 @@
     "totalTime": 3,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-014.jpg",
+    "image": "https://images.unsplash.com/photo-1510693206972-df098062cb71?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Skyr Natur",
@@ -1002,7 +1002,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-015.jpg",
+    "image": "https://images.unsplash.com/photo-1464454709131-ffd692591ee5?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Süßkartoffel",
@@ -1071,7 +1071,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-016.jpg",
+    "image": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Haferflocken",
@@ -1140,7 +1140,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-017.jpg",
+    "image": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Haferflocken",
@@ -1212,7 +1212,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-018.jpg",
+    "image": "https://images.unsplash.com/photo-1494597564530-871f2b93ac55?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Avocado",
@@ -1281,7 +1281,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-019.jpg",
+    "image": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Buchweizenmehl",
@@ -1347,7 +1347,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-020.jpg",
+    "image": "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Tortilla-Wrap",
@@ -1416,7 +1416,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-021.jpg",
+    "image": "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Gefrorene Mango",
@@ -1489,7 +1489,7 @@
     "totalTime": 30,
     "difficulty": "easy",
     "servings": 6,
-    "image": "/images/recipes/recipe-022.jpg",
+    "image": "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Eier",
@@ -1553,7 +1553,7 @@
     "totalTime": 3,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-023.jpg",
+    "image": "https://images.unsplash.com/photo-1549395156-e0c1fe31d2a0?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Vollkornbrot",
@@ -1617,7 +1617,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-024.jpg",
+    "image": "https://images.unsplash.com/photo-1506084868230-bb9d95c24759?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hartweizengrieß",
@@ -1687,7 +1687,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-025.jpg",
+    "image": "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Vollkorn-Bagel",
@@ -1757,7 +1757,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-026.jpg",
+    "image": "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Quinoa",
@@ -1832,7 +1832,7 @@
     "totalTime": 3,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-027.jpg",
+    "image": "https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Eiweißbrot",
@@ -1890,7 +1890,7 @@
     "totalTime": 3,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-028.jpg",
+    "image": "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Veganes Proteinpulver",
@@ -1959,7 +1959,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-029.jpg",
+    "image": "https://images.unsplash.com/photo-1510693206972-df098062cb71?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Eier",
@@ -2032,7 +2032,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 8,
-    "image": "/images/recipes/recipe-030.jpg",
+    "image": "https://images.unsplash.com/photo-1464454709131-ffd692591ee5?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Haferflocken",
@@ -2094,7 +2094,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-031.jpg",
+    "image": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Eier",
@@ -2159,7 +2159,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-032.jpg",
+    "image": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Mandelmehl",
@@ -2231,7 +2231,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-033.jpg",
+    "image": "https://images.unsplash.com/photo-1494597564530-871f2b93ac55?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Naturjoghurt",
@@ -2293,7 +2293,7 @@
     "totalTime": 15,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-034.jpg",
+    "image": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Eier",
@@ -2369,7 +2369,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-035.jpg",
+    "image": "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Haferflocken",
@@ -2443,7 +2443,7 @@
     "totalTime": 30,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-036.jpg",
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -2510,7 +2510,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-037.jpg",
+    "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Vollkorn-Wrap",
@@ -2584,7 +2584,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-038.jpg",
+    "image": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Basmatireis",
@@ -2667,7 +2667,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-039.jpg",
+    "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -2750,7 +2750,7 @@
     "totalTime": 35,
     "difficulty": "easy",
     "servings": 3,
-    "image": "/images/recipes/recipe-040.jpg",
+    "image": "https://images.unsplash.com/photo-1547592180-85f173990554?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Rote Linsen",
@@ -2830,7 +2830,7 @@
     "totalTime": 22,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-041.jpg",
+    "image": "https://images.unsplash.com/photo-1543339308-d595a3a8bfbf?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Lachsfilet",
@@ -2905,7 +2905,7 @@
     "totalTime": 18,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-042.jpg",
+    "image": "https://images.unsplash.com/photo-1569058242567-93de6f36f8e6?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Vollkorn-Wrap",
@@ -2973,7 +2973,7 @@
     "totalTime": 30,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-043.jpg",
+    "image": "https://images.unsplash.com/photo-1551248429-40975aa4de74?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Kichererbsen (Dose)",
@@ -3046,7 +3046,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-044.jpg",
+    "image": "https://images.unsplash.com/photo-1600335895229-6e75511892c8?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -3114,7 +3114,7 @@
     "totalTime": 35,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-045.jpg",
+    "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Süßkartoffel",
@@ -3193,7 +3193,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-046.jpg",
+    "image": "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Vollkornpasta",
@@ -3262,7 +3262,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-047.jpg",
+    "image": "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Glasnudeln",
@@ -3336,7 +3336,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-048.jpg",
+    "image": "https://images.unsplash.com/photo-1543352634-a1c51d9f1fa7?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hummus",
@@ -3411,7 +3411,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-049.jpg",
+    "image": "https://images.unsplash.com/photo-1505253758473-96b7015fcd40?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Putenbrust",
@@ -3479,7 +3479,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-050.jpg",
+    "image": "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Couscous",
@@ -3558,7 +3558,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-051.jpg",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Rinderhackfleisch (mager)",
@@ -3639,7 +3639,7 @@
     "totalTime": 18,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-052.jpg",
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Zucchini",
@@ -3715,7 +3715,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-053.jpg",
+    "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Passierte Tomaten",
@@ -3784,7 +3784,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-054.jpg",
+    "image": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -3852,7 +3852,7 @@
     "totalTime": 30,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-055.jpg",
+    "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Kichererbsen (Dose)",
@@ -3932,7 +3932,7 @@
     "totalTime": 25,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-056.jpg",
+    "image": "https://images.unsplash.com/photo-1547592180-85f173990554?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -4006,7 +4006,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-057.jpg",
+    "image": "https://images.unsplash.com/photo-1543339308-d595a3a8bfbf?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Ciabatta",
@@ -4074,7 +4074,7 @@
     "totalTime": 20,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-058.jpg",
+    "image": "https://images.unsplash.com/photo-1569058242567-93de6f36f8e6?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Reisnudeln",
@@ -4158,7 +4158,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-059.jpg",
+    "image": "https://images.unsplash.com/photo-1551248429-40975aa4de74?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Thunfisch im eigenen Saft",
@@ -4232,7 +4232,7 @@
     "totalTime": 30,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-060.jpg",
+    "image": "https://images.unsplash.com/photo-1600335895229-6e75511892c8?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Brokkoli",
@@ -4301,7 +4301,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-061.jpg",
+    "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Bulgur",
@@ -4373,7 +4373,7 @@
     "totalTime": 30,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-062.jpg",
+    "image": "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Lachsfilet",
@@ -4447,7 +4447,7 @@
     "totalTime": 25,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-063.jpg",
+    "image": "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Reis",
@@ -4518,7 +4518,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-064.jpg",
+    "image": "https://images.unsplash.com/photo-1543352634-a1c51d9f1fa7?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -4593,7 +4593,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-065.jpg",
+    "image": "https://images.unsplash.com/photo-1505253758473-96b7015fcd40?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Tofu",
@@ -4668,7 +4668,7 @@
     "totalTime": 45,
     "difficulty": "medium",
     "servings": 4,
-    "image": "/images/recipes/recipe-066.jpg",
+    "image": "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Blätterteig",
@@ -4745,7 +4745,7 @@
     "totalTime": 17,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-067.jpg",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Sushi-Reis",
@@ -4818,7 +4818,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-068.jpg",
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -4899,7 +4899,7 @@
     "totalTime": 25,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-069.jpg",
+    "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Beluga-Linsen",
@@ -4976,7 +4976,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-070.jpg",
+    "image": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Garnelen",
@@ -5052,7 +5052,7 @@
     "totalTime": 30,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-071.jpg",
+    "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Vollkornpasta",
@@ -5132,7 +5132,7 @@
     "totalTime": 25,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-072.jpg",
+    "image": "https://images.unsplash.com/photo-1547592180-85f173990554?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Quinoa",
@@ -5212,7 +5212,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-073.jpg",
+    "image": "https://images.unsplash.com/photo-1543339308-d595a3a8bfbf?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Vollkornbrot",
@@ -5280,7 +5280,7 @@
     "totalTime": 35,
     "difficulty": "medium",
     "servings": 3,
-    "image": "/images/recipes/recipe-074.jpg",
+    "image": "https://images.unsplash.com/photo-1569058242567-93de6f36f8e6?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Rote Linsen",
@@ -5366,7 +5366,7 @@
     "totalTime": 25,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-075.jpg",
+    "image": "https://images.unsplash.com/photo-1551248429-40975aa4de74?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -5433,7 +5433,7 @@
     "totalTime": 30,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-076.jpg",
+    "image": "https://images.unsplash.com/photo-1432139509613-5c4255815697?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -5502,7 +5502,7 @@
     "totalTime": 30,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-077.jpg",
+    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Lachsfilet",
@@ -5583,7 +5583,7 @@
     "totalTime": 30,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-078.jpg",
+    "image": "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Rinderfilet",
@@ -5652,7 +5652,7 @@
     "totalTime": 30,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-079.jpg",
+    "image": "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Blumenkohl",
@@ -5725,7 +5725,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-080.jpg",
+    "image": "https://images.unsplash.com/photo-1574484284002-952d92456975?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Putenbrust",
@@ -5800,7 +5800,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-081.jpg",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Lachsfilet",
@@ -5870,7 +5870,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-082.jpg",
+    "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Blumenkohl",
@@ -5941,7 +5941,7 @@
     "totalTime": 40,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-083.jpg",
+    "image": "https://images.unsplash.com/photo-1545247181-516773cae754?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Paprika",
@@ -6016,7 +6016,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-084.jpg",
+    "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Vollkornpasta",
@@ -6098,7 +6098,7 @@
     "totalTime": 35,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-085.jpg",
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -6168,7 +6168,7 @@
     "totalTime": 20,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-086.jpg",
+    "image": "https://images.unsplash.com/photo-1540914124281-342587941389?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -6249,7 +6249,7 @@
     "totalTime": 35,
     "difficulty": "easy",
     "servings": 3,
-    "image": "/images/recipes/recipe-087.jpg",
+    "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hokkaido-Kürbis",
@@ -6320,7 +6320,7 @@
     "totalTime": 35,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-088.jpg",
+    "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Rindersteak",
@@ -6386,7 +6386,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-089.jpg",
+    "image": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Weißfischfilet",
@@ -6468,7 +6468,7 @@
     "totalTime": 20,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-090.jpg",
+    "image": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Eier",
@@ -6552,7 +6552,7 @@
     "totalTime": 30,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-091.jpg",
+    "image": "https://images.unsplash.com/photo-1432139509613-5c4255815697?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenschenkel",
@@ -6625,7 +6625,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-092.jpg",
+    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Tofu",
@@ -6707,7 +6707,7 @@
     "totalTime": 50,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-093.jpg",
+    "image": "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenschenkel",
@@ -6780,7 +6780,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-094.jpg",
+    "image": "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Vollkorn-Spaghetti",
@@ -6855,7 +6855,7 @@
     "totalTime": 35,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-095.jpg",
+    "image": "https://images.unsplash.com/photo-1574484284002-952d92456975?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Kichererbsen",
@@ -6934,7 +6934,7 @@
     "totalTime": 30,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-096.jpg",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Kabeljaufilet",
@@ -7010,7 +7010,7 @@
     "totalTime": 35,
     "difficulty": "easy",
     "servings": 3,
-    "image": "/images/recipes/recipe-097.jpg",
+    "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Rinderhackfleisch (mager)",
@@ -7094,7 +7094,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-098.jpg",
+    "image": "https://images.unsplash.com/photo-1545247181-516773cae754?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -7174,7 +7174,7 @@
     "totalTime": 30,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-099.jpg",
+    "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Lachsfilet",
@@ -7251,7 +7251,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-100.jpg",
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -7332,7 +7332,7 @@
     "totalTime": 20,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-101.jpg",
+    "image": "https://images.unsplash.com/photo-1540914124281-342587941389?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Zucchini",
@@ -7413,7 +7413,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-102.jpg",
+    "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Putenschnitzel",
@@ -7494,7 +7494,7 @@
     "totalTime": 35,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-103.jpg",
+    "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Süßkartoffel",
@@ -7568,7 +7568,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-104.jpg",
+    "image": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Garnelen",
@@ -7643,7 +7643,7 @@
     "totalTime": 40,
     "difficulty": "easy",
     "servings": 3,
-    "image": "/images/recipes/recipe-105.jpg",
+    "image": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Braune Linsen",
@@ -7715,7 +7715,7 @@
     "totalTime": 35,
     "difficulty": "hard",
     "servings": 1,
-    "image": "/images/recipes/recipe-106.jpg",
+    "image": "https://images.unsplash.com/photo-1432139509613-5c4255815697?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Putenschnitzel",
@@ -7791,7 +7791,7 @@
     "totalTime": 20,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-107.jpg",
+    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Reisnudeln",
@@ -7873,7 +7873,7 @@
     "totalTime": 50,
     "difficulty": "hard",
     "servings": 4,
-    "image": "/images/recipes/recipe-108.jpg",
+    "image": "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Auberginen",
@@ -7960,7 +7960,7 @@
     "totalTime": 35,
     "difficulty": "medium",
     "servings": 2,
-    "image": "/images/recipes/recipe-109.jpg",
+    "image": "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hähnchenbrust",
@@ -8048,7 +8048,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-110.jpg",
+    "image": "https://images.unsplash.com/photo-1574484284002-952d92456975?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Lachsfilet",
@@ -8125,7 +8125,7 @@
     "totalTime": 35,
     "difficulty": "easy",
     "servings": 3,
-    "image": "/images/recipes/recipe-111.jpg",
+    "image": "https://images.unsplash.com/photo-1559847844-5315695dadae?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Süßkartoffel",
@@ -8200,7 +8200,7 @@
     "totalTime": 10,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-112.jpg",
+    "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Thunfischsteak",
@@ -8276,7 +8276,7 @@
     "totalTime": 30,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-113.jpg",
+    "image": "https://images.unsplash.com/photo-1545247181-516773cae754?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Kartoffeln",
@@ -8349,7 +8349,7 @@
     "totalTime": 30,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-114.jpg",
+    "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Kabeljaufilet",
@@ -8424,7 +8424,7 @@
     "totalTime": 25,
     "difficulty": "medium",
     "servings": 1,
-    "image": "/images/recipes/recipe-115.jpg",
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Reisnudeln",
@@ -8514,7 +8514,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 8,
-    "image": "/images/recipes/recipe-116.jpg",
+    "image": "https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Haferflocken",
@@ -8585,7 +8585,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-117.jpg",
+    "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Spinat",
@@ -8653,7 +8653,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 10,
-    "image": "/images/recipes/recipe-118.jpg",
+    "image": "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Medjool-Datteln",
@@ -8715,7 +8715,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-119.jpg",
+    "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Kichererbsen (Dose)",
@@ -8794,7 +8794,7 @@
     "totalTime": 3,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-120.jpg",
+    "image": "https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Magerquark",
@@ -8858,7 +8858,7 @@
     "totalTime": 3,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-121.jpg",
+    "image": "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Apfel",
@@ -8907,7 +8907,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-122.jpg",
+    "image": "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Griechischer Joghurt",
@@ -8982,7 +8982,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-123.jpg",
+    "image": "https://images.unsplash.com/photo-1499028344343-cd173ffc68a9?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Gefrorene Bananen",
@@ -9036,7 +9036,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-124.jpg",
+    "image": "https://images.unsplash.com/photo-1609951651556-5334e2706168?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Salatgurke",
@@ -9101,7 +9101,7 @@
     "totalTime": 30,
     "difficulty": "easy",
     "servings": 4,
-    "image": "/images/recipes/recipe-125.jpg",
+    "image": "https://images.unsplash.com/photo-1553787499-6f9133860278?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Kichererbsen (Dose)",
@@ -9168,7 +9168,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-126.jpg",
+    "image": "https://images.unsplash.com/photo-1470114716159-e389f8712fda?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Milch",
@@ -9225,7 +9225,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-127.jpg",
+    "image": "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Edamame (tiefgefroren)",
@@ -9274,7 +9274,7 @@
     "totalTime": 3,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-128.jpg",
+    "image": "https://images.unsplash.com/photo-1560008581-09826d1de69e?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Reiswaffeln",
@@ -9333,7 +9333,7 @@
     "totalTime": 2,
     "difficulty": "easy",
     "servings": 4,
-    "image": "/images/recipes/recipe-129.jpg",
+    "image": "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Mandeln",
@@ -9395,7 +9395,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 4,
-    "image": "/images/recipes/recipe-130.jpg",
+    "image": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Skyr",
@@ -9459,7 +9459,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-131.jpg",
+    "image": "https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Avocados",
@@ -9534,7 +9534,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-132.jpg",
+    "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Putenbrust-Aufschnitt",
@@ -9590,7 +9590,7 @@
     "totalTime": 25,
     "difficulty": "easy",
     "servings": 10,
-    "image": "/images/recipes/recipe-133.jpg",
+    "image": "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Haferflocken",
@@ -9657,7 +9657,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-134.jpg",
+    "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Mango",
@@ -9725,7 +9725,7 @@
     "totalTime": 12,
     "difficulty": "easy",
     "servings": 3,
-    "image": "/images/recipes/recipe-135.jpg",
+    "image": "https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Eier",
@@ -9775,7 +9775,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-136.jpg",
+    "image": "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Chiasamen",
@@ -9836,7 +9836,7 @@
     "totalTime": 50,
     "difficulty": "medium",
     "servings": 8,
-    "image": "/images/recipes/recipe-137.jpg",
+    "image": "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Bananen",
@@ -9914,7 +9914,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-138.jpg",
+    "image": "https://images.unsplash.com/photo-1499028344343-cd173ffc68a9?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Paprika",
@@ -9962,7 +9962,7 @@
     "totalTime": 3,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-139.jpg",
+    "image": "https://images.unsplash.com/photo-1609951651556-5334e2706168?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Milch",
@@ -10019,7 +10019,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-140.jpg",
+    "image": "https://images.unsplash.com/photo-1553787499-6f9133860278?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Griechischer Joghurt",
@@ -10088,7 +10088,7 @@
     "totalTime": 3,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-141.jpg",
+    "image": "https://images.unsplash.com/photo-1470114716159-e389f8712fda?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Hüttenkäse",
@@ -10139,7 +10139,7 @@
     "totalTime": 15,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-142.jpg",
+    "image": "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Avocado",
@@ -10203,7 +10203,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 8,
-    "image": "/images/recipes/recipe-143.jpg",
+    "image": "https://images.unsplash.com/photo-1560008581-09826d1de69e?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Mandeln",
@@ -10265,7 +10265,7 @@
     "totalTime": 3,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-144.jpg",
+    "image": "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Staudensellerie",
@@ -10321,7 +10321,7 @@
     "totalTime": 30,
     "difficulty": "easy",
     "servings": 2,
-    "image": "/images/recipes/recipe-145.jpg",
+    "image": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Süßkartoffel",
@@ -10382,7 +10382,7 @@
     "totalTime": 5,
     "difficulty": "easy",
     "servings": 1,
-    "image": "/images/recipes/recipe-146.jpg",
+    "image": "https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Haferflocken",
@@ -10449,7 +10449,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 4,
-    "image": "/images/recipes/recipe-147.jpg",
+    "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Thunfisch im eigenen Saft",
@@ -10520,7 +10520,7 @@
     "totalTime": 35,
     "difficulty": "medium",
     "servings": 8,
-    "image": "/images/recipes/recipe-148.jpg",
+    "image": "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Haferflocken",
@@ -10591,7 +10591,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 4,
-    "image": "/images/recipes/recipe-149.jpg",
+    "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Wassermelone",
@@ -10655,7 +10655,7 @@
     "totalTime": 10,
     "difficulty": "easy",
     "servings": 10,
-    "image": "/images/recipes/recipe-150.jpg",
+    "image": "https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=800&h=600&fit=crop",
     "ingredients": [
       {
         "name": "Proteinpulver Vanille",
