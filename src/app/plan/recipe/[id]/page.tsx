@@ -87,7 +87,7 @@ export default function RecipeDetailPage() {
   return (
     <div className={`min-h-screen pb-24 ${cookMode ? 'bg-gray-900' : 'bg-white'}`}>
       {/* Header Image */}
-      <div className="relative h-72 bg-gray-100">
+      <div className="relative h-48 sm:h-56 bg-gray-100">
         <img 
           src={imageUrl} 
           alt={recipe.name}
@@ -97,7 +97,7 @@ export default function RecipeDetailPage() {
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className="absolute top-4 left-4 p-2 rounded-full bg-white shadow-md"
+          className="absolute top-3 left-4 p-2 rounded-full bg-white shadow-md"
         >
           <svg className="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -107,7 +107,7 @@ export default function RecipeDetailPage() {
         {/* Favorite Button */}
         <button
           onClick={handleFavorite}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white shadow-md"
+          className="absolute top-3 right-4 p-2 rounded-full bg-white shadow-md"
         >
           <svg
             className={`w-6 h-6 ${favorite ? 'text-red-500 fill-current' : 'text-gray-400'}`}
@@ -126,10 +126,10 @@ export default function RecipeDetailPage() {
       </div>
 
       {/* Content */}
-      <div className={`px-6 py-6 -mt-6 rounded-t-3xl relative ${cookMode ? 'bg-gray-900 text-white' : 'bg-white'}`}>
+      <div className={`px-4 py-4 -mt-4 rounded-t-2xl relative ${cookMode ? 'bg-gray-900 text-white' : 'bg-white'}`}>
         {/* Title & Tags */}
-        <h1 className={`text-2xl font-bold mb-2 ${cookMode ? 'text-white' : 'text-gray-900'}`}>{recipe.name}</h1>
-        <div className="flex flex-wrap gap-2 mb-4">
+        <h1 className={`text-xl font-bold mb-1 ${cookMode ? 'text-white' : 'text-gray-900'}`}>{recipe.name}</h1>
+        <div className="flex flex-wrap gap-1.5 mb-3">
           {recipe.tags.slice(0, 4).map(tag => (
             <span 
               key={tag} 
@@ -145,7 +145,7 @@ export default function RecipeDetailPage() {
         </div>
 
         {/* Quick Info */}
-        <div className={`flex gap-4 mb-6 text-sm ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>
+        <div className={`flex gap-3 mb-4 text-sm ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>
           <span className="flex items-center gap-1">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -159,33 +159,33 @@ export default function RecipeDetailPage() {
         </div>
 
         {/* Nutrition Facts */}
-        <div className={`rounded-2xl p-4 mb-6 ${cookMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+        <div className={`rounded-2xl p-3 mb-4 ${cookMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
           <h3 className={`font-semibold mb-3 ${cookMode ? 'text-white' : 'text-gray-900'}`}>Nährwerte pro Portion</h3>
-          <div className="grid grid-cols-4 gap-4 text-center">
+          <div className="grid grid-cols-4 gap-3 text-center">
             <div>
-              <p className="text-2xl font-bold text-teal-500">{recipe.nutrition.calories}</p>
+              <p className="text-xl font-bold text-teal-500">{recipe.nutrition.calories}</p>
               <p className={`text-xs ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>kcal</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-red-500">{recipe.nutrition.protein}g</p>
+              <p className="text-xl font-bold text-red-500">{recipe.nutrition.protein}g</p>
               <p className={`text-xs ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>Protein</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-yellow-500">{recipe.nutrition.carbs}g</p>
+              <p className="text-xl font-bold text-yellow-500">{recipe.nutrition.carbs}g</p>
               <p className={`text-xs ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>Carbs</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-blue-500">{recipe.nutrition.fat}g</p>
+              <p className="text-xl font-bold text-blue-500">{recipe.nutrition.fat}g</p>
               <p className={`text-xs ${cookMode ? 'text-gray-400' : 'text-gray-500'}`}>Fett</p>
             </div>
           </div>
         </div>
 
         {/* Portion Adjuster */}
-        <div className={`rounded-2xl p-4 mb-6 ${cookMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+        <div className={`rounded-2xl p-3 mb-4 ${cookMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
           <div className="flex items-center justify-between">
             <span className={`font-semibold ${cookMode ? 'text-white' : 'text-gray-900'}`}>Portionen</span>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setServings(Math.max(1, servings - 1))}
                 className={`w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold ${
@@ -194,7 +194,7 @@ export default function RecipeDetailPage() {
               >
                 −
               </button>
-              <span className={`text-2xl font-bold w-8 text-center ${cookMode ? 'text-white' : 'text-gray-900'}`}>{servings}</span>
+              <span className={`text-xl font-bold w-8 text-center ${cookMode ? 'text-white' : 'text-gray-900'}`}>{servings}</span>
               <button
                 onClick={() => setServings(servings + 1)}
                 className="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center text-xl font-bold"
@@ -206,7 +206,7 @@ export default function RecipeDetailPage() {
         </div>
 
         {/* Ingredients */}
-        <div className="mb-6">
+        <div className="mb-4">
           <h3 className={`font-semibold mb-3 ${cookMode ? 'text-white' : 'text-gray-900'}`}>Zutaten</h3>
           <div className={`rounded-2xl divide-y ${cookMode ? 'bg-gray-800 divide-gray-700' : 'bg-gray-50 divide-gray-200'}`}>
             {recipe.ingredients.map((ing, i) => (
@@ -221,7 +221,7 @@ export default function RecipeDetailPage() {
         </div>
 
         {/* Instructions */}
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className={`font-semibold ${cookMode ? 'text-white' : 'text-gray-900'}`}>Zubereitung</h3>
             <button
@@ -239,7 +239,7 @@ export default function RecipeDetailPage() {
             {recipe.instructions.map((step, i) => (
               <div
                 key={i}
-                className={`rounded-xl p-4 flex gap-4 ${
+                className={`rounded-xl p-3 flex gap-3 ${
                   cookMode ? 'bg-gray-800 text-lg' : 'bg-gray-50'
                 }`}
               >
@@ -254,7 +254,7 @@ export default function RecipeDetailPage() {
 
         {/* Allergens */}
         {recipe.allergens.length > 0 && (
-          <div className={`rounded-2xl p-4 ${cookMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+          <div className={`rounded-2xl p-3 ${cookMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
             <h3 className={`font-semibold mb-2 ${cookMode ? 'text-white' : 'text-gray-900'}`}>Allergene</h3>
             <div className="flex flex-wrap gap-2">
               {recipe.allergens.map(allergen => (
