@@ -86,7 +86,7 @@ export default function RecipeDetailPage() {
 
   return (
     <div className={`min-h-screen pb-24 ${cookMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <div className="max-w-2xl mx-auto bg-white min-h-screen shadow-lg">
+      <div className="max-w-4xl mx-auto">
       {/* Header Image */}
       <div className="relative h-44 bg-gray-100">
         <img 

@@ -363,7 +363,7 @@ export default function PlanPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-      <div className="max-w-2xl mx-auto bg-white min-h-screen shadow-lg">
+      <div className="max-w-4xl mx-auto">
       {/* Header */}
       <div className="sticky top-0 bg-white z-10 shadow-sm">
         {/* Top Bar with Logo & Actions */}
