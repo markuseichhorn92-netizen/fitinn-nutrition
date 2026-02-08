@@ -10,6 +10,7 @@ import { loadProfile, loadDayPlan, saveDayPlan, saveFavorite, removeFavorite, is
 import { generateDayPlan } from '@/lib/mealPlanGenerator';
 import { calculateWaterGoal } from '@/lib/calculations';
 import { UserProfile, DayPlan, Recipe, MealPlan } from '@/types';
+import RecipeSwapPanel from '@/components/RecipeSwapPanel';
 
 function getDateString(date: Date): string {
   return date.toISOString().split('T')[0];
@@ -73,10 +74,11 @@ interface DesktopMealCardProps {
   meal: MealPlan;
   onToggleEaten: () => void;
   onSwap: (recipe: Recipe) => void;
+  onOpenSwapPanel: () => void;
 }
 
 // Desktop meal card - shows all info including ingredients and instructions
-function DesktopMealCard({ meal, onToggleEaten, onSwap }: DesktopMealCardProps) {
+function DesktopMealCard({ meal, onToggleEaten, onSwap, onOpenSwapPanel }: DesktopMealCardProps) {
   const [showAlternatives, setShowAlternatives] = useState(false);
   const [favorite, setFavorite] = useState(() => isFavorite(meal.recipe.id));
   const { label } = mealTypeLabels[meal.type] || { label: meal.type.toUpperCase() };
@@ -188,7 +190,7 @@ function DesktopMealCard({ meal, onToggleEaten, onSwap }: DesktopMealCardProps) 
             AUSLASSEN
           </button>
           <button
-            onClick={() => setShowAlternatives(true)}
+            onClick={onOpenSwapPanel}
             className="flex-1 py-2 px-2 rounded-lg border border-gray-200 text-gray-600 text-xs font-medium hover:border-gray-300 hover:bg-gray-50 transition-colors"
           >
             WECHSELN
@@ -205,52 +207,6 @@ function DesktopMealCard({ meal, onToggleEaten, onSwap }: DesktopMealCardProps) 
           </button>
         </div>
       </div>
-
-      {/* Alternatives Modal */}
-      {showAlternatives && meal.alternatives && meal.alternatives.length > 0 && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden">
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-semibold text-lg">Alternative Rezepte</h3>
-              <button
-                onClick={() => setShowAlternatives(false)}
-                className="p-2 rounded-full hover:bg-gray-100"
-              >
-                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-4 space-y-3 overflow-y-auto max-h-[60vh]">
-              {meal.alternatives.map((alt) => (
-                <button
-                  key={alt.id}
-                  onClick={() => {
-                    onSwap(alt);
-                    setShowAlternatives(false);
-                  }}
-                  className="w-full bg-gray-50 hover:bg-gray-100 rounded-xl p-4 flex items-center gap-4 text-left transition-colors"
-                >
-                  <img 
-                    src={getMealImage(alt.category, alt.id)} 
-                    alt={alt.name}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{alt.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {alt.nutrition.calories} kcal • {alt.totalTime} min
-                    </p>
-                  </div>
-                  <svg className="w-5 h-5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -260,9 +216,10 @@ interface MobileMealCardProps {
   meal: MealPlan;
   onToggleEaten: () => void;
   onSwap: (recipe: Recipe) => void;
+  onOpenSwapPanel: () => void;
 }
 
-function MobileMealCard({ meal, onToggleEaten, onSwap }: MobileMealCardProps) {
+function MobileMealCard({ meal, onToggleEaten, onSwap, onOpenSwapPanel }: MobileMealCardProps) {
   const [showAlternatives, setShowAlternatives] = useState(false);
   const [favorite, setFavorite] = useState(() => isFavorite(meal.recipe.id));
   const { label } = mealTypeLabels[meal.type] || { label: meal.type.toUpperCase() };
@@ -346,7 +303,7 @@ function MobileMealCard({ meal, onToggleEaten, onSwap }: MobileMealCardProps) {
           {/* Action Buttons */}
           <div className="flex gap-2">
             <button
-              onClick={() => setShowAlternatives(true)}
+              onClick={onOpenSwapPanel}
               className="flex-1 py-2.5 px-3 rounded-lg border border-gray-200 text-gray-600 text-xs font-medium hover:border-gray-300 transition-colors"
             >
               WECHSELN
@@ -364,52 +321,6 @@ function MobileMealCard({ meal, onToggleEaten, onSwap }: MobileMealCardProps) {
           </div>
         </div>
       </div>
-
-      {/* Alternatives Modal */}
-      {showAlternatives && meal.alternatives && meal.alternatives.length > 0 && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden">
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-semibold text-lg">Alternative Rezepte</h3>
-              <button
-                onClick={() => setShowAlternatives(false)}
-                className="p-2 rounded-full hover:bg-gray-100"
-              >
-                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-4 space-y-3 overflow-y-auto max-h-[60vh]">
-              {meal.alternatives.map((alt) => (
-                <button
-                  key={alt.id}
-                  onClick={() => {
-                    onSwap(alt);
-                    setShowAlternatives(false);
-                  }}
-                  className="w-full bg-gray-50 hover:bg-gray-100 rounded-xl p-4 flex items-center gap-4 text-left transition-colors"
-                >
-                  <img 
-                    src={getMealImage(alt.category, alt.id)} 
-                    alt={alt.name}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{alt.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {alt.nutrition.calories} kcal • {alt.totalTime} min
-                    </p>
-                  </div>
-                  <svg className="w-5 h-5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -423,6 +334,7 @@ export default function PlanPage() {
   const [dayPlan, setDayPlan] = useState<DayPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeMealIndex, setActiveMealIndex] = useState(0);
+  const [swapPanel, setSwapPanel] = useState<{ open: boolean; mealIndex: number; mealType: string }>({ open: false, mealIndex: -1, mealType: '' });
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize week dates
@@ -674,6 +586,7 @@ export default function PlanPage() {
               meal={meal}
               onToggleEaten={() => toggleMealEaten(index)}
               onSwap={(recipe) => swapMeal(index, recipe)}
+              onOpenSwapPanel={() => setSwapPanel({ open: true, mealIndex: index, mealType: meal.type })}
             />
           ))}
         </div>
@@ -691,6 +604,7 @@ export default function PlanPage() {
                 meal={meal}
                 onToggleEaten={() => toggleMealEaten(index)}
                 onSwap={(recipe) => swapMeal(index, recipe)}
+                onOpenSwapPanel={() => setSwapPanel({ open: true, mealIndex: index, mealType: meal.type })}
               />
             ))}
           </div>
@@ -763,6 +677,19 @@ export default function PlanPage() {
       </div>
 
       {/* Bottom Nav - Mobile Only */}
+      {/* Recipe Swap Panel */}
+      <RecipeSwapPanel
+        isOpen={swapPanel.open}
+        onClose={() => setSwapPanel({ open: false, mealIndex: -1, mealType: '' })}
+        onSelect={(recipe) => {
+          if (swapPanel.mealIndex >= 0) {
+            swapMeal(swapPanel.mealIndex, recipe);
+          }
+        }}
+        mealType={swapPanel.mealType}
+        currentRecipeId={swapPanel.mealIndex >= 0 && dayPlan?.meals[swapPanel.mealIndex] ? dayPlan.meals[swapPanel.mealIndex].recipe.id : undefined}
+      />
+
       <BottomNav />
     </div>
   );
