@@ -34,13 +34,15 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     const recipes: Recipe[] = [];
     
-    // Handle different response formats
+    // Search results are in data.results[].recipe format
     const items = data.results || data.items || data;
     
     if (Array.isArray(items)) {
       for (const item of items) {
         try {
-          const recipe = convertChefkochRecipe(item as ChefkochRecipe);
+          // Search results wrap recipe in { recipe: ..., score: ... }
+          const rawRecipe = item.recipe || item;
+          const recipe = convertChefkochRecipe(rawRecipe as ChefkochRecipe);
           recipes.push(recipe);
         } catch (err) {
           console.error('Error converting recipe:', err);

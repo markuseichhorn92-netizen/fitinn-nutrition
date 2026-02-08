@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getRecipeById } from '@/lib/mealPlanGenerator';
+import { fetchRecipeById } from '@/lib/chefkoch';
 import { saveFavorite, removeFavorite, isFavorite } from '@/lib/storage';
 import { Recipe } from '@/types';
 import BottomNav from '@/components/BottomNav';
@@ -52,11 +53,25 @@ export default function RecipeDetailPage() {
 
   useEffect(() => {
     const id = params.id as string;
+    
+    // Try local/cached first
     const foundRecipe = getRecipeById(id);
     if (foundRecipe) {
       setRecipe(foundRecipe);
       setServings(foundRecipe.servings);
       setFavorite(isFavorite(id));
+      return;
+    }
+    
+    // Fetch from Chefkoch API for ck- prefixed IDs
+    if (id.startsWith('ck-') || /^\d{10,}$/.test(id)) {
+      fetchRecipeById(id).then(r => {
+        if (r) {
+          setRecipe(r);
+          setServings(r.servings);
+          setFavorite(isFavorite(id));
+        }
+      });
     }
   }, [params.id]);
 
@@ -87,7 +102,7 @@ export default function RecipeDetailPage() {
     );
   }
 
-  const imageUrl = getMealImage(recipe.category, recipe.id);
+  const imageUrl = recipe.image && recipe.image.startsWith('http') ? recipe.image : getMealImage(recipe.category, recipe.id);
 
   return (
     <div className={`min-h-screen pb-24 lg:pb-8 ${cookMode ? 'bg-gray-900' : 'bg-gray-50'}`}>

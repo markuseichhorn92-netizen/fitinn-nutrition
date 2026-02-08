@@ -7,7 +7,7 @@ import Image from 'next/image';
 import BottomNav from '@/components/BottomNav';
 import WaterTracker from '@/components/WaterTracker';
 import { loadProfile, loadDayPlan, saveDayPlan, saveFavorite, removeFavorite, isFavorite } from '@/lib/storage';
-import { generateDayPlan } from '@/lib/mealPlanGenerator';
+import { generateDayPlan, refreshRecipes } from '@/lib/mealPlanGenerator';
 import { calculateWaterGoal } from '@/lib/calculations';
 import { UserProfile, DayPlan, Recipe, MealPlan } from '@/types';
 import RecipeSwapPanel from '@/components/RecipeSwapPanel';
@@ -83,7 +83,7 @@ function DesktopMealCard({ meal, onToggleEaten, onSwap, onOpenSwapPanel }: Deskt
   const [favorite, setFavorite] = useState(() => isFavorite(meal.recipe.id));
   const { label } = mealTypeLabels[meal.type] || { label: meal.type.toUpperCase() };
   const recipe = meal.recipe;
-  const imageUrl = getMealImage(recipe.category, recipe.id);
+  const imageUrl = recipe.image && recipe.image.startsWith('http') ? recipe.image : getMealImage(recipe.category, recipe.id);
   
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -224,7 +224,7 @@ function MobileMealCard({ meal, onToggleEaten, onSwap, onOpenSwapPanel }: Mobile
   const [favorite, setFavorite] = useState(() => isFavorite(meal.recipe.id));
   const { label } = mealTypeLabels[meal.type] || { label: meal.type.toUpperCase() };
   const recipe = meal.recipe;
-  const imageUrl = getMealImage(recipe.category, recipe.id);
+  const imageUrl = recipe.image && recipe.image.startsWith('http') ? recipe.image : getMealImage(recipe.category, recipe.id);
   
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -366,6 +366,9 @@ export default function PlanPage() {
       return;
     }
     setProfile(storedProfile);
+    
+    // Fetch Chefkoch recipes in background for future plans
+    refreshRecipes().catch(() => {});
   }, [router]);
 
   useEffect(() => {
