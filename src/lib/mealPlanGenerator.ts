@@ -1,8 +1,6 @@
 import { Recipe, UserProfile, DayPlan, MealPlan } from '@/types';
 import recipesData from '@/data/recipes.json';
-import { loadCachedRecipes, cacheRecipes, fetchRecipes } from '@/lib/chefkoch';
 
-// Fallback to mock recipes
 const mockRecipes = recipesData as Recipe[];
 
 // Get recipes by category (from cache or fallback)
@@ -68,45 +66,7 @@ function getAlternatives(recipe: Recipe, allRecipes: Recipe[], count: number = 2
   return sameCategory.slice(0, count);
 }
 
-// Load recipes (from cache, API, or fallback)
-async function loadRecipes(): Promise<Recipe[]> {
-  // Try cache first (client-side only)
-  if (typeof window !== 'undefined') {
-    const cached = loadCachedRecipes();
-    if (cached && cached.length > 20) {
-      return cached;
-    }
-    
-    // Try fetching from API
-    try {
-      const apiRecipes = await fetchRecipes(50);
-      if (apiRecipes.length > 0) {
-        // Merge with mock recipes for variety
-        const allRecipes = [...apiRecipes, ...mockRecipes];
-        // Remove duplicates by ID
-        const uniqueRecipes = Array.from(
-          new Map(allRecipes.map(r => [r.id, r])).values()
-        );
-        cacheRecipes(uniqueRecipes);
-        return uniqueRecipes;
-      }
-    } catch (error) {
-      console.error('Error fetching recipes:', error);
-    }
-  }
-  
-  // Fallback to mock recipes
-  return mockRecipes;
-}
-
-// Synchronous version for initial render
 function getRecipesSync(): Recipe[] {
-  if (typeof window !== 'undefined') {
-    const cached = loadCachedRecipes();
-    if (cached && cached.length > 0) {
-      return cached;
-    }
-  }
   return mockRecipes;
 }
 
@@ -243,134 +203,7 @@ export function generateDayPlan(date: string, profile: UserProfile): DayPlan {
 }
 
 // Async version that fetches fresh recipes
-export async function generateDayPlanAsync(date: string, profile: UserProfile): Promise<DayPlan> {
-  // Load recipes (tries API, falls back to cache/mock)
-  const recipes = await loadRecipes();
-  
-  const usedIds: string[] = [];
-  const meals: MealPlan[] = [];
-
-  // Filter all recipes for user
-  const breakfasts = filterRecipesForUser(getRecipesByCategory(recipes, 'breakfast'), profile);
-  const lunches = filterRecipesForUser(getRecipesByCategory(recipes, 'lunch'), profile);
-  const dinners = filterRecipesForUser(getRecipesByCategory(recipes, 'dinner'), profile);
-  const snacks = filterRecipesForUser(getRecipesByCategory(recipes, 'snack'), profile);
-
-  // Generate meals same as sync version
-  if (profile.meals?.breakfast) {
-    const recipe = selectRecipe(breakfasts, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
-      meals.push({
-        type: 'breakfast',
-        time: '07:30',
-        recipe,
-        eaten: false,
-        favorite: false,
-        alternatives: getAlternatives(recipe, breakfasts),
-      });
-    }
-  }
-
-  if (profile.meals?.morningSnack) {
-    const recipe = selectRecipe(snacks, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
-      meals.push({
-        type: 'morningSnack',
-        time: '10:00',
-        recipe,
-        eaten: false,
-        favorite: false,
-        alternatives: getAlternatives(recipe, snacks),
-      });
-    }
-  }
-
-  if (profile.meals?.lunch) {
-    const recipe = selectRecipe(lunches, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
-      meals.push({
-        type: 'lunch',
-        time: '12:30',
-        recipe,
-        eaten: false,
-        favorite: false,
-        alternatives: getAlternatives(recipe, lunches),
-      });
-    }
-  }
-
-  if (profile.meals?.afternoonSnack) {
-    const recipe = selectRecipe(snacks, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
-      meals.push({
-        type: 'afternoonSnack',
-        time: '15:30',
-        recipe,
-        eaten: false,
-        favorite: false,
-        alternatives: getAlternatives(recipe, snacks),
-      });
-    }
-  }
-
-  if (profile.meals?.dinner) {
-    const recipe = selectRecipe(dinners, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
-      meals.push({
-        type: 'dinner',
-        time: '19:00',
-        recipe,
-        eaten: false,
-        favorite: false,
-        alternatives: getAlternatives(recipe, dinners),
-      });
-    }
-  }
-
-  if (profile.meals?.lateSnack) {
-    const recipe = selectRecipe(snacks, usedIds);
-    if (recipe) {
-      usedIds.push(recipe.id);
-      meals.push({
-        type: 'lateSnack',
-        time: '21:00',
-        recipe,
-        eaten: false,
-        favorite: false,
-        alternatives: getAlternatives(recipe, snacks),
-      });
-    }
-  }
-
-  // Calculate totals
-  const totalCalories = meals.reduce((sum, m) => sum + m.recipe.nutrition.calories, 0);
-  const totalMacros = meals.reduce(
-    (acc, m) => ({
-      calories: acc.calories + m.recipe.nutrition.calories,
-      protein: acc.protein + m.recipe.nutrition.protein,
-      carbs: acc.carbs + m.recipe.nutrition.carbs,
-      fat: acc.fat + m.recipe.nutrition.fat,
-      fiber: acc.fiber + m.recipe.nutrition.fiber,
-    }),
-    { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
-  );
-
-  return {
-    date,
-    meals,
-    totalCalories,
-    totalMacros,
-    waterIntake: 0,
-    waterGoal: profile.weight ? profile.weight * 0.033 : 2.5,
-  };
-}
-
-// Get recipe by ID (check cache first, then fallback)
+// Get recipe by ID
 export function getRecipeById(id: string): Recipe | undefined {
   const recipes = getRecipesSync();
   return recipes.find(r => r.id === id);
@@ -406,20 +239,4 @@ export function generateShoppingList(plans: DayPlan[]): Map<string, { amount: nu
   return items;
 }
 
-// Refresh recipes from API (call this periodically or on user request)
-export async function refreshRecipes(): Promise<void> {
-  if (typeof window === 'undefined') return;
-  
-  try {
-    const apiRecipes = await fetchRecipes(50);
-    if (apiRecipes.length > 0) {
-      const allRecipes = [...apiRecipes, ...mockRecipes];
-      const uniqueRecipes = Array.from(
-        new Map(allRecipes.map(r => [r.id, r])).values()
-      );
-      cacheRecipes(uniqueRecipes);
-    }
-  } catch (error) {
-    console.error('Error refreshing recipes:', error);
-  }
-}
+

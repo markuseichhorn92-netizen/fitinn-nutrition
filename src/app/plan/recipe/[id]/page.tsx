@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getRecipeById } from '@/lib/mealPlanGenerator';
-import { fetchRecipeById } from '@/lib/chefkoch';
 import { saveFavorite, removeFavorite, isFavorite } from '@/lib/storage';
 import { Recipe } from '@/types';
 import BottomNav from '@/components/BottomNav';
@@ -63,16 +62,8 @@ export default function RecipeDetailPage() {
       return;
     }
     
-    // Fetch from Chefkoch API for ck- prefixed IDs
-    if (id.startsWith('ck-') || /^\d{10,}$/.test(id)) {
-      fetchRecipeById(id).then(r => {
-        if (r) {
-          setRecipe(r);
-          setServings(r.servings);
-          setFavorite(isFavorite(id));
-        }
-      });
-    }
+    // Recipe not found
+    router.push('/plan');
   }, [params.id]);
 
   const handleFavorite = () => {

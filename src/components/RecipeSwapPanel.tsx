@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Recipe, UserProfile } from '@/types';
 import { getAllRecipes } from '@/lib/mealPlanGenerator';
-import { searchRecipes } from '@/lib/chefkoch';
 import { loadProfile } from '@/lib/storage';
 
 const mealImages: Record<string, string[]> = {
@@ -60,8 +59,6 @@ export default function RecipeSwapPanel({ isOpen, onClose, onSelect, mealType, c
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'quick' | 'lowcal' | 'highprotein' | 'vegetarian' | 'vegan'>('all');
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [apiResults, setApiResults] = useState<Recipe[]>([]);
-
   useEffect(() => {
     const p = loadProfile();
     if (p) setProfile(p);
@@ -69,33 +66,10 @@ export default function RecipeSwapPanel({ isOpen, onClose, onSelect, mealType, c
 
   const allRecipes = useMemo(() => getAllRecipes(), []);
 
-  // Search Chefkoch API when user types a search query
-  useEffect(() => {
-    if (!search.trim() || search.trim().length < 3) {
-      setApiResults([]);
-      return;
-    }
-    const timer = setTimeout(() => {
-      searchRecipes(search.trim(), 10).then(results => {
-        setApiResults(results);
-      }).catch(() => {});
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [search]);
-
   const categories = mealTypeToCategory[mealType] || ['lunch', 'dinner'];
 
   const filteredRecipes = useMemo(() => {
-    // Combine local recipes with API search results
-    const combined = search.trim().length >= 3 && apiResults.length > 0
-      ? [...apiResults, ...allRecipes]
-      : allRecipes;
-    // Deduplicate by id
-    const deduped = Array.from(new Map(combined.map(r => [r.id, r])).values());
-    
-    let recipes = search.trim().length >= 3 && apiResults.length > 0
-      ? deduped  // Show all categories when searching via API
-      : deduped.filter(r => categories.includes(r.category));
+    let recipes = allRecipes.filter(r => categories.includes(r.category));
 
     // Exclude current recipe
     if (currentRecipeId) {

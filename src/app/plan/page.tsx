@@ -7,7 +7,7 @@ import Image from 'next/image';
 import BottomNav from '@/components/BottomNav';
 import WaterTracker from '@/components/WaterTracker';
 import { loadProfile, loadDayPlan, saveDayPlan, saveFavorite, removeFavorite, isFavorite } from '@/lib/storage';
-import { generateDayPlan, generateDayPlanAsync, refreshRecipes } from '@/lib/mealPlanGenerator';
+import { generateDayPlan } from '@/lib/mealPlanGenerator';
 import { calculateWaterGoal } from '@/lib/calculations';
 import { UserProfile, DayPlan, Recipe, MealPlan } from '@/types';
 import RecipeSwapPanel from '@/components/RecipeSwapPanel';
@@ -335,7 +335,6 @@ export default function PlanPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeMealIndex, setActiveMealIndex] = useState(0);
   const [swapPanel, setSwapPanel] = useState<{ open: boolean; mealIndex: number; mealType: string }>({ open: false, mealIndex: -1, mealType: '' });
-  const [recipesReady, setRecipesReady] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize week dates
@@ -368,10 +367,6 @@ export default function PlanPage() {
     }
     setProfile(storedProfile);
     
-    // Fetch Chefkoch recipes and regenerate plan with real data
-    refreshRecipes().then(() => {
-      setRecipesReady(prev => prev + 1);
-    }).catch(() => {});
   }, [router]);
 
   useEffect(() => {
@@ -379,26 +374,15 @@ export default function PlanPage() {
 
     const dateStr = getDateString(currentDate);
     
-    if (recipesReady > 0) {
-      // API recipes loaded — regenerate with real data
-      generateDayPlanAsync(dateStr, profile).then(plan => {
-        saveDayPlan(dateStr, plan);
-        setDayPlan(plan);
-        setIsLoading(false);
-        setActiveMealIndex(0);
-      });
-    } else {
-      // Initial render — use sync/cached
-      let plan = loadDayPlan(dateStr);
-      if (!plan) {
-        plan = generateDayPlan(dateStr, profile);
-        saveDayPlan(dateStr, plan);
-      }
-      setDayPlan(plan);
-      setIsLoading(false);
-      setActiveMealIndex(0);
+    let plan = loadDayPlan(dateStr);
+    if (!plan) {
+      plan = generateDayPlan(dateStr, profile);
+      saveDayPlan(dateStr, plan);
     }
-  }, [profile, currentDate, recipesReady]);
+    setDayPlan(plan);
+    setIsLoading(false);
+    setActiveMealIndex(0);
+  }, [profile, currentDate]);
 
   const toggleMealEaten = (mealIndex: number) => {
     if (!dayPlan) return;
