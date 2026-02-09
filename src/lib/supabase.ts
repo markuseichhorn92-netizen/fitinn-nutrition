@@ -8,7 +8,7 @@ export function isSupabaseConfigured(): boolean {
   return !!(supabaseUrl && supabaseAnonKey && supabaseUrl !== 'https://your-project.supabase.co');
 }
 
-// Singleton instance
+// Singleton instance - ONLY ONE client should exist
 let supabaseInstance: SupabaseClient | null = null;
 
 export function getSupabaseClient(): SupabaseClient | null {
@@ -16,17 +16,29 @@ export function getSupabaseClient(): SupabaseClient | null {
     return null;
   }
   
-  if (!supabaseInstance) {
-    supabaseInstance = createClient(supabaseUrl!, supabaseAnonKey!);
+  if (!supabaseInstance && typeof window !== 'undefined') {
+    supabaseInstance = createClient(supabaseUrl!, supabaseAnonKey!, {
+      auth: {
+        persistSession: true,
+        storageKey: 'fitinn-auth',
+        autoRefreshToken: true,
+        detectSessionInUrl: true, // This should handle the hash params automatically
+      },
+    });
+  }
+  
+  // For server-side, create a fresh client (no persistence needed)
+  if (!supabaseInstance && typeof window === 'undefined') {
+    return createClient(supabaseUrl!, supabaseAnonKey!);
   }
   
   return supabaseInstance;
 }
 
-// Legacy export for compatibility
-export const supabase = isSupabaseConfigured() 
-  ? createClient(supabaseUrl!, supabaseAnonKey!) 
-  : null as any;
+// Legacy export - use the singleton!
+export const supabase = typeof window !== 'undefined' 
+  ? getSupabaseClient() 
+  : null;
 
 // Type definitions for database
 export interface Profile {
