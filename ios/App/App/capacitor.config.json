@@ -1,28 +1,37 @@
 {
-  "appId": "com.fitinn.mahlzeit",
-  "appName": "Mahlzeit!",
-  "webDir": "public",
-  "server": {
-    "url": "https://fitinn-nutrition.vercel.app",
-    "cleartext": true
-  },
-  "ios": {
-    "contentInset": "automatic",
-    "allowsLinkPreview": false,
-    "scrollEnabled": true,
-    "scheme": "Mahlzeit"
-  },
-  "plugins": {
-    "SplashScreen": {
-      "launchShowDuration": 2000,
-      "backgroundColor": "#14B8A6",
-      "showSpinner": false,
-      "splashFullScreen": true,
-      "splashImmersive": true
-    },
-    "StatusBar": {
-      "style": "DARK",
-      "backgroundColor": "#14B8A6"
-    }
-  }
+	"appId": "com.fitinn.naehrkraft",
+	"appName": "Nährkraft",
+	"webDir": "out",
+	"server": {
+		"url": "https://fitinn-nutrition.vercel.app",
+		"cleartext": true
+	},
+	"ios": {
+		"contentInset": "automatic",
+		"allowsLinkPreview": false,
+		"scrollEnabled": true,
+		"scheme": "Naehrkraft"
+	},
+	"android": {
+		"allowMixedContent": true,
+		"captureInput": true,
+		"webContentsDebuggingEnabled": false
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 2000,
+			"backgroundColor": "#14B8A6",
+			"showSpinner": false,
+			"splashFullScreen": true,
+			"splashImmersive": true
+		},
+		"StatusBar": {
+			"style": "DARK",
+			"backgroundColor": "#14B8A6"
+		}
+	},
+	"packageClassList": [
+		"AppPlugin",
+		"CAPBrowserPlugin"
+	]
 }
