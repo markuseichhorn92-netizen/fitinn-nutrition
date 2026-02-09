@@ -51,9 +51,13 @@ export async function GET(request: NextRequest) {
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       let data = await res.json();
       
-      // Translate if German requested
+      // Translate if German requested (with fallback)
       if (lang === 'de') {
-        data = await translateRecipe(data);
+        try {
+          data = await translateRecipe(data);
+        } catch (translateErr) {
+          console.warn('Translation failed:', translateErr);
+        }
       }
       
       setCache(cacheKey, data);
@@ -83,9 +87,13 @@ export async function GET(request: NextRequest) {
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
       
-      // Translate results if German requested
+      // Translate results if German requested (with fallback)
       if (lang === 'de' && data.results) {
-        data.results = await translateRecipes(data.results);
+        try {
+          data.results = await translateRecipes(data.results);
+        } catch (translateErr) {
+          console.warn('Translation failed:', translateErr);
+        }
       }
       
       setCache(cacheKey, data);
@@ -126,9 +134,14 @@ export async function GET(request: NextRequest) {
         if (bulkRes.ok) {
           let recipes = await bulkRes.json();
           
-          // Translate recipes if German requested
-          if (lang === 'de' && recipes) {
-            recipes = await translateRecipes(recipes);
+          // Translate recipes if German requested (with fallback)
+          if (lang === 'de' && recipes && Array.isArray(recipes)) {
+            try {
+              recipes = await translateRecipes(recipes);
+            } catch (translateErr) {
+              console.warn('Translation failed, using original:', translateErr);
+              // Continue with untranslated recipes
+            }
           }
           
           const data = { recipes };
@@ -139,7 +152,11 @@ export async function GET(request: NextRequest) {
       
       // Fallback: return random data without nutrition
       if (lang === 'de' && randomData.recipes) {
-        randomData.recipes = await translateRecipes(randomData.recipes);
+        try {
+          randomData.recipes = await translateRecipes(randomData.recipes);
+        } catch (translateErr) {
+          console.warn('Translation failed, using original:', translateErr);
+        }
       }
       setCache(cacheKey, randomData);
       return NextResponse.json(randomData);
