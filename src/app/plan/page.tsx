@@ -8,6 +8,7 @@ import BottomNav from '@/components/BottomNav';
 import WaterTracker from '@/components/WaterTracker';
 import WaterTrackerYazio from '@/components/WaterTrackerYazio';
 import CalorieRingDashboard from '@/components/CalorieRingDashboard';
+import StreakWidget from '@/components/StreakWidget';
 import { loadProfile, loadDayPlan, saveDayPlan, loadAllPlans, saveFavorite, removeFavorite, isFavorite, loadScannedItems, saveScannedItem, getScannedItemsTotal } from '@/lib/storage';
 import { generateDayPlan, scaleRecipe, generateShoppingList, initializeRecipes, isApiRecipesLoaded } from '@/lib/mealPlanGenerator';
 import { calculateWaterGoal } from '@/lib/calculations';
@@ -481,6 +482,11 @@ export default function PlanPage() {
         </div>
       </div>
 
+      {/* Streak Widget - Mobile */}
+      <div className="px-4 py-3 lg:hidden">
+        <StreakWidget />
+      </div>
+
       {/* Desktop Meal Grid */}
       <div className="hidden lg:grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 px-8 mb-8">
         {dayPlan.meals.map((meal, index) => (
@@ -566,6 +572,11 @@ export default function PlanPage() {
           <div data-tutorial="water">
             <WaterTrackerYazio goal={waterGoal} date={getDateString(currentDate)} />
           </div>
+        </div>
+        
+        {/* Streak Widget - Desktop */}
+        <div className="hidden lg:block mt-4 max-w-md">
+          <StreakWidget />
         </div>
       </div>
 
