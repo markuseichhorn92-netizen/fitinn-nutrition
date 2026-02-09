@@ -1,10 +1,11 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getSupabaseClient } from '@/lib/supabase';
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -30,7 +31,7 @@ export default function AuthCallbackPage() {
           // Small delay to show success message
           setTimeout(() => {
             router.push('/plan');
-          }, 1000);
+          }, 1500);
         } else {
           // Try to exchange code for session
           const code = searchParams.get('code');
@@ -42,7 +43,7 @@ export default function AuthCallbackPage() {
             setStatus('success');
             setTimeout(() => {
               router.push('/plan');
-            }, 1000);
+            }, 1500);
           } else {
             throw new Error('Keine Session gefunden');
           }
@@ -59,7 +60,7 @@ export default function AuthCallbackPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-teal-50 to-white p-6">
-      <div className="text-center">
+      <div className="text-center max-w-sm">
         {status === 'loading' && (
           <>
             <div className="animate-spin w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full mx-auto mb-4" />
@@ -77,13 +78,13 @@ export default function AuthCallbackPage() {
             {/* Button for manual redirect */}
             <button
               onClick={() => router.push('/plan')}
-              className="px-6 py-3 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors mb-4 w-full max-w-xs"
+              className="px-6 py-3 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors mb-4 w-full"
             >
               Zum Ernährungsplan →
             </button>
 
             {/* Hint for mobile app users */}
-            <div className="mt-6 p-4 bg-amber-50 rounded-xl max-w-xs mx-auto">
+            <div className="mt-6 p-4 bg-amber-50 rounded-xl">
               <p className="text-amber-800 text-sm font-medium mb-2">📱 App-Nutzer?</p>
               <p className="text-amber-700 text-xs">
                 Falls du die App nutzt, gehe zurück zur App. 
@@ -100,7 +101,7 @@ export default function AuthCallbackPage() {
             <p className="text-red-500 mb-6">{error}</p>
             <button
               onClick={() => router.push('/')}
-              className="px-6 py-3 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors"
+              className="px-6 py-3 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors w-full"
             >
               Zurück zur Startseite
             </button>
@@ -108,5 +109,17 @@ export default function AuthCallbackPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-teal-50 to-white">
+        <div className="animate-spin w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full" />
+      </div>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   );
 }
