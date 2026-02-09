@@ -44,13 +44,29 @@ function AuthCallbackContent() {
       // If we have tokens in the hash, manually set the session
       if (accessToken && refreshToken) {
         console.log('Found tokens in URL hash, setting session...');
-        setDebugInfo('Setze Session...');
+        setDebugInfo('Tokens gefunden, setze Session...');
         
         try {
-          const { data, error: sessionError } = await supabase.auth.setSession({
+          // Add timeout to prevent infinite hang
+          const timeoutMs = 10000;
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+          
+          const sessionPromise = supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
+          
+          // Race between session and timeout
+          const result = await Promise.race([
+            sessionPromise,
+            new Promise<never>((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout nach 10s')), timeoutMs)
+            )
+          ]);
+          
+          clearTimeout(timeoutId);
+          const { data, error: sessionError } = result;
           
           if (sessionError) {
             console.error('Error setting session:', sessionError);
@@ -59,7 +75,7 @@ function AuthCallbackContent() {
             return;
           }
           
-          if (data.session) {
+          if (data?.session) {
             console.log('Session set successfully!', data.session.user?.email);
             setDebugInfo(`Eingeloggt als ${data.session.user?.email}`);
             setStatus('success');
@@ -71,6 +87,11 @@ function AuthCallbackContent() {
             setTimeout(() => {
               window.location.href = '/plan';
             }, 1500);
+            return;
+          } else {
+            console.error('No session in response');
+            setError('Keine Session erhalten');
+            setStatus('error');
             return;
           }
         } catch (err: any) {
