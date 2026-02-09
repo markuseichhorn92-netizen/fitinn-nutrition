@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { translateRecipe, translateRecipes } from '@/lib/translate';
 
-const API_KEY = process.env.SPOONACULAR_API_KEY || '5d497a5334804128b400da1a1898d1d4';
+// Hardcoded key for now (Vercel ENV issue debugging)
+const API_KEY = '5d497a5334804128b400da1a1898d1d4';
 const BASE_URL = 'https://api.spoonacular.com';
 
 // Cache recipes in memory (server-side) - stores TRANSLATED recipes
