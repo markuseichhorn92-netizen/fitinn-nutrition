@@ -1,8 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import BarcodeScannerModal from './BarcodeScannerModal';
+import { saveScannedItem } from '@/lib/storage';
+import { ScannedItem } from '@/types';
 
 const navItems = [
   {
@@ -23,6 +27,9 @@ const navItems = [
       </svg>
     ),
   },
+];
+
+const navItemsRight = [
   {
     href: '/favoriten',
     label: 'Favoriten',
@@ -46,66 +53,83 @@ const navItems = [
 export default function BottomNav() {
   const pathname = usePathname();
   const { user, isLoading } = useAuth();
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleScannerAdd = (item: ScannedItem) => {
+    // Save to today's date
+    const today = new Date().toISOString().split('T')[0];
+    saveScannedItem(today, item);
+    setShowScanner(false);
+    
+    // If we're on the plan page, trigger a refresh
+    if (pathname === '/plan') {
+      window.location.reload();
+    }
+  };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-pb lg:hidden z-50">
-      <div className="flex items-center justify-around py-2">
-        {navItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
-                isActive ? 'text-teal-600' : 'text-gray-400 hover:text-gray-600'
-              }`}
-            >
-              {item.icon(isActive)}
-              <span className={`text-[10px] mt-1 font-medium ${isActive ? 'text-teal-600' : 'text-gray-400'}`}>
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
-        
-        {/* Auth Button */}
-        {!isLoading && (
-          user ? (
-            <Link
-              href="/profil"
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
-                pathname === '/profil' ? 'text-teal-600' : 'text-gray-400 hover:text-gray-600'
-              }`}
-              title={user.email || 'Eingeloggt'}
-            >
-              <div className="relative">
-                <svg className={`w-6 h-6 ${pathname === '/profil' ? 'text-teal-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                {/* Green dot indicating logged in */}
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
-              </div>
-              <span className={`text-[10px] mt-1 font-medium ${pathname === '/profil' ? 'text-teal-600' : 'text-gray-400'}`}>
-                Konto
-              </span>
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
-                pathname === '/login' ? 'text-teal-600' : 'text-gray-400 hover:text-gray-600'
-              }`}
-            >
-              <svg className={`w-6 h-6 ${pathname === '/login' ? 'text-teal-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+    <>
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-pb lg:hidden z-50">
+        <div className="flex items-center justify-around py-2 relative">
+          {/* Left nav items */}
+          {navItems.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+                  isActive ? 'text-teal-600' : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                {item.icon(isActive)}
+                <span className={`text-[10px] mt-1 font-medium ${isActive ? 'text-teal-600' : 'text-gray-400'}`}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+
+          {/* Center Scanner Button - Prominent! */}
+          <button
+            onClick={() => setShowScanner(true)}
+            className="flex flex-col items-center -mt-6 touch-manipulation"
+          >
+            <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-teal-600 rounded-full flex items-center justify-center shadow-lg shadow-teal-500/30 active:scale-95 transition-transform">
+              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
-              <span className={`text-[10px] mt-1 font-medium ${pathname === '/login' ? 'text-teal-600' : 'text-gray-400'}`}>
-                Anmelden
-              </span>
-            </Link>
-          )
-        )}
-      </div>
-    </nav>
+            </div>
+            <span className="text-[10px] mt-1 font-medium text-teal-600">Scannen</span>
+          </button>
+
+          {/* Right nav items */}
+          {navItemsRight.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+                  isActive ? 'text-teal-600' : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                {item.icon(isActive)}
+                <span className={`text-[10px] mt-1 font-medium ${isActive ? 'text-teal-600' : 'text-gray-400'}`}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* Barcode Scanner Modal */}
+      <BarcodeScannerModal
+        isOpen={showScanner}
+        onClose={() => setShowScanner(false)}
+        onAddItem={handleScannerAdd}
+      />
+    </>
   );
 }
