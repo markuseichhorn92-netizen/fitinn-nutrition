@@ -158,32 +158,32 @@ export default function InteractiveTutorial({ steps, onComplete, onSkip }: Inter
   const showSpotlight = targetRect && step?.targetSelector;
 
   return (
-    <div className="fixed inset-0 z-[100]">
+    <div className="fixed inset-0 z-[100] pointer-events-none">
       {/* Dark overlay - 4 rectangles around the spotlight area */}
       {showSpotlight ? (
         <>
           {/* Top */}
           <div 
-            className="absolute bg-black/75 left-0 right-0 top-0"
-            style={{ height: targetRect.top - 12 }}
+            className="absolute bg-black/75 left-0 right-0 top-0 pointer-events-auto"
+            style={{ height: Math.max(0, targetRect.top - 12) }}
           />
           {/* Bottom */}
           <div 
-            className="absolute bg-black/75 left-0 right-0 bottom-0"
+            className="absolute bg-black/75 left-0 right-0 bottom-0 pointer-events-auto"
             style={{ top: targetRect.bottom + 12 }}
           />
           {/* Left */}
           <div 
-            className="absolute bg-black/75 left-0"
+            className="absolute bg-black/75 left-0 pointer-events-auto"
             style={{ 
               top: targetRect.top - 12,
               height: targetRect.height + 24,
-              width: targetRect.left - 12
+              width: Math.max(0, targetRect.left - 12)
             }}
           />
           {/* Right */}
           <div 
-            className="absolute bg-black/75 right-0"
+            className="absolute bg-black/75 right-0 pointer-events-auto"
             style={{ 
               top: targetRect.top - 12,
               height: targetRect.height + 24,
@@ -192,7 +192,7 @@ export default function InteractiveTutorial({ steps, onComplete, onSkip }: Inter
           />
         </>
       ) : (
-        <div className="absolute inset-0 bg-black/75" />
+        <div className="absolute inset-0 bg-black/75 pointer-events-auto" />
       )}
 
       {/* Highlight ring around target */}
