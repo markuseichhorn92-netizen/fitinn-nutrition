@@ -326,7 +326,7 @@ export default function ProfilePage() {
               <div className="text-left">
                 <p className="font-medium text-gray-900">Aktivitätslevel</p>
                 <p className="text-sm text-gray-500">
-                  {activityLevels.find(a => a.id === profile.sportsFrequency)?.label || 'Moderat aktiv'}
+                  {activityLevels.find(a => a.id === String(profile.sportsFrequency))?.label || 'Moderat aktiv'}
                 </p>
               </div>
             </div>
