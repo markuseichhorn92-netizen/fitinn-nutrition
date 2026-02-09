@@ -11,7 +11,7 @@ import { generateDayPlan, scaleRecipe, generateShoppingList } from '@/lib/mealPl
 import { calculateWaterGoal } from '@/lib/calculations';
 import { UserProfile, DayPlan, Recipe, MealPlan } from '@/types';
 import RecipeSwapPanel from '@/components/RecipeSwapPanel';
-import AppTutorial, { hasTutorialBeenSeen } from '@/components/AppTutorial';
+import PlanTutorial from '@/components/PlanTutorial';
 
 function getDateString(date: Date): string {
   return date.toISOString().split('T')[0];
@@ -77,7 +77,7 @@ function MobileMealCard({
       <div className={`bg-white rounded-2xl overflow-hidden shadow-sm ${meal.eaten ? 'opacity-60' : ''}`}>
         
         {/* PROMINENT Meal Type Header */}
-        <div className={`${mealInfo.bgColor} px-4 py-3 flex items-center gap-3`}>
+        <div data-tutorial="meal-header" className={`${mealInfo.bgColor} px-4 py-3 flex items-center gap-3`}>
           <span className="text-3xl">{mealInfo.emoji}</span>
           <div>
             <p className={`font-bold text-lg ${mealInfo.color}`}>{mealInfo.label}</p>
@@ -100,7 +100,7 @@ function MobileMealCard({
 
         {/* Recipe Content */}
         <div className="p-4">
-          <Link href={`/plan/recipe/${recipe.id}`}>
+          <Link href={`/plan/recipe/${recipe.id}`} data-tutorial="recipe-name">
             <h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-2 active:text-teal-600">{recipe.name}</h3>
           </Link>
           
@@ -114,12 +114,14 @@ function MobileMealCard({
           <div className="flex gap-2">
             <button
               onClick={onOpenSwapPanel}
+              data-tutorial="swap-btn"
               className="flex-1 py-3 px-3 rounded-xl border border-gray-200 text-gray-700 font-medium text-sm hover:border-gray-300 transition-colors touch-manipulation"
             >
               🔄 Wechseln
             </button>
             <button
               onClick={onToggleEaten}
+              data-tutorial="eaten-btn"
               className={`flex-1 py-3 px-3 rounded-xl font-medium text-sm transition-colors touch-manipulation ${
                 meal.eaten
                   ? 'bg-teal-600 text-white'
@@ -231,7 +233,6 @@ export default function PlanPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeMealIndex, setActiveMealIndex] = useState(0);
   const [swapPanel, setSwapPanel] = useState<{ open: boolean; mealIndex: number; mealType: string }>({ open: false, mealIndex: -1, mealType: '' });
-  const [showTutorial, setShowTutorial] = useState(false);
   const mealScrollRef = useRef<HTMLDivElement>(null);
   const calendarScrollRef = useRef<HTMLDivElement>(null);
 
@@ -259,11 +260,6 @@ export default function PlanPage() {
       return;
     }
     setProfile(storedProfile);
-    
-    // Show tutorial for first-time users
-    if (!hasTutorialBeenSeen()) {
-      setShowTutorial(true);
-    }
   }, [router]);
 
   useEffect(() => {
@@ -362,7 +358,7 @@ export default function PlanPage() {
               <span className="text-sm text-gray-500">Ziel:</span>
               <span className="font-bold text-teal-600">{profile.targetCalories} kcal</span>
             </div>
-            <Link href="/einkaufsliste" className="p-2 text-gray-600 hover:text-teal-600 hover:bg-gray-50 rounded-lg transition-colors">
+            <Link href="/einkaufsliste" data-tutorial="nav-shopping" className="p-2 text-gray-600 hover:text-teal-600 hover:bg-gray-50 rounded-lg transition-colors">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
@@ -373,6 +369,7 @@ export default function PlanPage() {
         {/* Swipeable Calendar - 3 Weeks */}
         <div 
           ref={calendarScrollRef}
+          data-tutorial="calendar"
           className="overflow-x-auto hide-scrollbar px-2 py-3 bg-gray-50"
         >
           <div className="flex gap-1" style={{ width: 'max-content' }}>
@@ -464,6 +461,7 @@ export default function PlanPage() {
       <div className="lg:hidden py-4">
         <div 
           ref={mealScrollRef}
+          data-tutorial="meals"
           onScroll={handleMealScroll}
           className="flex gap-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory scroll-smooth"
         >
@@ -539,7 +537,9 @@ export default function PlanPage() {
           </div>
 
           {/* Water */}
-          <WaterTracker goal={waterGoal} date={getDateString(currentDate)} />
+          <div data-tutorial="water">
+            <WaterTracker goal={waterGoal} date={getDateString(currentDate)} />
+          </div>
         </div>
       </div>
 
@@ -556,10 +556,8 @@ export default function PlanPage() {
 
       <BottomNav />
 
-      {/* App Tutorial for first-time users */}
-      {showTutorial && (
-        <AppTutorial onComplete={() => setShowTutorial(false)} />
-      )}
+      {/* Interactive Tutorial for first-time users */}
+      <PlanTutorial onComplete={() => {}} />
     </div>
   );
 }

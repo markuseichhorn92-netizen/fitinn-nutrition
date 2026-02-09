@@ -9,7 +9,7 @@ import { saveUserProfile, loadUserProfile } from '@/lib/supabase-data';
 import { getGoalLabel, getDietLabel, calculateWaterGoal, calculateTDEE, calculateTargetCalories } from '@/lib/calculations';
 import { UserProfile } from '@/types';
 import { useAuth } from '@/context/AuthContext';
-import { resetTutorial } from '@/components/AppTutorial';
+import { resetTutorialState } from '@/components/PlanTutorial';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -307,7 +307,7 @@ export default function ProfilePage() {
 
               <button
                 onClick={() => {
-                  resetTutorial();
+                  resetTutorialState();
                   router.push('/plan');
                 }}
                 className="w-full py-4 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
