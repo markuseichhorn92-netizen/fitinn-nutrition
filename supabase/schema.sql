@@ -44,6 +44,19 @@ CREATE TABLE IF NOT EXISTS favorites (
   PRIMARY KEY (user_id, recipe_id)
 );
 
+-- Scanned extras (barcode products)
+CREATE TABLE IF NOT EXISTS scanned_extras (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  products JSONB NOT NULL DEFAULT '[]',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(user_id, date)
+);
+
+-- Create index for date-based queries
+CREATE INDEX IF NOT EXISTS idx_scanned_extras_user_date ON scanned_extras(user_id, date);
+
 -- Shopping lists table
 CREATE TABLE IF NOT EXISTS shopping_lists (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -61,6 +74,7 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE meal_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE shopping_lists ENABLE ROW LEVEL SECURITY;
+ALTER TABLE scanned_extras ENABLE ROW LEVEL SECURITY;
 
 -- Policies for profiles (users can only access their own data)
 CREATE POLICY "Users can view own profile" ON profiles
@@ -91,6 +105,13 @@ CREATE POLICY "Users can view own shopping lists" ON shopping_lists
   FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can manage own shopping lists" ON shopping_lists
+  FOR ALL USING (auth.uid() = user_id);
+
+-- Policies for scanned_extras
+CREATE POLICY "Users can view own scanned extras" ON scanned_extras
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can manage own scanned extras" ON scanned_extras
   FOR ALL USING (auth.uid() = user_id);
 
 -- Function to update updated_at timestamp
