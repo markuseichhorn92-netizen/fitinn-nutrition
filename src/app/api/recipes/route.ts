@@ -214,8 +214,14 @@ export async function GET(request: NextRequest) {
     if (errorMsg.includes('402') || errorMsg.includes('401')) {
       console.log('Spoonacular quota exceeded, falling back to TheMealDB');
       try {
-        const fallbackRecipes = await fetchFromTheMealDB(parseInt(number) || 5);
+        let fallbackRecipes = await fetchFromTheMealDB(parseInt(number) || 5);
         if (fallbackRecipes.length > 0) {
+          // Translate TheMealDB recipes to German
+          try {
+            fallbackRecipes = await translateRecipes(fallbackRecipes as Parameters<typeof translateRecipes>[0]);
+          } catch (translateErr) {
+            console.warn('Translation of MealDB recipes failed:', translateErr);
+          }
           return NextResponse.json({ recipes: fallbackRecipes, source: 'themealdb' });
         }
       } catch (fallbackError) {
@@ -255,6 +261,40 @@ async function fetchFromTheMealDB(count: number): Promise<unknown[]> {
   return recipes;
 }
 
+// Unit translations for TheMealDB
+const unitTranslations: Record<string, string> = {
+  'tablespoon': 'EL', 'tablespoons': 'EL', 'tbsp': 'EL', 'Tbsp': 'EL', 'tbs': 'EL',
+  'teaspoon': 'TL', 'teaspoons': 'TL', 'tsp': 'TL', 'Tsp': 'TL',
+  'cup': 'Tasse', 'cups': 'Tassen',
+  'ounce': 'oz', 'ounces': 'oz', 'oz': 'oz',
+  'pound': 'Pfund', 'pounds': 'Pfund', 'lb': 'Pfund', 'lbs': 'Pfund',
+  'gram': 'g', 'grams': 'g', 'g': 'g',
+  'kg': 'kg', 'kilogram': 'kg',
+  'ml': 'ml', 'milliliter': 'ml',
+  'liter': 'l', 'liters': 'l', 'l': 'l',
+  'pinch': 'Prise', 'clove': 'Zehe', 'cloves': 'Zehen',
+  'slice': 'Scheibe', 'slices': 'Scheiben',
+  'piece': 'Stück', 'pieces': 'Stück',
+  'serving': 'Portion', 'servings': 'Portionen',
+  'small': 'klein', 'medium': 'mittel', 'large': 'groß',
+  'bunch': 'Bund', 'can': 'Dose', 'handful': 'Handvoll',
+  'dash': 'Spritzer', 'drop': 'Tropfen', 'drops': 'Tropfen',
+};
+
+function translateMeasure(measure: string): string {
+  if (!measure) return 'Stück';
+  const trimmed = measure.trim().toLowerCase();
+  // Check for exact match
+  if (unitTranslations[trimmed]) return unitTranslations[trimmed];
+  // Check if measure contains a known unit
+  for (const [en, de] of Object.entries(unitTranslations)) {
+    if (trimmed.includes(en.toLowerCase())) {
+      return measure.replace(new RegExp(en, 'gi'), de);
+    }
+  }
+  return measure;
+}
+
 // Convert TheMealDB recipe to Spoonacular-like format
 function convertMealDBRecipe(meal: Record<string, string | null>): unknown {
   // Extract ingredients (TheMealDB has strIngredient1-20 and strMeasure1-20)
@@ -266,7 +306,7 @@ function convertMealDBRecipe(meal: Record<string, string | null>): unknown {
       ingredients.push({
         name: ingredient.trim(),
         amount: 1,
-        unit: measure?.trim() || 'Stück',
+        unit: translateMeasure(measure || ''),
         aisle: 'Sonstiges',
       });
     }
