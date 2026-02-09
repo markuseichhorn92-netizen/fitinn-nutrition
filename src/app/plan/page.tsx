@@ -7,7 +7,7 @@ import Image from 'next/image';
 import BottomNav from '@/components/BottomNav';
 import WaterTracker from '@/components/WaterTracker';
 import { loadProfile, loadDayPlan, saveDayPlan, loadAllPlans, saveFavorite, removeFavorite, isFavorite } from '@/lib/storage';
-import { generateDayPlan, scaleRecipe, generateShoppingList } from '@/lib/mealPlanGenerator';
+import { generateDayPlan, scaleRecipe, generateShoppingList, initializeRecipes, isApiRecipesLoaded } from '@/lib/mealPlanGenerator';
 import { calculateWaterGoal } from '@/lib/calculations';
 import { UserProfile, DayPlan, Recipe, MealPlan } from '@/types';
 import RecipeSwapPanel from '@/components/RecipeSwapPanel';
@@ -253,13 +253,29 @@ export default function PlanPage() {
     }
   }, [allDates]);
 
+  // Load profile and initialize recipes from API
   useEffect(() => {
-    const storedProfile = loadProfile();
-    if (!storedProfile) {
-      router.push('/onboarding');
-      return;
-    }
-    setProfile(storedProfile);
+    const init = async () => {
+      const storedProfile = loadProfile();
+      if (!storedProfile) {
+        router.push('/onboarding');
+        return;
+      }
+      
+      // Initialize recipes from Spoonacular API
+      if (!isApiRecipesLoaded()) {
+        const dietMap: Record<string, string> = {
+          vegetarian: 'vegetarian',
+          vegan: 'vegan',
+          pescatarian: 'pescatarian',
+        };
+        const diet = dietMap[storedProfile.dietType] || undefined;
+        await initializeRecipes(diet);
+      }
+      
+      setProfile(storedProfile);
+    };
+    init();
   }, [router]);
 
   useEffect(() => {

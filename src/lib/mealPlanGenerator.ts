@@ -1,11 +1,39 @@
-import { Recipe, UserProfile, DayPlan, MealPlan } from '@/types';
-import recipesData from '@/data/recipes.json';
+import { Recipe, UserProfile, DayPlan, MealPlan, Nutrition } from '@/types';
+import { getRecipesByCategory, prefetchAllRecipes } from './recipeService';
 
-const mockRecipes = recipesData as Recipe[];
+// Fallback recipes (minimal set for offline/error cases)
+import recipesData from '@/data/recipes.json';
+const fallbackRecipes = recipesData as Recipe[];
+
+// Recipe cache for the current session
+let cachedRecipes: {
+  breakfast: Recipe[];
+  lunch: Recipe[];
+  dinner: Recipe[];
+  snack: Recipe[];
+} | null = null;
+
+// Initialize recipes from API
+export async function initializeRecipes(diet?: string): Promise<void> {
+  try {
+    cachedRecipes = await prefetchAllRecipes(diet);
+    console.log('Recipes loaded from Spoonacular API');
+  } catch (error) {
+    console.error('Failed to load recipes from API, using fallback:', error);
+    cachedRecipes = null;
+  }
+}
 
 // Get recipes by category (from cache or fallback)
-function getRecipesByCategory(recipes: Recipe[], category: string): Recipe[] {
-  return recipes.filter(r => r.category === category);
+function getRecipesByCategorySync(category: string): Recipe[] {
+  if (cachedRecipes) {
+    const key = category as keyof typeof cachedRecipes;
+    if (key in cachedRecipes) {
+      return cachedRecipes[key];
+    }
+  }
+  // Fallback to local data
+  return fallbackRecipes.filter(r => r.category === category);
 }
 
 // Filter recipes based on user preferences
@@ -81,13 +109,6 @@ function selectRecipeForTarget(recipes: Recipe[], usedIds: string[], targetCals:
   return top[Math.floor(Math.random() * top.length)];
 }
 
-// Select a random recipe from filtered list
-function selectRecipe(recipes: Recipe[], usedIds: string[] = []): Recipe | null {
-  const available = recipes.filter(r => !usedIds.includes(r.id));
-  if (available.length === 0) return recipes[0] || null;
-  return available[Math.floor(Math.random() * available.length)];
-}
-
 // Get alternatives for a recipe
 function getAlternatives(recipe: Recipe, allRecipes: Recipe[], count: number = 2): Recipe[] {
   const sameCategory = allRecipes.filter(
@@ -104,23 +125,16 @@ function getAlternatives(recipe: Recipe, allRecipes: Recipe[], count: number = 2
   return sameCategory.slice(0, count);
 }
 
-function getRecipesSync(): Recipe[] {
-  return mockRecipes;
-}
-
 // Generate meal plan for a day
 export function generateDayPlan(date: string, profile: UserProfile): DayPlan {
-  // Use cached/mock recipes synchronously for initial render
-  const recipes = getRecipesSync();
-  
   const usedIds: string[] = [];
   const meals: MealPlan[] = [];
 
-  // Filter all recipes for user
-  const breakfasts = filterRecipesForUser(getRecipesByCategory(recipes, 'breakfast'), profile);
-  const lunches = filterRecipesForUser(getRecipesByCategory(recipes, 'lunch'), profile);
-  const dinners = filterRecipesForUser(getRecipesByCategory(recipes, 'dinner'), profile);
-  const snacks = filterRecipesForUser(getRecipesByCategory(recipes, 'snack'), profile);
+  // Get recipes by category
+  const breakfasts = filterRecipesForUser(getRecipesByCategorySync('breakfast'), profile);
+  const lunches = filterRecipesForUser(getRecipesByCategorySync('lunch'), profile);
+  const dinners = filterRecipesForUser(getRecipesByCategorySync('dinner'), profile);
+  const snacks = filterRecipesForUser(getRecipesByCategorySync('snack'), profile);
 
   // Calculate target calories per meal type
   const targetCalories = profile.targetCalories || profile.tdee || 2000;
@@ -128,10 +142,7 @@ export function generateDayPlan(date: string, profile: UserProfile): DayPlan {
   const mainMealTypes = ['breakfast', 'lunch', 'dinner'];
   const mainMealCount = activeMeals.filter(([k]) => mainMealTypes.includes(k)).length;
   const snackCount = activeMeals.length - mainMealCount;
-  // Main meals get ~30% each, snacks ~10% each (adjusted to fill 100%)
   const totalRatio = mainMealCount * 0.3 + snackCount * 0.1;
-  const mainCalTarget = (targetCalories * 0.3) / (totalRatio || 1) * (totalRatio);
-  const snackCalTarget = (targetCalories * 0.1) / (totalRatio || 1) * (totalRatio);
 
   // Per-meal calorie targets
   const mainTarget = targetCalories * 0.3 / (totalRatio || 1);
@@ -235,7 +246,7 @@ export function generateDayPlan(date: string, profile: UserProfile): DayPlan {
 
   // Calculate totals
   const totalCalories = meals.reduce((sum, m) => sum + m.recipe.nutrition.calories, 0);
-  const totalMacros = meals.reduce(
+  const totalMacros: Nutrition = meals.reduce(
     (acc, m) => ({
       calories: acc.calories + m.recipe.nutrition.calories,
       protein: acc.protein + m.recipe.nutrition.protein,
@@ -256,16 +267,30 @@ export function generateDayPlan(date: string, profile: UserProfile): DayPlan {
   };
 }
 
-// Async version that fetches fresh recipes
 // Get recipe by ID
 export function getRecipeById(id: string): Recipe | undefined {
-  const recipes = getRecipesSync();
-  return recipes.find(r => r.id === id);
+  // Check cached API recipes first
+  if (cachedRecipes) {
+    for (const category of Object.values(cachedRecipes)) {
+      const found = category.find(r => r.id === id);
+      if (found) return found;
+    }
+  }
+  // Fallback to local data
+  return fallbackRecipes.find(r => r.id === id);
 }
 
 // Get all recipes
 export function getAllRecipes(): Recipe[] {
-  return getRecipesSync();
+  if (cachedRecipes) {
+    return [
+      ...cachedRecipes.breakfast,
+      ...cachedRecipes.lunch,
+      ...cachedRecipes.dinner,
+      ...cachedRecipes.snack,
+    ];
+  }
+  return fallbackRecipes;
 }
 
 // Generate shopping list for a week
@@ -293,4 +318,7 @@ export function generateShoppingList(plans: DayPlan[]): Map<string, { amount: nu
   return items;
 }
 
-
+// Check if recipes are loaded from API
+export function isApiRecipesLoaded(): boolean {
+  return cachedRecipes !== null;
+}
