@@ -4,23 +4,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchProductByBarcode, calculateNutritionForQuantity, ProductResult } from '@/lib/openFoodFacts';
 import { ScannedItem } from '@/types';
 
-// Dynamic import for Capacitor - only available in native app
-let BarcodeScanner: any = null;
-let isNativeApp = false;
-
-if (typeof window !== 'undefined') {
-  // Check if running in Capacitor
-  isNativeApp = !!(window as any).Capacitor?.isNativePlatform?.();
-  
-  if (isNativeApp) {
-    import('@capacitor-community/barcode-scanner').then(module => {
-      BarcodeScanner = module.BarcodeScanner;
-    }).catch(() => {
-      // Not available
-    });
-  }
-}
-
 interface BarcodeScannerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -47,16 +30,10 @@ export default function BarcodeScannerModal({ isOpen, onClose, onAddItem }: Barc
 
   const stopScanning = useCallback(async () => {
     try {
-      // Stop web scanner
       if (html5QrCodeRef.current) {
         await html5QrCodeRef.current.stop();
         html5QrCodeRef.current = null;
       }
-      // Stop native scanner
-      if (isNativeApp && BarcodeScanner) {
-        await BarcodeScanner.stopScan();
-      }
-      document.body.classList.remove('barcode-scanner-active');
       setIsScanning(false);
     } catch (error) {
       console.error('Error stopping scan:', error);
@@ -77,70 +54,6 @@ export default function BarcodeScannerModal({ isOpen, onClose, onAddItem }: Barc
     onClose();
   }, [onClose, stopScanning]);
 
-  const startScanning = useCallback(async () => {
-    try {
-      setIsScanning(true);
-      
-      if (isNativeApp && BarcodeScanner) {
-        // Native app - use Capacitor scanner
-        const status = await BarcodeScanner.checkPermission({ force: true });
-        
-        if (!status.granted) {
-          alert('Kamera-Berechtigung wird benötigt um Barcodes zu scannen.');
-          setIsScanning(false);
-          return;
-        }
-
-        document.body.classList.add('barcode-scanner-active');
-
-        const result = await BarcodeScanner.startScan({
-          targetedFormats: ['EAN_13', 'EAN_8', 'UPC_A', 'UPC_E'],
-        });
-
-        setIsScanning(false);
-        document.body.classList.remove('barcode-scanner-active');
-
-        if (result.hasContent && result.content) {
-          await handleBarcodeScanned(result.content);
-        }
-      } else {
-        // Web - use html5-qrcode
-        const { Html5Qrcode } = await import('html5-qrcode');
-        
-        const scannerId = 'barcode-scanner-web';
-        
-        // Create scanner element if not exists
-        if (!document.getElementById(scannerId)) {
-          const div = document.createElement('div');
-          div.id = scannerId;
-          scannerContainerRef.current?.appendChild(div);
-        }
-        
-        const html5QrCode = new Html5Qrcode(scannerId);
-        html5QrCodeRef.current = html5QrCode;
-        
-        await html5QrCode.start(
-          { facingMode: 'environment' },
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 150 },
-          },
-          async (decodedText: string) => {
-            await stopScanning();
-            await handleBarcodeScanned(decodedText);
-          },
-          () => {} // Ignore intermediate errors
-        );
-      }
-    } catch (error) {
-      console.error('Error scanning:', error);
-      setIsScanning(false);
-      document.body.classList.remove('barcode-scanner-active');
-      // Fallback to manual entry
-      setStep('manual');
-    }
-  }, [stopScanning]);
-
   const handleBarcodeScanned = async (barcode: string) => {
     setStep('loading');
     setManualBarcode(barcode);
@@ -155,6 +68,49 @@ export default function BarcodeScannerModal({ isOpen, onClose, onAddItem }: Barc
       setStep('notfound');
     }
   };
+
+  const startScanning = useCallback(async () => {
+    try {
+      setIsScanning(true);
+      
+      // Use html5-qrcode for web scanning
+      const { Html5Qrcode } = await import('html5-qrcode');
+      
+      const scannerId = 'barcode-scanner-web';
+      
+      // Wait for DOM
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Create scanner element if not exists
+      let scannerElement = document.getElementById(scannerId);
+      if (!scannerElement && scannerContainerRef.current) {
+        const div = document.createElement('div');
+        div.id = scannerId;
+        scannerContainerRef.current.appendChild(div);
+      }
+      
+      const html5QrCode = new Html5Qrcode(scannerId);
+      html5QrCodeRef.current = html5QrCode;
+      
+      await html5QrCode.start(
+        { facingMode: 'environment' },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 150 },
+        },
+        async (decodedText: string) => {
+          await stopScanning();
+          await handleBarcodeScanned(decodedText);
+        },
+        () => {} // Ignore intermediate errors
+      );
+    } catch (error) {
+      console.error('Error scanning:', error);
+      setIsScanning(false);
+      // Fallback to manual entry
+      setStep('manual');
+    }
+  }, [stopScanning]);
 
   const handleAddProduct = () => {
     if (!product) return;
@@ -224,32 +180,14 @@ export default function BarcodeScannerModal({ isOpen, onClose, onAddItem }: Barc
 
       {/* Scanner View (when actively scanning) */}
       {isScanning && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black">
           <div className="relative" ref={scannerContainerRef}>
             {/* Web Scanner Container (html5-qrcode renders here) */}
-            {!isNativeApp && (
-              <div id="barcode-scanner-web" className="w-72 h-72 rounded-2xl overflow-hidden" />
-            )}
-            
-            {/* Native Scanner Frame Overlay */}
-            {isNativeApp && (
-              <div className="w-72 h-72 border-4 border-white rounded-2xl relative">
-                <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-teal-500 rounded-tl-lg" />
-                <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-teal-500 rounded-tr-lg" />
-                <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-teal-500 rounded-bl-lg" />
-                <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-teal-500 rounded-br-lg" />
-                
-                {/* Scanning line animation */}
-                <div className="absolute inset-4 overflow-hidden">
-                  <div className="w-full h-0.5 bg-teal-500 animate-pulse" 
-                       style={{ animation: 'scan-line 2s ease-in-out infinite' }} />
-                </div>
-              </div>
-            )}
+            <div id="barcode-scanner-web" className="w-80 h-80 rounded-2xl overflow-hidden" />
           </div>
           
           <p className="text-white text-center mt-6 text-lg font-medium">
-            Barcode in den Rahmen halten
+            📷 Barcode in den Rahmen halten
           </p>
           
           <button
@@ -537,22 +475,6 @@ export default function BarcodeScannerModal({ isOpen, onClose, onAddItem }: Barc
           )}
         </div>
       )}
-
-      {/* CSS for scanner animation */}
-      <style jsx global>{`
-        @keyframes scan-line {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(240px); }
-        }
-        
-        body.barcode-scanner-active {
-          background: transparent !important;
-        }
-        
-        body.barcode-scanner-active .scanner-hidden {
-          display: none !important;
-        }
-      `}</style>
     </div>
   );
 }
