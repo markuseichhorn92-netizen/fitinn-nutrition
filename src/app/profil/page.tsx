@@ -22,20 +22,32 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const loadData = async () => {
-      // Try to load from Supabase first (if authenticated), then localStorage
-      const storedProfile = await loadUserProfile();
-      if (!storedProfile) {
-        router.push('/onboarding');
-        return;
+      try {
+        // Try to load from Supabase first (if authenticated), then localStorage
+        const storedProfile = await loadUserProfile();
+        if (!storedProfile) {
+          router.push('/onboarding');
+          return;
+        }
+        setProfile(storedProfile);
+        setWeightInput(storedProfile.weight.toString());
+      } catch (err) {
+        console.error('Error loading profile:', err);
+      } finally {
+        setIsLoading(false);
       }
-      setProfile(storedProfile);
-      setWeightInput(storedProfile.weight.toString());
-      setIsLoading(false);
     };
+    
+    // Timeout fallback - stop loading after 5 seconds
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
     
     if (!authLoading) {
       loadData();
     }
+    
+    return () => clearTimeout(timeout);
   }, [router, authLoading]);
 
   const handleDeleteData = () => {
@@ -69,10 +81,53 @@ export default function ProfilePage() {
     setTimeout(() => setShowWeightSaved(false), 2000);
   };
 
-  if (isLoading || authLoading || !profile) {
+  if (isLoading || authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full" />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
+        <div className="animate-spin w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full mb-4" />
+        <p className="text-gray-500 text-sm">Profil wird geladen...</p>
+      </div>
+    );
+  }
+  
+  // If no profile, show emergency options
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
+        <div className="text-center max-w-sm">
+          <div className="text-5xl mb-4">😕</div>
+          <h1 className="text-xl font-semibold mb-2">Kein Profil gefunden</h1>
+          <p className="text-gray-500 mb-6">Erstelle ein neues Profil oder melde dich ab.</p>
+          
+          <div className="space-y-3">
+            <button
+              onClick={() => router.push('/onboarding')}
+              className="w-full py-3 bg-teal-500 text-white rounded-xl font-medium"
+            >
+              Neues Profil erstellen
+            </button>
+            
+            {user && (
+              <button
+                onClick={handleSignOut}
+                className="w-full py-3 border border-gray-300 text-gray-700 rounded-xl font-medium"
+              >
+                Abmelden
+              </button>
+            )}
+            
+            <button
+              onClick={() => {
+                clearAllData();
+                window.location.href = '/';
+              }}
+              className="w-full py-3 text-red-500 text-sm"
+            >
+              Alle Daten löschen & neu starten
+            </button>
+          </div>
+        </div>
+        <BottomNav />
       </div>
     );
   }
