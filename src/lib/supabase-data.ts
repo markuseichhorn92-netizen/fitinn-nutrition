@@ -436,6 +436,187 @@ export async function getWaterIntake(dateStr: string): Promise<{ glasses: number
 }
 
 // =============================================================================
+// SCANNED EXTRAS (Barcode Products)
+// =============================================================================
+
+export async function saveScannedExtras(dateStr: string, items: any[]): Promise<void> {
+  // Always save to localStorage
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(`fitinn_scanned_${dateStr}`, JSON.stringify(items));
+  }
+  
+  const user = await getAuthenticatedUser();
+  if (!user) return;
+  
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+  
+  try {
+    const { error } = await supabase
+      .from('scanned_extras')
+      .upsert({
+        user_id: user.id,
+        date: dateStr,
+        items: items,
+      }, {
+        onConflict: 'user_id,date'
+      });
+    
+    if (error) {
+      console.error('Error saving scanned extras to Supabase:', error);
+    }
+  } catch (err) {
+    console.error('Error saving scanned extras:', err);
+  }
+}
+
+export async function getScannedExtras(dateStr: string): Promise<any[]> {
+  const user = await getAuthenticatedUser();
+  
+  // Try localStorage first
+  let localItems: any[] = [];
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = window.localStorage.getItem(`fitinn_scanned_${dateStr}`);
+      if (stored) localItems = JSON.parse(stored);
+    } catch (e) {}
+  }
+  
+  if (!user) {
+    return localItems;
+  }
+  
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return localItems;
+  }
+  
+  try {
+    const { data, error } = await supabase
+      .from('scanned_extras')
+      .select('items')
+      .eq('user_id', user.id)
+      .eq('date', dateStr)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return localItems;
+      }
+      console.error('Error loading scanned extras from Supabase:', error);
+      return localItems;
+    }
+    
+    return data?.items || localItems;
+  } catch (err) {
+    console.error('Error loading scanned extras:', err);
+    return localItems;
+  }
+}
+
+// =============================================================================
+// STREAKS & ACHIEVEMENTS
+// =============================================================================
+
+export async function updateStreak(): Promise<{ current: number; longest: number; total: number }> {
+  const defaultStreak = { current: 0, longest: 0, total: 0 };
+  
+  const user = await getAuthenticatedUser();
+  if (!user) return defaultStreak;
+  
+  const supabase = getSupabaseClient();
+  if (!supabase) return defaultStreak;
+  
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Get current streak data
+    const { data: existing } = await supabase
+      .from('user_streaks')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+    
+    let currentStreak = 1;
+    let longestStreak = existing?.longest_streak || 0;
+    let totalDays = (existing?.total_days_logged || 0) + 1;
+    
+    if (existing?.last_active_date) {
+      const lastDate = new Date(existing.last_active_date);
+      const todayDate = new Date(today);
+      const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) {
+        // Same day, don't increment
+        return {
+          current: existing.current_streak,
+          longest: existing.longest_streak,
+          total: existing.total_days_logged,
+        };
+      } else if (diffDays === 1) {
+        // Consecutive day
+        currentStreak = (existing.current_streak || 0) + 1;
+      }
+      // else: streak broken, starts at 1
+    }
+    
+    longestStreak = Math.max(longestStreak, currentStreak);
+    
+    // Upsert streak
+    const { error } = await supabase
+      .from('user_streaks')
+      .upsert({
+        user_id: user.id,
+        current_streak: currentStreak,
+        longest_streak: longestStreak,
+        last_active_date: today,
+        total_days_logged: totalDays,
+      }, {
+        onConflict: 'user_id'
+      });
+    
+    if (error) {
+      console.error('Error updating streak:', error);
+    }
+    
+    return { current: currentStreak, longest: longestStreak, total: totalDays };
+  } catch (err) {
+    console.error('Error updating streak:', err);
+    return defaultStreak;
+  }
+}
+
+export async function getStreak(): Promise<{ current: number; longest: number; total: number }> {
+  const defaultStreak = { current: 0, longest: 0, total: 0 };
+  
+  const user = await getAuthenticatedUser();
+  if (!user) return defaultStreak;
+  
+  const supabase = getSupabaseClient();
+  if (!supabase) return defaultStreak;
+  
+  try {
+    const { data, error } = await supabase
+      .from('user_streaks')
+      .select('current_streak, longest_streak, total_days_logged')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (error) {
+      return defaultStreak;
+    }
+    
+    return {
+      current: data?.current_streak || 0,
+      longest: data?.longest_streak || 0,
+      total: data?.total_days_logged || 0,
+    };
+  } catch (err) {
+    return defaultStreak;
+  }
+}
+
+// =============================================================================
 // SYNC HELPERS
 // =============================================================================
 
@@ -443,6 +624,8 @@ export async function getWaterIntake(dateStr: string): Promise<{ glasses: number
 export async function syncLocalDataToSupabase(): Promise<void> {
   const user = await getAuthenticatedUser();
   if (!user) return;
+  
+  console.log('Syncing local data to Supabase...');
   
   // Sync profile
   const localProfile = localStorage.loadProfile();
@@ -456,9 +639,9 @@ export async function syncLocalDataToSupabase(): Promise<void> {
     await addFavorite(recipeId);
   }
   
-  // Sync recent meal plans (last 7 days)
+  // Sync recent meal plans (last 14 days)
   const today = new Date();
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 14; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
     const dateStr = d.toISOString().split('T')[0];
@@ -467,4 +650,34 @@ export async function syncLocalDataToSupabase(): Promise<void> {
       await saveDayPlan(dateStr, plan);
     }
   }
+  
+  // Update streak
+  await updateStreak();
+  
+  console.log('Sync complete!');
+}
+
+// Sync Supabase data to localStorage (for offline access)
+export async function syncSupabaseToLocal(): Promise<void> {
+  const user = await getAuthenticatedUser();
+  if (!user) return;
+  
+  console.log('Syncing Supabase data to local...');
+  
+  // Load profile from Supabase
+  await loadUserProfile();
+  
+  // Load favorites
+  await getFavorites();
+  
+  // Load recent meal plans
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    await loadDayPlan(dateStr);
+  }
+  
+  console.log('Local sync complete!');
 }
