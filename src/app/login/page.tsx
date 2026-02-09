@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
+import { openOAuthInBrowser } from '@/lib/capacitorAuth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -68,22 +69,10 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     
-    const supabase = getSupabaseClient();
-    if (!supabase) {
-      setError('Supabase nicht konfiguriert');
-      setLoading(false);
-      return;
-    }
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      setError(error.message);
+    try {
+      await openOAuthInBrowser('google');
+    } catch (err: any) {
+      setError(err.message || 'Login fehlgeschlagen');
       setLoading(false);
     }
   };
@@ -92,22 +81,10 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     
-    const supabase = getSupabaseClient();
-    if (!supabase) {
-      setError('Supabase nicht konfiguriert');
-      setLoading(false);
-      return;
-    }
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'apple',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      setError(error.message);
+    try {
+      await openOAuthInBrowser('apple');
+    } catch (err: any) {
+      setError(err.message || 'Login fehlgeschlagen');
       setLoading(false);
     }
   };

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
+import { isNativeApp, openOAuthInBrowser } from '@/lib/capacitorAuth';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -24,19 +25,14 @@ export default function LandingPage() {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
-    const supabase = getSupabaseClient();
-    if (!supabase) {
-      setError('Login nicht verfügbar');
+    setError('');
+    
+    try {
+      await openOAuthInBrowser('google');
+    } catch (err: any) {
+      setError(err.message || 'Login fehlgeschlagen');
       setIsLoading(false);
-      return;
     }
-
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
   };
 
   const handleEmailLogin = async (e: React.FormEvent) => {

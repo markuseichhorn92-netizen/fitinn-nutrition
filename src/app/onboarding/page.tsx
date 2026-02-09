@@ -8,6 +8,7 @@ import { saveProfile } from '@/lib/storage';
 import { saveOnboardingProgress, loadOnboardingProgress, clearOnboardingProgress } from '@/lib/database';
 import { calculateTDEE, calculateTargetCalories, calculateMacros, calculateWaterGoal, getGoalLabel, getDietLabel } from '@/lib/calculations';
 import { getSupabaseClient } from '@/lib/supabase';
+import { openOAuthInBrowser } from '@/lib/capacitorAuth';
 
 const steps = [
   { id: 0, name: 'Persönliche Daten', required: true },
@@ -231,19 +232,12 @@ export default function OnboardingPage() {
     saveProfile(completeProfile);
     clearOnboardingProgress();
     
-    const supabase = getSupabaseClient();
-    if (!supabase) {
-      // If Supabase not configured, just continue without auth
-      router.push('/plan');
-      return;
+    try {
+      await openOAuthInBrowser('google');
+    } catch (err: any) {
+      setRegError(err.message || 'Registrierung fehlgeschlagen');
+      setRegLoading(false);
     }
-
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
   };
 
   const handleEmailRegister = async (e: React.FormEvent) => {
