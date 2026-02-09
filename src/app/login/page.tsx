@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { getSupabaseClient } from '@/lib/supabase';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -64,13 +65,51 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
-    // Google Sign In - requires Supabase OAuth setup
-    setError('Google Login wird bald verfügbar sein. Nutze vorerst E-Mail.');
+    setLoading(true);
+    setError(null);
+    
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      setError('Supabase nicht konfiguriert');
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
   };
 
   const handleAppleLogin = async () => {
-    // Apple Sign In - requires Supabase OAuth setup
-    setError('Apple Login wird bald verfügbar sein. Nutze vorerst E-Mail.');
+    setLoading(true);
+    setError(null);
+    
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      setError('Supabase nicht konfiguriert');
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
   };
 
   return (
