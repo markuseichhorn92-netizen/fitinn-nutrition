@@ -2,7 +2,9 @@
 
 import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
-import { getSupabaseClient } from '@/lib/supabase';
+
+// Storage key must match what's in supabase.ts
+const STORAGE_KEY = 'fitinn-auth';
 
 function AuthCallbackContent() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -11,13 +13,6 @@ function AuthCallbackContent() {
 
   useEffect(() => {
     const handleAuth = async () => {
-      const supabase = getSupabaseClient();
-      if (!supabase) {
-        setError('Supabase nicht konfiguriert');
-        setStatus('error');
-        return;
-      }
-
       const url = window.location.href;
       const hash = window.location.hash;
       console.log('Auth callback - Full URL:', url);
@@ -27,11 +22,12 @@ function AuthCallbackContent() {
       const hashParams = new URLSearchParams(hash.replace('#', ''));
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
+      const expiresIn = hashParams.get('expires_in');
+      const tokenType = hashParams.get('token_type');
       const errorParam = hashParams.get('error');
       const errorDescription = hashParams.get('error_description');
 
-      // Debug info
-      setDebugInfo(accessToken ? 'Token gefunden...' : 'Prüfe Session...');
+      setDebugInfo(accessToken ? 'Tokens gefunden...' : 'Keine Tokens in URL');
 
       // If there's an error in the URL
       if (errorParam) {
@@ -41,84 +37,87 @@ function AuthCallbackContent() {
         return;
       }
 
-      // If we have tokens in the hash, manually set the session
+      // If we have tokens, store them directly in localStorage
       if (accessToken && refreshToken) {
-        console.log('Found tokens in URL hash, setting session...');
-        setDebugInfo('Tokens gefunden, setze Session...');
+        console.log('Found tokens, storing directly in localStorage...');
+        setDebugInfo('Speichere Session...');
         
         try {
-          // Add timeout to prevent infinite hang
-          const timeoutMs = 10000;
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+          // Decode the JWT to get user info and expiry
+          const tokenParts = accessToken.split('.');
+          if (tokenParts.length !== 3) {
+            throw new Error('Invalid token format');
+          }
           
-          const sessionPromise = supabase.auth.setSession({
+          const payload = JSON.parse(atob(tokenParts[1]));
+          console.log('Token payload:', payload);
+          
+          // Calculate expiry
+          const expiresAt = payload.exp || (Math.floor(Date.now() / 1000) + parseInt(expiresIn || '3600'));
+          
+          // Construct session object matching Supabase's format
+          const session = {
             access_token: accessToken,
             refresh_token: refreshToken,
-          });
+            expires_in: parseInt(expiresIn || '3600'),
+            expires_at: expiresAt,
+            token_type: tokenType || 'bearer',
+            user: {
+              id: payload.sub,
+              email: payload.email,
+              app_metadata: payload.app_metadata || {},
+              user_metadata: payload.user_metadata || {},
+              aud: payload.aud,
+              created_at: payload.created_at || new Date().toISOString(),
+            }
+          };
           
-          // Race between session and timeout
-          const result = await Promise.race([
-            sessionPromise,
-            new Promise<never>((_, reject) => 
-              setTimeout(() => reject(new Error('Timeout nach 10s')), timeoutMs)
-            )
-          ]);
+          // Store in localStorage with Supabase's expected format
+          const storageValue = JSON.stringify(session);
+          localStorage.setItem(STORAGE_KEY, storageValue);
           
-          clearTimeout(timeoutId);
-          const { data, error: sessionError } = result;
+          console.log('Session stored successfully!');
+          setDebugInfo(`Eingeloggt als ${payload.email}`);
+          setStatus('success');
           
-          if (sessionError) {
-            console.error('Error setting session:', sessionError);
-            setError(sessionError.message);
-            setStatus('error');
-            return;
-          }
+          // Clear the hash from URL
+          window.history.replaceState(null, '', '/auth/callback');
           
-          if (data?.session) {
-            console.log('Session set successfully!', data.session.user?.email);
-            setDebugInfo(`Eingeloggt als ${data.session.user?.email}`);
-            setStatus('success');
-            
-            // Clear hash from URL for cleaner look
-            window.history.replaceState(null, '', '/auth/callback');
-            
-            // Redirect to plan
-            setTimeout(() => {
-              window.location.href = '/plan';
-            }, 1500);
-            return;
-          } else {
-            console.error('No session in response');
-            setError('Keine Session erhalten');
-            setStatus('error');
-            return;
-          }
+          // Redirect to plan (full page reload to pick up new session)
+          setTimeout(() => {
+            window.location.href = '/plan';
+          }, 1500);
+          
         } catch (err: any) {
-          console.error('Exception setting session:', err);
-          setError(err.message || 'Unbekannter Fehler');
+          console.error('Error processing tokens:', err);
+          setError(err.message || 'Fehler beim Verarbeiten der Tokens');
           setStatus('error');
-          return;
         }
-      }
-
-      // No tokens in hash - check if already logged in
-      console.log('No tokens in URL, checking existing session...');
-      setDebugInfo('Prüfe bestehende Session...');
-      
-      const { data } = await supabase.auth.getSession();
-      if (data?.session) {
-        console.log('Already logged in!', data.session.user?.email);
-        setDebugInfo(`Bereits eingeloggt: ${data.session.user?.email}`);
-        setStatus('success');
-        setTimeout(() => {
-          window.location.href = '/plan';
-        }, 1000);
         return;
       }
 
+      // No tokens - check if already have a session in storage
+      const existingSession = localStorage.getItem(STORAGE_KEY);
+      if (existingSession) {
+        try {
+          const session = JSON.parse(existingSession);
+          if (session.access_token && session.expires_at > Date.now() / 1000) {
+            console.log('Found existing valid session');
+            setDebugInfo(`Bereits eingeloggt: ${session.user?.email}`);
+            setStatus('success');
+            setTimeout(() => {
+              window.location.href = '/plan';
+            }, 1000);
+            return;
+          }
+        } catch (e) {
+          console.error('Error parsing existing session:', e);
+        }
+      }
+
       // No session found
-      setError('Keine Anmeldedaten gefunden. Bitte erneut versuchen.');
+      setError('Keine Anmeldedaten gefunden');
+      setDebugInfo('URL: ' + url.substring(0, 80) + '...');
       setStatus('error');
     };
 
@@ -151,7 +150,7 @@ function AuthCallbackContent() {
             <div className="text-5xl mb-4">❌</div>
             <h1 className="text-xl font-semibold text-gray-900 mb-2">Anmeldung fehlgeschlagen</h1>
             <p className="text-red-500 mb-2">{error}</p>
-            <p className="text-xs text-gray-400 mb-6">{debugInfo}</p>
+            <p className="text-xs text-gray-400 mb-6 break-all">{debugInfo}</p>
             
             <div className="space-y-3">
               <button
