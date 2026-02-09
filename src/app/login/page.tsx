@@ -71,8 +71,16 @@ export default function LoginPage() {
     
     try {
       await openOAuthInBrowser('google');
+      // Note: If OAuth redirect works, we won't reach here
+      // The page will navigate away
     } catch (err: any) {
-      setError(err.message || 'Login fehlgeschlagen');
+      console.error('Google OAuth error:', err);
+      // Check for specific abort error
+      if (err.message?.includes('aborted')) {
+        setError('Login wurde abgebrochen. Bitte versuche es erneut oder nutze E-Mail-Anmeldung.');
+      } else {
+        setError(err.message || 'Login fehlgeschlagen');
+      }
       setLoading(false);
     }
   };
@@ -84,7 +92,12 @@ export default function LoginPage() {
     try {
       await openOAuthInBrowser('apple');
     } catch (err: any) {
-      setError(err.message || 'Login fehlgeschlagen');
+      console.error('Apple OAuth error:', err);
+      if (err.message?.includes('aborted')) {
+        setError('Login wurde abgebrochen. Bitte versuche es erneut oder nutze E-Mail-Anmeldung.');
+      } else {
+        setError(err.message || 'Login fehlgeschlagen');
+      }
       setLoading(false);
     }
   };

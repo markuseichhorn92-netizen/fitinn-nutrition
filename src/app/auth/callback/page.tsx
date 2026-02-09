@@ -11,68 +11,82 @@ function AuthCallbackContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleCallback = async () => {
-      try {
-        const supabase = getSupabaseClient();
-        if (!supabase) {
-          throw new Error('Supabase nicht konfiguriert');
-        }
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      setError('Supabase nicht konfiguriert');
+      setStatus('error');
+      return;
+    }
 
-        console.log('Auth callback - processing...');
+    console.log('Auth callback - waiting for session...');
+    console.log('Current URL:', window.location.href);
+
+    // Listen for auth state changes - Supabase will automatically
+    // detect and exchange the tokens from the URL hash
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session?.user?.email);
+      
+      if (event === 'SIGNED_IN' && session) {
+        console.log('Login successful!');
+        setStatus('success');
         
-        // Wait for Supabase to detect session from URL
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Get the session
-        const { data, error: sessionError } = await supabase.auth.getSession();
+        // Check if we came from native app
+        const isFromApp = typeof window !== 'undefined' && (
+          navigator.userAgent.includes('Capacitor') ||
+          window.location.href.includes('capacitor') ||
+          document.referrer.includes('capacitor')
+        );
         
-        if (sessionError) {
-          throw sessionError;
-        }
-
-        if (data?.session) {
-          console.log('Login successful!');
-          setStatus('success');
+        if (isFromApp) {
+          // Try to redirect back to app using custom URL scheme
+          const accessToken = session.access_token;
+          const refreshToken = session.refresh_token;
+          const deepLink = `naehrkraft://auth/callback?access_token=${accessToken}&refresh_token=${refreshToken}`;
           
-          // Check if we came from native app (check for Capacitor in user agent or referrer)
-          const isFromApp = typeof window !== 'undefined' && (
-            navigator.userAgent.includes('Capacitor') ||
-            window.location.href.includes('capacitor') ||
-            document.referrer.includes('capacitor')
-          );
+          console.log('Redirecting to app via deep link...');
+          window.location.href = deepLink;
           
-          if (isFromApp) {
-            // Try to redirect back to app using custom URL scheme
-            const accessToken = data.session.access_token;
-            const refreshToken = data.session.refresh_token;
-            const deepLink = `naehrkraft://auth/callback?access_token=${accessToken}&refresh_token=${refreshToken}`;
-            
-            console.log('Redirecting to app via deep link...');
-            window.location.href = deepLink;
-            
-            // Fallback after 2 seconds if deep link didn't work
-            setTimeout(() => {
-              window.location.href = '/plan';
-            }, 2000);
-          } else {
-            // Web browser - just redirect
-            setTimeout(() => {
-              window.location.href = '/plan';
-            }, 1000);
-          }
-          return;
+          // Fallback after 2 seconds if deep link didn't work
+          setTimeout(() => {
+            window.location.href = '/plan';
+          }, 2000);
+        } else {
+          // Web browser - just redirect
+          setTimeout(() => {
+            window.location.href = '/plan';
+          }, 500);
         }
+      }
+    });
 
-        throw new Error('Login fehlgeschlagen - keine Session');
+    // Fallback: Check if already logged in after 3 seconds
+    const timeoutId = setTimeout(async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session) {
+        console.log('Session found via fallback check');
+        setStatus('success');
+        setTimeout(() => {
+          window.location.href = '/plan';
+        }, 500);
+      } else {
+        // Check URL for error
+        const hash = window.location.hash;
+        const params = new URLSearchParams(hash.replace('#', ''));
+        const errorDescription = params.get('error_description');
         
-      } catch (err: any) {
-        console.error('Auth callback error:', err);
-        setError(err.message || 'Unbekannter Fehler');
+        if (errorDescription) {
+          setError(decodeURIComponent(errorDescription));
+        } else {
+          setError('Login fehlgeschlagen - keine Session erhalten');
+        }
         setStatus('error');
       }
-    };
+    }, 3000);
 
-    handleCallback();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeoutId);
+    };
   }, [router]);
 
   // Function to manually open app
