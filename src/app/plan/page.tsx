@@ -6,13 +6,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import BottomNav from '@/components/BottomNav';
 import WaterTracker from '@/components/WaterTracker';
-import { loadProfile, loadDayPlan, saveDayPlan, loadAllPlans, saveFavorite, removeFavorite, isFavorite } from '@/lib/storage';
+import { loadProfile, loadDayPlan, saveDayPlan, loadAllPlans, saveFavorite, removeFavorite, isFavorite, loadScannedItems, saveScannedItem, getScannedItemsTotal } from '@/lib/storage';
 import { generateDayPlan, scaleRecipe, generateShoppingList, initializeRecipes, isApiRecipesLoaded } from '@/lib/mealPlanGenerator';
 import { calculateWaterGoal } from '@/lib/calculations';
-import { UserProfile, DayPlan, Recipe, MealPlan } from '@/types';
+import { UserProfile, DayPlan, Recipe, MealPlan, ScannedItem } from '@/types';
 import RecipeSwapPanel from '@/components/RecipeSwapPanel';
 import PlanTutorial from '@/components/PlanTutorial';
-import ExtrasSection from '@/components/ExtrasSection';
+import SnacksExtrasSection from '@/components/SnacksExtrasSection';
 
 function getDateString(date: Date): string {
   return date.toISOString().split('T')[0];
@@ -234,6 +234,7 @@ export default function PlanPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeMealIndex, setActiveMealIndex] = useState(0);
   const [swapPanel, setSwapPanel] = useState<{ open: boolean; mealIndex: number; mealType: string }>({ open: false, mealIndex: -1, mealType: '' });
+  const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
   const mealScrollRef = useRef<HTMLDivElement>(null);
   const calendarScrollRef = useRef<HTMLDivElement>(null);
 
@@ -281,9 +282,33 @@ export default function PlanPage() {
       saveDayPlan(dateStr, plan);
     }
     setDayPlan(plan);
+    setScannedItems(loadScannedItems(dateStr));
     setIsLoading(false);
     setActiveMealIndex(0);
   }, [profile, currentDate]);
+
+  // Handle adding/removing scanned items
+  const handleScannedItemAdded = (item: ScannedItem) => {
+    const dateStr = getDateString(currentDate);
+    saveScannedItem(dateStr, item);
+    setScannedItems(loadScannedItems(dateStr));
+  };
+
+  const handleScannedItemRemoved = (itemId: string) => {
+    const dateStr = getDateString(currentDate);
+    setScannedItems(prev => prev.filter(item => item.id !== itemId));
+  };
+
+  // Calculate totals including scanned items
+  const scannedItemsTotal = scannedItems.reduce(
+    (acc, item) => ({
+      calories: acc.calories + item.nutrition.calories,
+      protein: acc.protein + item.nutrition.protein,
+      carbs: acc.carbs + item.nutrition.carbs,
+      fat: acc.fat + item.nutrition.fat,
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+  );
 
   const regeneratePlan = () => {
     if (!profile) return;
@@ -446,7 +471,7 @@ export default function PlanPage() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-gray-500">
-            <span className="font-bold text-gray-900">{dayPlan.totalCalories}</span> / {profile.targetCalories} kcal
+            <span className="font-bold text-gray-900">{dayPlan.totalCalories + scannedItemsTotal.calories}</span> / {profile.targetCalories} kcal
           </span>
           <button onClick={regeneratePlan} className="px-4 py-2 bg-teal-50 text-teal-600 rounded-xl font-medium hover:bg-teal-100 transition-colors">
             🔄 Neuer Plan
@@ -510,41 +535,53 @@ export default function PlanPage() {
         </div>
       </div>
 
-      {/* Extras Section - Barcode Scanner */}
-      <ExtrasSection date={getDateString(currentDate)} />
+      {/* Snacks & Extras Section - Barcode Scanner */}
+      <div className="px-4 lg:px-8 mt-4">
+        <SnacksExtrasSection 
+          date={getDateString(currentDate)}
+          items={scannedItems}
+          onItemAdded={handleScannedItemAdded}
+          onItemRemoved={handleScannedItemRemoved}
+        />
+      </div>
 
       {/* Daily Stats */}
-      <div className="px-4 lg:px-8">
+      <div className="px-4 lg:px-8 mt-4">
         <div className="grid lg:grid-cols-2 gap-4 max-w-4xl lg:max-w-none mx-auto">
           {/* Summary */}
           <div className="bg-white rounded-2xl p-5 shadow-sm">
             <h3 className="font-semibold text-gray-900 mb-4">Tagesübersicht</h3>
             <div className="grid grid-cols-4 gap-4 mb-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-teal-600">{dayPlan.totalCalories}</p>
+                <p className="text-2xl font-bold text-teal-600">{dayPlan.totalCalories + scannedItemsTotal.calories}</p>
                 <p className="text-xs text-gray-500">kcal</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-red-500">{dayPlan.totalMacros.protein}g</p>
+                <p className="text-2xl font-bold text-red-500">{Math.round((dayPlan.totalMacros.protein + scannedItemsTotal.protein) * 10) / 10}g</p>
                 <p className="text-xs text-gray-500">Protein</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-yellow-500">{dayPlan.totalMacros.carbs}g</p>
+                <p className="text-2xl font-bold text-yellow-500">{Math.round((dayPlan.totalMacros.carbs + scannedItemsTotal.carbs) * 10) / 10}g</p>
                 <p className="text-xs text-gray-500">Carbs</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-blue-500">{dayPlan.totalMacros.fat}g</p>
+                <p className="text-2xl font-bold text-blue-500">{Math.round((dayPlan.totalMacros.fat + scannedItemsTotal.fat) * 10) / 10}g</p>
                 <p className="text-xs text-gray-500">Fett</p>
               </div>
             </div>
+            {scannedItemsTotal.calories > 0 && (
+              <p className="text-xs text-gray-400 mb-2 text-center">
+                inkl. {scannedItemsTotal.calories} kcal aus Extras
+              </p>
+            )}
             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-teal-400 to-teal-600 rounded-full transition-all"
-                style={{ width: `${Math.min((dayPlan.totalCalories / profile.targetCalories!) * 100, 100)}%` }}
+                style={{ width: `${Math.min(((dayPlan.totalCalories + scannedItemsTotal.calories) / profile.targetCalories!) * 100, 100)}%` }}
               />
             </div>
             <p className="text-xs text-gray-500 text-right mt-1">
-              {Math.round((dayPlan.totalCalories / profile.targetCalories!) * 100)}% des Tagesziels
+              {Math.round(((dayPlan.totalCalories + scannedItemsTotal.calories) / profile.targetCalories!) * 100)}% des Tagesziels
             </p>
           </div>
 

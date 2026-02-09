@@ -54,5 +54,7 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Die Kamera wird benötigt um Produkt-Barcodes zu scannen und Nährwerte automatisch zu laden.</string>
 </dict>
 </plist>

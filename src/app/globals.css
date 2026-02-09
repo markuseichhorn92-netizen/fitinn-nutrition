@@ -312,6 +312,32 @@ input:focus-visible {
   -webkit-backdrop-filter: blur(12px);
 }
 
+/* ===== BARCODE SCANNER ===== */
+
+body.barcode-scanner-active {
+  background: transparent !important;
+  --background: transparent;
+  --ion-background-color: transparent;
+}
+
+body.barcode-scanner-active .scanner-hidden,
+body.barcode-scanner-active #__next > *:not(.scanner-overlay) {
+  visibility: hidden;
+}
+
+@keyframes scan-line {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(240px);
+  }
+}
+
+.scan-line-animation {
+  animation: scan-line 2s ease-in-out infinite;
+}
+
 /* ===== PRINT ===== */
 
 @media print {
