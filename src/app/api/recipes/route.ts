@@ -3,6 +3,7 @@ import { translateRecipe, translateRecipes } from '@/lib/translate';
 
 // Hardcoded key for now (Vercel ENV issue debugging)
 const API_KEY = '5d497a5334804128b400da1a1898d1d4';
+const THEMEALDB_URL = 'https://www.themealdb.com/api/json/v1/1';
 const BASE_URL = 'https://api.spoonacular.com';
 
 // Cache recipes in memory (server-side) - stores TRANSLATED recipes
@@ -207,12 +208,115 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('Spoonacular API error:', error);
+    
+    // If Spoonacular fails (402 = quota exceeded), try TheMealDB as fallback
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    if (errorMsg.includes('402') || errorMsg.includes('401')) {
+      console.log('Spoonacular quota exceeded, falling back to TheMealDB');
+      try {
+        const fallbackRecipes = await fetchFromTheMealDB(parseInt(number) || 5);
+        if (fallbackRecipes.length > 0) {
+          return NextResponse.json({ recipes: fallbackRecipes, source: 'themealdb' });
+        }
+      } catch (fallbackError) {
+        console.error('TheMealDB fallback also failed:', fallbackError);
+      }
+    }
+    
     return NextResponse.json(
       { 
         error: 'Failed to fetch recipes',
-        details: error instanceof Error ? error.message : String(error),
+        details: errorMsg,
       },
       { status: 500 }
     );
   }
+}
+
+// TheMealDB Fallback - kostenlos, unlimited
+async function fetchFromTheMealDB(count: number): Promise<unknown[]> {
+  const recipes = [];
+  
+  // TheMealDB only returns 1 random recipe at a time, so we need multiple calls
+  const promises = Array(Math.min(count, 10)).fill(null).map(() => 
+    fetch(`${THEMEALDB_URL}/random.php`).then(r => r.json())
+  );
+  
+  const results = await Promise.all(promises);
+  
+  for (const result of results) {
+    if (result.meals && result.meals[0]) {
+      const meal = result.meals[0];
+      // Convert TheMealDB format to our format
+      recipes.push(convertMealDBRecipe(meal));
+    }
+  }
+  
+  return recipes;
+}
+
+// Convert TheMealDB recipe to Spoonacular-like format
+function convertMealDBRecipe(meal: Record<string, string | null>): unknown {
+  // Extract ingredients (TheMealDB has strIngredient1-20 and strMeasure1-20)
+  const ingredients = [];
+  for (let i = 1; i <= 20; i++) {
+    const ingredient = meal[`strIngredient${i}`];
+    const measure = meal[`strMeasure${i}`];
+    if (ingredient && ingredient.trim()) {
+      ingredients.push({
+        name: ingredient.trim(),
+        amount: 1,
+        unit: measure?.trim() || 'Stück',
+        aisle: 'Sonstiges',
+      });
+    }
+  }
+
+  // Map TheMealDB category to our meal type
+  const categoryMap: Record<string, string> = {
+    'Breakfast': 'breakfast',
+    'Starter': 'snack',
+    'Side': 'snack',
+    'Dessert': 'snack',
+    'Beef': 'dinner',
+    'Chicken': 'dinner',
+    'Lamb': 'dinner',
+    'Pork': 'dinner',
+    'Seafood': 'dinner',
+    'Vegetarian': 'lunch',
+    'Vegan': 'lunch',
+    'Pasta': 'lunch',
+    'Miscellaneous': 'lunch',
+  };
+
+  const category = meal.strCategory || 'Miscellaneous';
+  
+  return {
+    id: parseInt(meal.idMeal || '0'),
+    title: meal.strMeal || 'Unbekanntes Rezept',
+    image: meal.strMealThumb || '',
+    servings: 4,
+    readyInMinutes: 30,
+    extendedIngredients: ingredients,
+    analyzedInstructions: meal.strInstructions ? [{
+      steps: meal.strInstructions.split('\r\n').filter(Boolean).map((step, i) => ({
+        number: i + 1,
+        step: step.trim(),
+      }))
+    }] : [],
+    nutrition: {
+      // TheMealDB doesn't have nutrition, estimate based on category
+      nutrients: [
+        { name: 'Calories', amount: category === 'Dessert' ? 350 : 450, unit: 'kcal' },
+        { name: 'Protein', amount: category === 'Vegetarian' ? 15 : 25, unit: 'g' },
+        { name: 'Carbohydrates', amount: 40, unit: 'g' },
+        { name: 'Fat', amount: 20, unit: 'g' },
+        { name: 'Fiber', amount: 5, unit: 'g' },
+      ],
+    },
+    dishTypes: [categoryMap[category] || 'dinner'],
+    vegetarian: category === 'Vegetarian' || category === 'Vegan',
+    vegan: category === 'Vegan',
+    sourceUrl: meal.strSource || meal.strYoutube || '',
+  };
 }
