@@ -6,6 +6,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import BottomNav from '@/components/BottomNav';
 import WaterTracker from '@/components/WaterTracker';
+import WaterTrackerYazio from '@/components/WaterTrackerYazio';
+import CalorieRingDashboard from '@/components/CalorieRingDashboard';
 import { loadProfile, loadDayPlan, saveDayPlan, loadAllPlans, saveFavorite, removeFavorite, isFavorite, loadScannedItems, saveScannedItem, getScannedItemsTotal } from '@/lib/storage';
 import { generateDayPlan, scaleRecipe, generateShoppingList, initializeRecipes, isApiRecipesLoaded } from '@/lib/mealPlanGenerator';
 import { calculateWaterGoal } from '@/lib/calculations';
@@ -545,49 +547,24 @@ export default function PlanPage() {
         />
       </div>
 
-      {/* Daily Stats */}
+      {/* Daily Stats - Yazio Style */}
       <div className="px-4 lg:px-8 mt-4">
         <div className="grid lg:grid-cols-2 gap-4 max-w-4xl lg:max-w-none mx-auto">
-          {/* Summary */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-4">Tagesübersicht</h3>
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-teal-600">{dayPlan.totalCalories + scannedItemsTotal.calories}</p>
-                <p className="text-xs text-gray-500">kcal</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-red-500">{Math.round((dayPlan.totalMacros.protein + scannedItemsTotal.protein) * 10) / 10}g</p>
-                <p className="text-xs text-gray-500">Protein</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-yellow-500">{Math.round((dayPlan.totalMacros.carbs + scannedItemsTotal.carbs) * 10) / 10}g</p>
-                <p className="text-xs text-gray-500">Carbs</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-blue-500">{Math.round((dayPlan.totalMacros.fat + scannedItemsTotal.fat) * 10) / 10}g</p>
-                <p className="text-xs text-gray-500">Fett</p>
-              </div>
-            </div>
-            {scannedItemsTotal.calories > 0 && (
-              <p className="text-xs text-gray-400 mb-2 text-center">
-                inkl. {scannedItemsTotal.calories} kcal aus Extras
-              </p>
-            )}
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-teal-400 to-teal-600 rounded-full transition-all"
-                style={{ width: `${Math.min(((dayPlan.totalCalories + scannedItemsTotal.calories) / profile.targetCalories!) * 100, 100)}%` }}
-              />
-            </div>
-            <p className="text-xs text-gray-500 text-right mt-1">
-              {Math.round(((dayPlan.totalCalories + scannedItemsTotal.calories) / profile.targetCalories!) * 100)}% des Tagesziels
-            </p>
-          </div>
+          {/* Calorie Ring Dashboard */}
+          <CalorieRingDashboard
+            consumed={dayPlan.totalCalories + scannedItemsTotal.calories}
+            goal={profile.targetCalories!}
+            protein={Math.round((dayPlan.totalMacros.protein + scannedItemsTotal.protein) * 10) / 10}
+            proteinGoal={Math.round(profile.targetCalories! * 0.3 / 4)} // 30% of calories from protein
+            carbs={Math.round((dayPlan.totalMacros.carbs + scannedItemsTotal.carbs) * 10) / 10}
+            carbsGoal={Math.round(profile.targetCalories! * 0.4 / 4)} // 40% of calories from carbs
+            fat={Math.round((dayPlan.totalMacros.fat + scannedItemsTotal.fat) * 10) / 10}
+            fatGoal={Math.round(profile.targetCalories! * 0.3 / 9)} // 30% of calories from fat
+          />
 
-          {/* Water */}
+          {/* Water Tracker - Yazio Style with Glasses */}
           <div data-tutorial="water">
-            <WaterTracker goal={waterGoal} date={getDateString(currentDate)} />
+            <WaterTrackerYazio goal={waterGoal} date={getDateString(currentDate)} />
           </div>
         </div>
       </div>
