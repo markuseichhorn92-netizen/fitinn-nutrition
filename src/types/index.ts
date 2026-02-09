@@ -118,3 +118,25 @@ export interface ShoppingItem {
   category: string;
   checked: boolean;
 }
+
+export interface ScannedItem {
+  id: string;
+  barcode: string;
+  name: string;
+  brand?: string;
+  quantity: number; // Menge in Gramm oder ml
+  servingSize: number; // Standard-Portionsgröße
+  nutrition: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+  imageUrl?: string;
+  addedAt: number; // timestamp
+}
+
+export interface DailyScannedItems {
+  date: string;
+  items: ScannedItem[];
+}

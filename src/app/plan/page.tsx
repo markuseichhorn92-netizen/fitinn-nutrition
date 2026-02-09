@@ -12,6 +12,7 @@ import { calculateWaterGoal } from '@/lib/calculations';
 import { UserProfile, DayPlan, Recipe, MealPlan } from '@/types';
 import RecipeSwapPanel from '@/components/RecipeSwapPanel';
 import PlanTutorial from '@/components/PlanTutorial';
+import ExtrasSection from '@/components/ExtrasSection';
 
 function getDateString(date: Date): string {
   return date.toISOString().split('T')[0];
@@ -508,6 +509,9 @@ export default function PlanPage() {
           })}
         </div>
       </div>
+
+      {/* Extras Section - Barcode Scanner */}
+      <ExtrasSection date={getDateString(currentDate)} />
 
       {/* Daily Stats */}
       <div className="px-4 lg:px-8">

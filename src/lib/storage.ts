@@ -1,11 +1,12 @@
 'use client';
 
-import { UserProfile, DayPlan } from '@/types';
+import { UserProfile, DayPlan, ScannedItem } from '@/types';
 
 const PROFILE_KEY = 'fitinn_user_profile';
 const PLAN_KEY = 'fitinn_meal_plan';
 const WATER_KEY = 'fitinn_water_intake';
 const FAVORITES_KEY = 'fitinn_favorites';
+const SCANNED_ITEMS_KEY = 'fitinn_scanned_items';
 
 export function saveProfile(profile: UserProfile): void {
   if (typeof window !== 'undefined') {
@@ -114,9 +115,69 @@ export function clearAllData(): void {
     localStorage.removeItem(PLAN_KEY);
     localStorage.removeItem(WATER_KEY);
     localStorage.removeItem(FAVORITES_KEY);
+    localStorage.removeItem(SCANNED_ITEMS_KEY);
   }
 }
 
 export function hasCompletedOnboarding(): boolean {
   return loadProfile() !== null;
+}
+
+// Scanned Items Storage
+export function loadScannedItems(date: string): ScannedItem[] {
+  if (typeof window !== 'undefined') {
+    const data = localStorage.getItem(SCANNED_ITEMS_KEY);
+    const allItems: Record<string, ScannedItem[]> = data ? JSON.parse(data) : {};
+    return allItems[date] || [];
+  }
+  return [];
+}
+
+export function saveScannedItem(date: string, item: ScannedItem): void {
+  if (typeof window !== 'undefined') {
+    const data = localStorage.getItem(SCANNED_ITEMS_KEY);
+    const allItems: Record<string, ScannedItem[]> = data ? JSON.parse(data) : {};
+    if (!allItems[date]) {
+      allItems[date] = [];
+    }
+    allItems[date].push(item);
+    localStorage.setItem(SCANNED_ITEMS_KEY, JSON.stringify(allItems));
+  }
+}
+
+export function removeScannedItem(date: string, itemId: string): void {
+  if (typeof window !== 'undefined') {
+    const data = localStorage.getItem(SCANNED_ITEMS_KEY);
+    const allItems: Record<string, ScannedItem[]> = data ? JSON.parse(data) : {};
+    if (allItems[date]) {
+      allItems[date] = allItems[date].filter(item => item.id !== itemId);
+      localStorage.setItem(SCANNED_ITEMS_KEY, JSON.stringify(allItems));
+    }
+  }
+}
+
+export function updateScannedItem(date: string, itemId: string, updates: Partial<ScannedItem>): void {
+  if (typeof window !== 'undefined') {
+    const data = localStorage.getItem(SCANNED_ITEMS_KEY);
+    const allItems: Record<string, ScannedItem[]> = data ? JSON.parse(data) : {};
+    if (allItems[date]) {
+      allItems[date] = allItems[date].map(item => 
+        item.id === itemId ? { ...item, ...updates } : item
+      );
+      localStorage.setItem(SCANNED_ITEMS_KEY, JSON.stringify(allItems));
+    }
+  }
+}
+
+export function getScannedItemsTotal(date: string): { calories: number; protein: number; carbs: number; fat: number } {
+  const items = loadScannedItems(date);
+  return items.reduce(
+    (acc, item) => ({
+      calories: acc.calories + item.nutrition.calories,
+      protein: acc.protein + item.nutrition.protein,
+      carbs: acc.carbs + item.nutrition.carbs,
+      fat: acc.fat + item.nutrition.fat,
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+  );
 }

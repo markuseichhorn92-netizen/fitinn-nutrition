@@ -9,12 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@capacitor-community/barcode-scanner": "^4.0.1",
     "@capacitor/android": "^8.0.2",
     "@capacitor/cli": "^8.0.2",
     "@capacitor/core": "^8.0.2",
     "@capacitor/ios": "^8.0.2",
     "@supabase/supabase-js": "^2.95.3",
     "@vitalets/google-translate-api": "^9.2.1",
+    "html5-qrcode": "^2.3.8",
     "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18"
