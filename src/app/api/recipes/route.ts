@@ -34,8 +34,20 @@ export async function GET(request: NextRequest) {
   const number = searchParams.get('number') || '10';
   const diet = searchParams.get('diet');
   const lang = searchParams.get('lang') || 'de'; // Default to German
+  const debug = searchParams.get('debug') === 'true';
 
   try {
+    // Debug mode
+    if (debug) {
+      return NextResponse.json({
+        apiKeySet: !!API_KEY,
+        apiKeyLength: API_KEY?.length || 0,
+        action,
+        type,
+        number,
+        lang,
+      });
+    }
     // Get recipe by ID
     if (action === 'get' && id) {
       const numericId = id.startsWith('spoon-') ? id.slice(6) : id;
@@ -193,7 +205,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Spoonacular API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch recipes' },
+      { 
+        error: 'Failed to fetch recipes',
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
