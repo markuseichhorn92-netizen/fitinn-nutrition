@@ -7,7 +7,6 @@ const config: CapacitorConfig = {
   
   // Server URL für Development & Production
   server: {
-    // Für Production: lädt von der Vercel URL
     url: 'https://fitinn-nutrition.vercel.app',
     cleartext: true
   },
