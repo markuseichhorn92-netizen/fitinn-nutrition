@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { translateRecipe, translateRecipes } from '@/lib/translate';
 
 const API_KEY = process.env.SPOONACULAR_API_KEY || '5d497a5334804128b400da1a1898d1d4';
 const BASE_URL = 'https://api.spoonacular.com';
 
-// Cache recipes in memory (server-side)
+// Cache recipes in memory (server-side) - stores TRANSLATED recipes
 const recipeCache = new Map<string, unknown>();
-const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours (translated recipes don't change)
 
 interface CacheEntry {
   data: unknown;
@@ -32,12 +33,13 @@ export async function GET(request: NextRequest) {
   const id = searchParams.get('id');
   const number = searchParams.get('number') || '10';
   const diet = searchParams.get('diet');
+  const lang = searchParams.get('lang') || 'de'; // Default to German
 
   try {
     // Get recipe by ID
     if (action === 'get' && id) {
       const numericId = id.startsWith('spoon-') ? id.slice(6) : id;
-      const cacheKey = `recipe-${numericId}`;
+      const cacheKey = `recipe-${numericId}-${lang}`;
       const cached = getCached(cacheKey);
       if (cached) {
         return NextResponse.json(cached);
@@ -47,14 +49,20 @@ export async function GET(request: NextRequest) {
         `${BASE_URL}/recipes/${numericId}/information?apiKey=${API_KEY}&includeNutrition=true`
       );
       if (!res.ok) throw new Error(`API error: ${res.status}`);
-      const data = await res.json();
+      let data = await res.json();
+      
+      // Translate if German requested
+      if (lang === 'de') {
+        data = await translateRecipe(data);
+      }
+      
       setCache(cacheKey, data);
       return NextResponse.json(data);
     }
 
     // Search recipes
     if (action === 'search' && query) {
-      const cacheKey = `search-${query}-${type}-${diet}-${number}`;
+      const cacheKey = `search-${query}-${type}-${diet}-${number}-${lang}`;
       const cached = getCached(cacheKey);
       if (cached) {
         return NextResponse.json(cached);
@@ -74,13 +82,19 @@ export async function GET(request: NextRequest) {
       const res = await fetch(`${BASE_URL}/recipes/complexSearch?${params}`);
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
+      
+      // Translate results if German requested
+      if (lang === 'de' && data.results) {
+        data.results = await translateRecipes(data.results);
+      }
+      
       setCache(cacheKey, data);
       return NextResponse.json(data);
     }
 
     // Get random recipes by type
     if (action === 'random') {
-      const cacheKey = `random-${type}-${diet}-${number}`;
+      const cacheKey = `random-${type}-${diet}-${number}-${lang}`;
       const cached = getCached(cacheKey);
       if (cached) {
         return NextResponse.json(cached);
@@ -98,6 +112,12 @@ export async function GET(request: NextRequest) {
       const res = await fetch(`${BASE_URL}/recipes/random?${params}`);
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
+      
+      // Translate recipes if German requested
+      if (lang === 'de' && data.recipes) {
+        data.recipes = await translateRecipes(data.recipes);
+      }
+      
       setCache(cacheKey, data);
       return NextResponse.json(data);
     }
