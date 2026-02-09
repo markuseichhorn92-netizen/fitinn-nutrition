@@ -44,10 +44,10 @@ const tutorialSteps: TutorialStep[] = [
     id: 'recipe-tap',
     emoji: '👆',
     title: 'Rezept ansehen',
-    description: 'Tippe auf den Rezept-Namen für alle Details!',
+    description: 'Tippe auf den Rezept-Namen um Zutaten und Zubereitung zu sehen. (Probier es später aus!)',
     targetSelector: '[data-tutorial="recipe-name"]',
-    action: 'tap',
     position: 'bottom',
+    // No action - just show, don't require tap (would navigate away)
   },
   {
     id: 'swap-button',

@@ -11,9 +11,11 @@ export interface TutorialStep {
   action?: 'tap' | 'swipe' | 'scroll' | 'any'; // What user needs to do
   position?: 'top' | 'bottom' | 'center'; // Where to show tooltip
   onEnter?: () => void; // Called when step starts
+  preventNavigation?: boolean; // Prevent link clicks from navigating
 }
 
 const TUTORIAL_KEY = 'fitinn_tutorial_completed';
+const TUTORIAL_STEP_KEY = 'fitinn_tutorial_step';
 
 export function isTutorialCompleted(): boolean {
   if (typeof window === 'undefined') return true;
@@ -23,14 +25,38 @@ export function isTutorialCompleted(): boolean {
 export function completeTutorial(): void {
   if (typeof window !== 'undefined') {
     localStorage.setItem(TUTORIAL_KEY, 'true');
+    localStorage.removeItem(TUTORIAL_STEP_KEY);
   }
 }
 
 export function resetTutorialState(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(TUTORIAL_KEY);
+    localStorage.removeItem(TUTORIAL_STEP_KEY);
   }
 }
+
+// Save/load current step for cross-page persistence
+export function saveTutorialStep(step: number): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(TUTORIAL_STEP_KEY, String(step));
+  }
+}
+
+export function loadTutorialStep(): number {
+  if (typeof window === 'undefined') return 0;
+  const saved = localStorage.getItem(TUTORIAL_STEP_KEY);
+  return saved ? parseInt(saved, 10) : 0;
+}
+
+// Success messages to show after completing an action
+const successMessages = [
+  { text: 'Super!', emoji: '✨' },
+  { text: 'Perfekt!', emoji: '👏' },
+  { text: 'Genau so!', emoji: '💪' },
+  { text: 'Richtig!', emoji: '✅' },
+  { text: 'Klasse!', emoji: '🌟' },
+];
 
 interface InteractiveTutorialProps {
   steps: TutorialStep[];
@@ -39,9 +65,11 @@ interface InteractiveTutorialProps {
 }
 
 export default function InteractiveTutorial({ steps, onComplete, onSkip }: InteractiveTutorialProps) {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(() => loadTutorialStep());
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [isVisible, setIsVisible] = useState(true);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(successMessages[0]);
 
   const step = steps[currentStep];
   const isLastStep = currentStep === steps.length - 1;
@@ -81,15 +109,28 @@ export default function InteractiveTutorial({ steps, onComplete, onSkip }: Inter
     };
   }, [step]);
 
-  const handleNext = useCallback(() => {
+  const goToNextStep = useCallback(() => {
     if (isLastStep) {
       completeTutorial();
       setIsVisible(false);
       onComplete();
     } else {
-      setCurrentStep(prev => prev + 1);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      saveTutorialStep(nextStep);
+      setShowSuccess(false);
     }
-  }, [isLastStep, onComplete]);
+  }, [isLastStep, currentStep, onComplete]);
+
+  const handleActionComplete = useCallback(() => {
+    // Show success message
+    const randomSuccess = successMessages[Math.floor(Math.random() * successMessages.length)];
+    setSuccessMessage(randomSuccess);
+    setShowSuccess(true);
+    
+    // Wait 1.5 seconds before going to next step
+    setTimeout(goToNextStep, 1500);
+  }, [goToNextStep]);
 
   const handleSkip = useCallback(() => {
     completeTutorial();
@@ -99,23 +140,30 @@ export default function InteractiveTutorial({ steps, onComplete, onSkip }: Inter
 
   // Listen for user interactions on target
   useEffect(() => {
-    if (!step?.targetSelector || !step?.action) return;
+    if (!step?.targetSelector || !step?.action || showSuccess) return;
 
     const element = document.querySelector(step.targetSelector);
     if (!element) return;
 
     let hasInteracted = false;
     
-    const handleInteraction = () => {
+    const handleInteraction = (e: Event) => {
       if (hasInteracted) return;
       hasInteracted = true;
-      // User performed the action, go to next step
-      setTimeout(handleNext, 300);
+      
+      // Prevent navigation if specified
+      if (step.preventNavigation) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      // Show success and go to next step after delay
+      handleActionComplete();
     };
 
     if (step.action === 'tap' || step.action === 'any') {
-      element.addEventListener('click', handleInteraction);
-      element.addEventListener('touchend', handleInteraction);
+      element.addEventListener('click', handleInteraction, { capture: true });
+      element.addEventListener('touchend', handleInteraction, { capture: true });
     }
     
     // For swipe actions, detect scroll
@@ -127,11 +175,11 @@ export default function InteractiveTutorial({ steps, onComplete, onSkip }: Inter
       const handleTouchEnd = (e: TouchEvent) => {
         const endX = e.changedTouches[0].clientX;
         if (Math.abs(endX - startX) > 30) {
-          handleInteraction();
+          handleInteraction(e);
         }
       };
-      const handleScroll = () => {
-        handleInteraction();
+      const handleScroll = (e: Event) => {
+        handleInteraction(e);
       };
       
       element.addEventListener('touchstart', handleTouchStart as EventListener);
@@ -139,18 +187,18 @@ export default function InteractiveTutorial({ steps, onComplete, onSkip }: Inter
       element.addEventListener('scroll', handleScroll);
       
       return () => {
-        element.removeEventListener('click', handleInteraction);
-        element.removeEventListener('touchend', handleInteraction as EventListener);
+        element.removeEventListener('click', handleInteraction, { capture: true });
+        element.removeEventListener('touchend', handleInteraction as EventListener, { capture: true });
         element.removeEventListener('touchstart', handleTouchStart as EventListener);
         element.removeEventListener('scroll', handleScroll);
       };
     }
 
     return () => {
-      element.removeEventListener('click', handleInteraction);
-      element.removeEventListener('touchend', handleInteraction);
+      element.removeEventListener('click', handleInteraction, { capture: true });
+      element.removeEventListener('touchend', handleInteraction, { capture: true });
     };
-  }, [step, handleNext]);
+  }, [step, handleActionComplete, showSuccess]);
 
   if (!isVisible) return null;
 
@@ -198,85 +246,100 @@ export default function InteractiveTutorial({ steps, onComplete, onSkip }: Inter
       {/* Highlight ring around target */}
       {showSpotlight && (
         <div
-          className="absolute border-4 border-teal-400 rounded-2xl pointer-events-none animate-pulse-ring"
+          className={`absolute border-4 rounded-2xl pointer-events-none ${
+            showSuccess ? 'border-green-400 bg-green-400/20' : 'border-teal-400 animate-pulse-ring'
+          }`}
           style={{
             left: targetRect.left - 12,
             top: targetRect.top - 12,
             width: targetRect.width + 24,
             height: targetRect.height + 24,
+            transition: 'all 0.3s ease',
           }}
         />
       )}
 
-      {/* Tooltip */}
-      <div 
-        className={`absolute left-4 right-4 pointer-events-auto ${
-          tooltipPosition === 'top' ? 'top-20' :
-          tooltipPosition === 'center' ? 'top-1/2 -translate-y-1/2' :
-          showSpotlight ? '' : 'bottom-24'
-        }`}
-        style={showSpotlight && tooltipPosition === 'bottom' ? {
-          top: Math.min(targetRect.bottom + 24, window.innerHeight - 200),
-        } : showSpotlight && tooltipPosition === 'top' ? {
-          top: Math.max(targetRect.top - 180, 80),
-        } : {}}
-      >
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mx-auto max-w-sm">
-          {/* Progress */}
-          <div className="h-1 bg-gray-100">
-            <div 
-              className="h-full bg-teal-500 transition-all duration-300"
-              style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-            />
+      {/* Success Overlay */}
+      {showSuccess && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+          <div className="bg-white rounded-3xl shadow-2xl px-8 py-6 text-center animate-bounce-in">
+            <span className="text-5xl block mb-2">{successMessage.emoji}</span>
+            <span className="text-2xl font-bold text-gray-900">{successMessage.text}</span>
           </div>
+        </div>
+      )}
 
-          <div className="p-5">
-            {/* Step indicator */}
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-4xl">{step.emoji}</span>
-              <span className="text-sm text-gray-400">{currentStep + 1}/{steps.length}</span>
+      {/* Tooltip */}
+      {!showSuccess && (
+        <div 
+          className={`absolute left-4 right-4 pointer-events-auto ${
+            tooltipPosition === 'top' ? 'top-20' :
+            tooltipPosition === 'center' ? 'top-1/2 -translate-y-1/2' :
+            showSpotlight ? '' : 'bottom-24'
+          }`}
+          style={showSpotlight && tooltipPosition === 'bottom' ? {
+            top: Math.min(targetRect.bottom + 24, window.innerHeight - 200),
+          } : showSpotlight && tooltipPosition === 'top' ? {
+            top: Math.max(targetRect.top - 180, 80),
+          } : {}}
+        >
+          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mx-auto max-w-sm">
+            {/* Progress */}
+            <div className="h-1 bg-gray-100">
+              <div 
+                className="h-full bg-teal-500 transition-all duration-300"
+                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+              />
             </div>
 
-            {/* Content */}
-            <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
-            <p className="text-gray-600 text-sm mb-4">{step.description}</p>
-
-            {/* Action hint */}
-            {step.action && step.action !== 'any' && (
-              <div className="bg-teal-50 rounded-xl px-4 py-2 mb-4 flex items-center gap-2">
-                <span className="text-teal-600">
-                  {step.action === 'tap' && '👆'}
-                  {step.action === 'swipe' && '👈👉'}
-                  {step.action === 'scroll' && '↕️'}
-                </span>
-                <span className="text-sm text-teal-700 font-medium">
-                  {step.action === 'tap' && 'Tippe auf den markierten Bereich'}
-                  {step.action === 'swipe' && 'Wische nach links oder rechts'}
-                  {step.action === 'scroll' && 'Scrolle durch den Bereich'}
-                </span>
+            <div className="p-5">
+              {/* Step indicator */}
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-4xl">{step.emoji}</span>
+                <span className="text-sm text-gray-400">{currentStep + 1}/{steps.length}</span>
               </div>
-            )}
 
-            {/* Buttons */}
-            <div className="flex gap-3">
-              <button
-                onClick={handleSkip}
-                className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-600 font-medium text-sm touch-manipulation active:scale-95 transition-transform"
-              >
-                Überspringen
-              </button>
-              {!step.action && (
-                <button
-                  onClick={handleNext}
-                  className="flex-1 py-3 rounded-xl bg-teal-600 text-white font-semibold text-sm shadow-lg shadow-teal-500/30 touch-manipulation active:scale-95 transition-transform"
-                >
-                  {isLastStep ? 'Fertig! 🎉' : 'Weiter →'}
-                </button>
+              {/* Content */}
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
+              <p className="text-gray-600 text-sm mb-4">{step.description}</p>
+
+              {/* Action hint */}
+              {step.action && step.action !== 'any' && (
+                <div className="bg-teal-50 rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
+                  <span className="text-2xl">
+                    {step.action === 'tap' && '👆'}
+                    {step.action === 'swipe' && '👈👉'}
+                    {step.action === 'scroll' && '↕️'}
+                  </span>
+                  <span className="text-sm text-teal-700 font-medium">
+                    {step.action === 'tap' && 'Tippe jetzt auf den markierten Bereich'}
+                    {step.action === 'swipe' && 'Wische jetzt nach links oder rechts'}
+                    {step.action === 'scroll' && 'Scrolle jetzt durch den Bereich'}
+                  </span>
+                </div>
               )}
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleSkip}
+                  className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-600 font-medium text-sm touch-manipulation active:scale-95 transition-transform"
+                >
+                  Überspringen
+                </button>
+                {!step.action && (
+                  <button
+                    onClick={goToNextStep}
+                    className="flex-1 py-3 rounded-xl bg-teal-600 text-white font-semibold text-sm shadow-lg shadow-teal-500/30 touch-manipulation active:scale-95 transition-transform"
+                  >
+                    {isLastStep ? 'Fertig! 🎉' : 'Weiter →'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <style jsx>{`
         @keyframes pulse-ring {
@@ -289,6 +352,14 @@ export default function InteractiveTutorial({ steps, onComplete, onSkip }: Inter
         }
         .animate-pulse-ring {
           animation: pulse-ring 1.5s ease-in-out infinite;
+        }
+        @keyframes bounce-in {
+          0% { transform: scale(0.5); opacity: 0; }
+          50% { transform: scale(1.1); }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-bounce-in {
+          animation: bounce-in 0.4s ease-out;
         }
       `}</style>
     </div>
