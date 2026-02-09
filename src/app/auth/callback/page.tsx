@@ -30,88 +30,86 @@ function AuthCallbackContent() {
         console.log('Auth callback URL info:', urlInfo);
         setDebugInfo(JSON.stringify(urlInfo, null, 2));
 
-        // Check if we have hash params (OAuth implicit flow)
-        if (window.location.hash && window.location.hash.includes('access_token')) {
-          console.log('Found access_token in hash, letting Supabase handle it...');
-          // Supabase client should auto-detect this
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-
-        // Get the session
-        const { data, error: sessionError } = await supabase.auth.getSession();
-        console.log('Session check:', { session: !!data.session, error: sessionError });
+        // FIRST: Check for hash params (OAuth implicit flow) - this is the most common case
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
         
-        if (sessionError) {
-          throw sessionError;
-        }
-
-        if (data.session) {
-          console.log('Session found! User:', data.session.user.email);
-          setStatus('success');
+        console.log('Hash params:', { 
+          hasAccessToken: !!accessToken, 
+          hasRefreshToken: !!refreshToken,
+          hash: window.location.hash.substring(0, 100) + '...'
+        });
+        
+        if (accessToken && refreshToken) {
+          console.log('Setting session from hash tokens...');
+          const { data: sessionData, error: setError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
           
-          // Try to close Capacitor browser if in native app
-          try {
-            const { Browser } = await import('@capacitor/browser');
-            await Browser.close();
-          } catch (e) {
-            console.log('Not in native app or browser close failed');
+          console.log('setSession result:', { 
+            success: !!sessionData?.session, 
+            error: setError?.message,
+            user: sessionData?.session?.user?.email 
+          });
+          
+          if (setError) {
+            throw setError;
           }
           
+          if (sessionData?.session) {
+            console.log('Session created successfully!');
+            setStatus('success');
+            
+            // Try to close Capacitor browser
+            try {
+              const { Browser } = await import('@capacitor/browser');
+              await Browser.close();
+            } catch (e) {
+              console.log('Not in native app');
+            }
+            
+            setTimeout(() => {
+              window.location.href = '/plan';
+            }, 1000);
+            return;
+          }
+        }
+
+        // Fallback: Check existing session
+        const { data, error: sessionError } = await supabase.auth.getSession();
+        console.log('Existing session check:', { session: !!data.session, error: sessionError });
+        
+        if (data.session) {
+          console.log('Existing session found!');
+          setStatus('success');
           setTimeout(() => {
-            router.push('/plan');
+            window.location.href = '/plan';
           }, 1000);
           return;
         }
 
-        // No session yet, try code exchange
+        // Fallback: Try code exchange (PKCE flow)
         const code = searchParams.get('code');
-        console.log('No session, checking for code:', code);
-        
         if (code) {
           console.log('Exchanging code for session...');
           const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
           
           if (exchangeError) {
-            console.error('Code exchange failed:', exchangeError);
             throw exchangeError;
           }
           
-          console.log('Code exchange successful!', exchangeData.session?.user.email);
-          setStatus('success');
-          
-          // Try to close Capacitor browser
-          try {
-            const { Browser } = await import('@capacitor/browser');
-            await Browser.close();
-          } catch (e) {
-            console.log('Browser close skipped');
+          if (exchangeData.session) {
+            setStatus('success');
+            setTimeout(() => {
+              window.location.href = '/plan';
+            }, 1000);
+            return;
           }
-          
-          setTimeout(() => {
-            router.push('/plan');
-          }, 1000);
-        } else {
-          // No code and no session - maybe hash params?
-          const hashParams = new URLSearchParams(window.location.hash.substring(1));
-          const accessToken = hashParams.get('access_token');
-          
-          if (accessToken) {
-            console.log('Found access_token in hash, setting session...');
-            const { data: sessionData, error: setError } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: hashParams.get('refresh_token') || '',
-            });
-            
-            if (setError) throw setError;
-            if (sessionData.session) {
-              setStatus('success');
-              setTimeout(() => router.push('/plan'), 1000);
-              return;
-            }
-          }
-          
-          throw new Error('Keine Authentifizierungsdaten gefunden');
         }
+        
+        throw new Error('Keine Authentifizierungsdaten gefunden');
       } catch (err: any) {
         console.error('Auth callback error:', err);
         setError(err.message);
