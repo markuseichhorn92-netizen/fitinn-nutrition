@@ -18,20 +18,13 @@ function AuthCallbackContent() {
           throw new Error('Supabase nicht konfiguriert');
         }
 
-        console.log('Auth callback started, URL:', window.location.href.substring(0, 100));
+        console.log('Auth callback - processing...');
         
-        // Wait a moment for Supabase to detect the session from URL
-        // detectSessionInUrl: true should handle this automatically
+        // Wait for Supabase to detect session from URL
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Get the session - Supabase should have parsed the hash automatically
+        // Get the session
         const { data, error: sessionError } = await supabase.auth.getSession();
-        
-        console.log('Session result:', { 
-          hasSession: !!data?.session, 
-          error: sessionError?.message,
-          user: data?.session?.user?.email 
-        });
         
         if (sessionError) {
           throw sessionError;
@@ -41,15 +34,36 @@ function AuthCallbackContent() {
           console.log('Login successful!');
           setStatus('success');
           
-          // Redirect after short delay
-          setTimeout(() => {
-            window.location.href = '/plan';
-          }, 1500);
+          // Check if we came from native app (check for Capacitor in user agent or referrer)
+          const isFromApp = typeof window !== 'undefined' && (
+            navigator.userAgent.includes('Capacitor') ||
+            window.location.href.includes('capacitor') ||
+            document.referrer.includes('capacitor')
+          );
+          
+          if (isFromApp) {
+            // Try to redirect back to app using custom URL scheme
+            const accessToken = data.session.access_token;
+            const refreshToken = data.session.refresh_token;
+            const deepLink = `naehrkraft://auth/callback?access_token=${accessToken}&refresh_token=${refreshToken}`;
+            
+            console.log('Redirecting to app via deep link...');
+            window.location.href = deepLink;
+            
+            // Fallback after 2 seconds if deep link didn't work
+            setTimeout(() => {
+              window.location.href = '/plan';
+            }, 2000);
+          } else {
+            // Web browser - just redirect
+            setTimeout(() => {
+              window.location.href = '/plan';
+            }, 1000);
+          }
           return;
         }
 
-        // No session found - something went wrong
-        throw new Error('Login fehlgeschlagen - keine Session erstellt');
+        throw new Error('Login fehlgeschlagen - keine Session');
         
       } catch (err: any) {
         console.error('Auth callback error:', err);
@@ -60,6 +74,11 @@ function AuthCallbackContent() {
 
     handleCallback();
   }, [router]);
+
+  // Function to manually open app
+  const openApp = () => {
+    window.location.href = 'naehrkraft://plan';
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-teal-50 to-white p-6">
@@ -77,21 +96,21 @@ function AuthCallbackContent() {
             <div className="text-5xl mb-4">✅</div>
             <h1 className="text-xl font-semibold text-gray-900 mb-2">Erfolgreich angemeldet!</h1>
             
-            {/* App User Hint */}
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-              <p className="text-amber-800 font-medium text-sm mb-1">📱 App-Nutzer?</p>
-              <p className="text-amber-700 text-sm">
-                Tippe oben links auf <strong>✕</strong> um dieses Fenster zu schließen und zur App zurückzukehren.
-              </p>
-            </div>
+            {/* Button to open app */}
+            <button
+              onClick={openApp}
+              className="px-6 py-4 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors mb-4 w-full text-lg"
+            >
+              📱 Zurück zur App
+            </button>
             
-            <p className="text-gray-500 mb-4">Oder hier weitermachen:</p>
+            <p className="text-gray-400 text-sm mb-4">— oder —</p>
             
             <button
               onClick={() => window.location.href = '/plan'}
-              className="px-6 py-3 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors mb-4 w-full"
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium w-full"
             >
-              Zum Ernährungsplan →
+              Im Browser weitermachen
             </button>
           </>
         )}

@@ -6,6 +6,50 @@ import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase';
 import { syncLocalDataToSupabase, syncSupabaseToLocal } from '@/lib/supabase-data';
 import { syncFromCloud } from '@/lib/storage';
 
+// Setup deep link listener for OAuth callback
+async function setupDeepLinkListener(supabase: any) {
+  if (typeof window === 'undefined') return;
+  
+  // Check if Capacitor is available
+  const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
+  if (!isNative) return;
+  
+  try {
+    const { App } = await import('@capacitor/app');
+    
+    // Listen for app URL open events
+    App.addListener('appUrlOpen', async ({ url }) => {
+      console.log('Deep link received:', url);
+      
+      if (url.includes('naehrkraft://auth/callback') || url.includes('access_token')) {
+        // Parse tokens from URL
+        const urlObj = new URL(url.replace('naehrkraft://', 'https://'));
+        const accessToken = urlObj.searchParams.get('access_token');
+        const refreshToken = urlObj.searchParams.get('refresh_token');
+        
+        if (accessToken && refreshToken) {
+          console.log('Setting session from deep link...');
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          
+          if (!error) {
+            console.log('Session set successfully!');
+            window.location.href = '/plan';
+          } else {
+            console.error('Error setting session:', error);
+          }
+        }
+      }
+    });
+    
+    console.log('Deep link listener registered');
+  } catch (e) {
+    console.warn('Could not setup deep link listener:', e);
+  }
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -55,6 +99,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return;
     }
 
+    // Setup deep link listener for OAuth
+    setupDeepLinkListener(supabase);
+    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
