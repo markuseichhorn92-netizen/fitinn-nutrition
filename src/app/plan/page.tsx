@@ -11,6 +11,7 @@ import { generateDayPlan, scaleRecipe, generateShoppingList } from '@/lib/mealPl
 import { calculateWaterGoal } from '@/lib/calculations';
 import { UserProfile, DayPlan, Recipe, MealPlan } from '@/types';
 import RecipeSwapPanel from '@/components/RecipeSwapPanel';
+import AppTutorial, { hasTutorialBeenSeen } from '@/components/AppTutorial';
 
 function getDateString(date: Date): string {
   return date.toISOString().split('T')[0];
@@ -230,6 +231,7 @@ export default function PlanPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeMealIndex, setActiveMealIndex] = useState(0);
   const [swapPanel, setSwapPanel] = useState<{ open: boolean; mealIndex: number; mealType: string }>({ open: false, mealIndex: -1, mealType: '' });
+  const [showTutorial, setShowTutorial] = useState(false);
   const mealScrollRef = useRef<HTMLDivElement>(null);
   const calendarScrollRef = useRef<HTMLDivElement>(null);
 
@@ -257,6 +259,11 @@ export default function PlanPage() {
       return;
     }
     setProfile(storedProfile);
+    
+    // Show tutorial for first-time users
+    if (!hasTutorialBeenSeen()) {
+      setShowTutorial(true);
+    }
   }, [router]);
 
   useEffect(() => {
@@ -548,6 +555,11 @@ export default function PlanPage() {
       />
 
       <BottomNav />
+
+      {/* App Tutorial for first-time users */}
+      {showTutorial && (
+        <AppTutorial onComplete={() => setShowTutorial(false)} />
+      )}
     </div>
   );
 }
