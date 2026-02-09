@@ -102,12 +102,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Setup deep link listener for OAuth
     setupDeepLinkListener(supabase);
     
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    // Skip initial getSession on auth callback page - let the callback handle it
+    const isAuthCallback = typeof window !== 'undefined' && 
+      window.location.pathname.includes('/auth/callback');
+    
+    if (isAuthCallback) {
+      console.log('AuthContext: Skipping getSession on auth callback page');
       setIsLoading(false);
-    });
+      // Still set up the listener below, but don't call getSession
+    } else {
+      // Get initial session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+      });
+    }
+
+    // Skip auth state listener on callback page to prevent interference
+    if (isAuthCallback) {
+      console.log('AuthContext: Skipping onAuthStateChange on auth callback page');
+      return;
+    }
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
