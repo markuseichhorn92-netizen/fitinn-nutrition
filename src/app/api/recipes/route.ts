@@ -214,7 +214,17 @@ export async function GET(request: NextRequest) {
     if (errorMsg.includes('402') || errorMsg.includes('401')) {
       console.log('Spoonacular quota exceeded, falling back to TheMealDB');
       try {
-        let fallbackRecipes = await fetchFromTheMealDB(parseInt(number) || 5);
+        // Map Spoonacular type tags to our meal types
+        const typeToMealType: Record<string, string> = {
+          'breakfast': 'breakfast',
+          'main course': 'dinner',
+          'main course,salad,soup': 'lunch',
+          'main course,dinner': 'dinner',
+          'snack': 'snack',
+          'snack,appetizer': 'snack',
+        };
+        const mealType = typeToMealType[type] || 'lunch';
+        let fallbackRecipes = await fetchFromTheMealDB(parseInt(number) || 5, mealType);
         if (fallbackRecipes.length > 0) {
           // Translate TheMealDB recipes to German
           try {
@@ -239,22 +249,66 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Map our meal types to TheMealDB categories
+const mealTypeToTheMealDBCategories: Record<string, string[]> = {
+  breakfast: ['Breakfast'],
+  lunch: ['Beef', 'Chicken', 'Pork', 'Lamb', 'Pasta', 'Vegetarian', 'Vegan', 'Seafood'],
+  dinner: ['Beef', 'Chicken', 'Pork', 'Lamb', 'Pasta', 'Vegetarian', 'Vegan', 'Seafood'],
+  snack: ['Starter', 'Side', 'Dessert', 'Miscellaneous'],
+};
+
 // TheMealDB Fallback - kostenlos, unlimited
-async function fetchFromTheMealDB(count: number): Promise<unknown[]> {
-  const recipes = [];
+async function fetchFromTheMealDB(count: number, requestedType?: string): Promise<unknown[]> {
+  const recipes: unknown[] = [];
   
-  // TheMealDB only returns 1 random recipe at a time, so we need multiple calls
-  const promises = Array(Math.min(count, 10)).fill(null).map(() => 
-    fetch(`${THEMEALDB_URL}/random.php`).then(r => r.json())
-  );
+  // Determine which TheMealDB categories to use
+  const categories = requestedType 
+    ? mealTypeToTheMealDBCategories[requestedType] || ['Miscellaneous']
+    : ['Beef', 'Chicken', 'Vegetarian', 'Pasta']; // Default mix
   
-  const results = await Promise.all(promises);
+  // Try to get recipes from appropriate categories
+  for (const category of categories) {
+    if (recipes.length >= count) break;
+    
+    try {
+      const res = await fetch(`${THEMEALDB_URL}/filter.php?c=${encodeURIComponent(category)}`);
+      if (!res.ok) continue;
+      
+      const data = await res.json();
+      if (!data.meals || data.meals.length === 0) continue;
+      
+      // Get random recipes from this category
+      const shuffled = data.meals.sort(() => Math.random() - 0.5);
+      const needed = Math.min(count - recipes.length, Math.ceil(count / categories.length), shuffled.length);
+      
+      // Fetch full details for each recipe
+      for (let i = 0; i < needed && recipes.length < count; i++) {
+        const mealId = shuffled[i].idMeal;
+        const detailRes = await fetch(`${THEMEALDB_URL}/lookup.php?i=${mealId}`);
+        if (detailRes.ok) {
+          const detailData = await detailRes.json();
+          if (detailData.meals && detailData.meals[0]) {
+            recipes.push(convertMealDBRecipe(detailData.meals[0]));
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`Failed to fetch TheMealDB category ${category}:`, err);
+    }
+  }
   
-  for (const result of results) {
-    if (result.meals && result.meals[0]) {
-      const meal = result.meals[0];
-      // Convert TheMealDB format to our format
-      recipes.push(convertMealDBRecipe(meal));
+  // Fallback to random if we couldn't get enough from categories
+  if (recipes.length < count) {
+    const remaining = count - recipes.length;
+    const promises = Array(Math.min(remaining, 5)).fill(null).map(() => 
+      fetch(`${THEMEALDB_URL}/random.php`).then(r => r.json()).catch(() => null)
+    );
+    
+    const results = await Promise.all(promises);
+    for (const result of results) {
+      if (result?.meals?.[0]) {
+        recipes.push(convertMealDBRecipe(result.meals[0]));
+      }
     }
   }
   
