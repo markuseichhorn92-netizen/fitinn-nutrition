@@ -100,26 +100,49 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(cached);
       }
 
-      const params = new URLSearchParams({
+      // Step 1: Get random recipe IDs
+      const randomParams = new URLSearchParams({
         apiKey: API_KEY,
         number,
         tags: type,
-        addRecipeNutrition: 'true',
-        addRecipeInstructions: 'true',
       });
-      if (diet) params.append('diet', diet);
+      if (diet) randomParams.append('diet', diet);
 
-      const res = await fetch(`${BASE_URL}/recipes/random?${params}`);
-      if (!res.ok) throw new Error(`API error: ${res.status}`);
-      const data = await res.json();
+      const randomRes = await fetch(`${BASE_URL}/recipes/random?${randomParams}`);
+      if (!randomRes.ok) throw new Error(`API error: ${randomRes.status}`);
+      const randomData = await randomRes.json();
       
-      // Translate recipes if German requested
-      if (lang === 'de' && data.recipes) {
-        data.recipes = await translateRecipes(data.recipes);
+      // Step 2: Fetch full details with nutrition for each recipe
+      const recipeIds = (randomData.recipes || []).map((r: { id: number }) => r.id);
+      
+      if (recipeIds.length > 0) {
+        const bulkParams = new URLSearchParams({
+          apiKey: API_KEY,
+          ids: recipeIds.join(','),
+          includeNutrition: 'true',
+        });
+        
+        const bulkRes = await fetch(`${BASE_URL}/recipes/informationBulk?${bulkParams}`);
+        if (bulkRes.ok) {
+          let recipes = await bulkRes.json();
+          
+          // Translate recipes if German requested
+          if (lang === 'de' && recipes) {
+            recipes = await translateRecipes(recipes);
+          }
+          
+          const data = { recipes };
+          setCache(cacheKey, data);
+          return NextResponse.json(data);
+        }
       }
       
-      setCache(cacheKey, data);
-      return NextResponse.json(data);
+      // Fallback: return random data without nutrition
+      if (lang === 'de' && randomData.recipes) {
+        randomData.recipes = await translateRecipes(randomData.recipes);
+      }
+      setCache(cacheKey, randomData);
+      return NextResponse.json(randomData);
     }
 
     // Get similar recipes
