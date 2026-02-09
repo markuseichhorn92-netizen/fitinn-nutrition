@@ -3,17 +3,31 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LandingPage() {
   const router = useRouter();
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const { user } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // If already logged in, redirect to plan
+  if (user) {
+    router.push('/plan');
+    return null;
+  }
 
   const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
+    setIsLoading(true);
     const supabase = getSupabaseClient();
     if (!supabase) {
-      router.push('/login');
+      setError('Login nicht verfügbar');
+      setIsLoading(false);
       return;
     }
 
@@ -24,305 +38,218 @@ export default function LandingPage() {
       },
     });
   };
-  const [email, setEmail] = useState('');
-  const [memberNumber, setMemberNumber] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Simulate login (MVP - no actual auth)
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // For MVP, any valid-looking input works
-    if (email && memberNumber) {
-      // Check if user has completed onboarding
-      const profile = localStorage.getItem('fitinn_user_profile');
-      if (profile) {
-        router.push('/plan');
-      } else {
-        router.push('/onboarding');
-      }
-    } else {
-      setError('Bitte fülle alle Felder aus.');
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      setError('Login nicht verfügbar');
       setIsLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError('Ungültige E-Mail oder Passwort');
+      setIsLoading(false);
+    } else {
+      router.push('/plan');
     }
   };
 
+  const handleStartOnboarding = () => {
+    router.push('/onboarding');
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
-      {/* Desktop Navigation */}
-      <header className="hidden lg:flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100">
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-teal-50 via-white to-gray-50">
+      {/* Header */}
+      <header className="px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <Image 
             src="/logo.png" 
             alt="FIT-INN Logo" 
-            width={44} 
-            height={44} 
+            width={40} 
+            height={40} 
             className="rounded-xl"
           />
-          <span className="font-bold text-xl text-gray-900">FIT-INN Nutrition</span>
+          <span className="font-bold text-lg text-gray-900 hidden sm:block">Mahlzeit!</span>
         </div>
         <a 
           href="https://fitinn-trier.de" 
-          className="text-teal-600 hover:text-teal-700 font-medium transition-colors"
+          className="text-sm text-teal-600 hover:text-teal-700 font-medium"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Zur FIT-INN Website →
+          FIT-INN Website →
         </a>
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row">
-        {/* Left Side - Hero (Desktop) / Logo + Benefits (Mobile) */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 lg:py-0 lg:px-16">
-          {/* Logo */}
-          <div className="mb-8 lg:mb-12">
-            <div className="relative">
-              <Image 
-                src="/logo.png" 
-                alt="FIT-INN Logo" 
-                width={120} 
-                height={120} 
-                className="rounded-2xl shadow-2xl shadow-teal-500/20 lg:w-[160px] lg:h-[160px]"
-              />
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-teal-500/20 blur-3xl rounded-full -z-10 scale-150" />
-            </div>
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+        {/* Logo & Title */}
+        <div className="text-center mb-8">
+          <div className="relative inline-block mb-6">
+            <Image 
+              src="/logo.png" 
+              alt="Mahlzeit!" 
+              width={100} 
+              height={100} 
+              className="rounded-2xl shadow-xl"
+            />
+            <div className="absolute inset-0 bg-teal-500/20 blur-2xl rounded-full -z-10 scale-150" />
           </div>
-
-          {/* Title */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-4 text-gray-900">
-            <span className="text-teal-600">FIT-INN</span> Nutrition
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+            <span className="text-teal-600">Mahlzeit!</span>
           </h1>
-          <p className="text-gray-500 text-center text-lg lg:text-xl mb-8 max-w-lg">
-            Dein persönlicher Ernährungsplan – abgestimmt auf deine Ziele
+          <p className="text-gray-500 text-lg max-w-md mx-auto">
+            Dein persönlicher Ernährungsplan — powered by FIT-INN Trier
           </p>
+        </div>
 
-          {/* Benefits Grid */}
-          <div className="grid grid-cols-2 gap-4 mb-10 w-full max-w-md lg:max-w-lg">
-            {[
-              { icon: '🎯', text: 'Personalisiert', desc: 'Auf dich zugeschnitten' },
-              { icon: '📊', text: 'Kalorienziele', desc: 'Präzise berechnet' },
-              { icon: '🥗', text: '500+ Rezepte', desc: 'Von Chefkoch.de' },
-              { icon: '🛒', text: 'Einkaufsliste', desc: 'Automatisch generiert' },
-            ].map((benefit, i) => (
-              <div key={i} className="bg-white rounded-xl p-4 lg:p-5 text-center border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-                <span className="text-2xl lg:text-3xl mb-2 block">{benefit.icon}</span>
-                <span className="text-sm lg:text-base text-gray-900 font-semibold block">{benefit.text}</span>
-                <span className="text-xs lg:text-sm text-gray-500 hidden lg:block">{benefit.desc}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Mobile Only: Login Form */}
-          <div className="lg:hidden w-full max-w-md">
-            {/* Google Login Button */}
-            <button
-              onClick={handleGoogleLogin}
-              disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3.5 mb-4 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              <span className="font-medium text-gray-700">
-                {googleLoading ? 'Laden...' : 'Mit Google anmelden'}
-              </span>
-            </button>
-
-            {/* Divider */}
-            <div className="relative mb-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-gradient-to-b from-white to-gray-50 text-gray-400">oder</span>
-              </div>
+        {/* Benefits */}
+        <div className="grid grid-cols-2 gap-3 mb-8 w-full max-w-sm">
+          {[
+            { icon: '🎯', text: 'Personalisiert' },
+            { icon: '📊', text: 'Kalorienziele' },
+            { icon: '🥗', text: '2000+ Rezepte' },
+            { icon: '📷', text: 'Barcode Scanner' },
+          ].map((benefit, i) => (
+            <div key={i} className="bg-white/80 backdrop-blur rounded-xl p-3 text-center border border-gray-100 shadow-sm">
+              <span className="text-xl mb-1 block">{benefit.icon}</span>
+              <span className="text-sm text-gray-700 font-medium">{benefit.text}</span>
             </div>
+          ))}
+        </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  E-Mail Adresse
-                </label>
+        {/* Main CTA - Start Onboarding */}
+        <div className="w-full max-w-sm space-y-4">
+          <button
+            onClick={handleStartOnboarding}
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold text-lg shadow-lg shadow-teal-500/25 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+          >
+            Jetzt starten — kostenlos 🚀
+          </button>
+          <p className="text-center text-sm text-gray-400">
+            Erstelle deinen personalisierten Ernährungsplan in 2 Minuten
+          </p>
+        </div>
+
+        {/* Divider */}
+        <div className="w-full max-w-sm my-8">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center">
+              <span className="px-4 bg-gradient-to-b from-white to-gray-50 text-sm text-gray-400">
+                Bereits registriert?
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Login Section */}
+        <div className="w-full max-w-sm">
+          {!showLogin ? (
+            <button
+              onClick={() => setShowLogin(true)}
+              className="w-full py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+            >
+              Anmelden
+            </button>
+          ) : (
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h3 className="font-semibold text-gray-900 text-center mb-4">Anmelden</h3>
+              
+              {/* Google Login */}
+              <button
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 mb-4 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span className="font-medium text-gray-700">Mit Google</span>
+              </button>
+
+              {/* Divider */}
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-2 bg-white text-gray-400">oder</span>
+                </div>
+              </div>
+
+              {/* Email Login Form */}
+              <form onSubmit={handleEmailLogin} className="space-y-3">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-white border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none text-gray-900 placeholder-gray-400"
-                  placeholder="deine@email.de"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none text-gray-900"
+                  placeholder="E-Mail"
+                  required
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Mitgliedsnummer
-                </label>
                 <input
-                  type="text"
-                  value={memberNumber}
-                  onChange={(e) => setMemberNumber(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-white border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none text-gray-900 placeholder-gray-400"
-                  placeholder="z.B. M-12345"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none text-gray-900"
+                  placeholder="Passwort"
+                  required
                 />
-              </div>
+                
+                {error && (
+                  <p className="text-red-500 text-sm text-center">{error}</p>
+                )}
 
-              {error && (
-                <p className="text-red-500 text-sm text-center">{error}</p>
-              )}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-3 rounded-xl bg-teal-500 text-white font-medium hover:bg-teal-600 transition-colors disabled:opacity-50"
+                >
+                  {isLoading ? 'Laden...' : 'Anmelden'}
+                </button>
+              </form>
 
               <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                onClick={() => setShowLogin(false)}
+                className="w-full mt-3 text-sm text-gray-400 hover:text-gray-600"
               >
-                {isLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Anmelden...
-                  </span>
-                ) : (
-                  'Jetzt starten 🚀'
-                )}
+                Abbrechen
               </button>
-            </form>
-
-            <p className="text-gray-500 text-sm mt-6 text-center">
-              Noch kein Mitglied?{' '}
-              <a href="https://fitinn-trier.de" className="text-teal-600 hover:underline font-medium">
-                Jetzt bei FIT-INN anmelden
-              </a>
-            </p>
-          </div>
-        </div>
-
-        {/* Right Side - Login Form (Desktop Only) */}
-        <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] bg-white border-l border-gray-100 items-center justify-center p-12">
-          <div className="w-full max-w-sm">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Willkommen zurück</h2>
-            <p className="text-gray-500 mb-6">Melde dich an, um deinen Ernährungsplan zu sehen.</p>
-
-            {/* Google Login Button */}
-            <button
-              onClick={handleGoogleLogin}
-              disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3.5 mb-4 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              <span className="font-medium text-gray-700">
-                {googleLoading ? 'Laden...' : 'Mit Google anmelden'}
-              </span>
-            </button>
-
-            {/* Divider */}
-            <div className="relative mb-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-white text-gray-400">oder mit Mitgliedsnummer</span>
-              </div>
             </div>
-
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  E-Mail Adresse
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:bg-white outline-none text-gray-900 placeholder-gray-400 transition-all"
-                  placeholder="deine@email.de"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Mitgliedsnummer
-                </label>
-                <input
-                  type="text"
-                  value={memberNumber}
-                  onChange={(e) => setMemberNumber(e.target.value)}
-                  className="w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:bg-white outline-none text-gray-900 placeholder-gray-400 transition-all"
-                  placeholder="z.B. M-12345"
-                />
-              </div>
-
-              {error && (
-                <p className="text-red-500 text-sm text-center">{error}</p>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
-              >
-                {isLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Anmelden...
-                  </span>
-                ) : (
-                  'Jetzt starten 🚀'
-                )}
-              </button>
-            </form>
-
-            <div className="mt-8 pt-8 border-t border-gray-100">
-              <p className="text-gray-500 text-sm text-center">
-                Noch kein Mitglied?{' '}
-                <a href="https://fitinn-trier.de" className="text-teal-600 hover:underline font-medium">
-                  Jetzt bei FIT-INN anmelden →
-                </a>
-              </p>
-            </div>
-          </div>
+          )}
         </div>
-      </div>
+      </main>
 
       {/* Footer */}
-      <footer className="py-6 px-6 text-center bg-white border-t border-gray-100">
-        <div className="flex items-center justify-center gap-3 mb-3">
-          <Image 
-            src="/logo.png" 
-            alt="FIT-INN" 
-            width={28} 
-            height={28} 
-            className="rounded-lg"
-          />
-          <span className="font-semibold text-gray-700">Powered by FIT-INN Trier</span>
+      <footer className="px-6 py-6 text-center">
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <Image src="/logo.png" alt="FIT-INN" width={24} height={24} className="rounded-lg" />
+          <span className="text-sm font-medium text-gray-600">Powered by FIT-INN Trier</span>
         </div>
-        <p className="text-gray-400 text-sm">
+        <p className="text-xs text-gray-400 mb-2">
           © 2026 FIT-INN Trier • Ernährungsplan powered by AI
         </p>
-        <div className="mt-2 flex items-center justify-center gap-4 text-xs text-gray-400">
-          <a href="https://fitinn-trier.de/impressum" className="hover:text-teal-600 transition-colors">Impressum</a>
+        <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
+          <Link href="/impressum" className="hover:text-gray-600">Impressum</Link>
           <span>•</span>
-          <a href="https://fitinn-trier.de/datenschutz" className="hover:text-teal-600 transition-colors">Datenschutz</a>
-          <span>•</span>
-          <a href="mailto:info@fitinn-trier.de" className="hover:text-teal-600 transition-colors">Kontakt</a>
+          <Link href="/datenschutz" className="hover:text-gray-600">Datenschutz</Link>
         </div>
       </footer>
     </div>
