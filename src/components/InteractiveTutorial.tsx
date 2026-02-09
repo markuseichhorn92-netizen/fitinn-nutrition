@@ -104,14 +104,46 @@ export default function InteractiveTutorial({ steps, onComplete, onSkip }: Inter
     const element = document.querySelector(step.targetSelector);
     if (!element) return;
 
+    let hasInteracted = false;
+    
     const handleInteraction = () => {
+      if (hasInteracted) return;
+      hasInteracted = true;
       // User performed the action, go to next step
-      setTimeout(handleNext, 500);
+      setTimeout(handleNext, 300);
     };
 
     if (step.action === 'tap' || step.action === 'any') {
       element.addEventListener('click', handleInteraction);
       element.addEventListener('touchend', handleInteraction);
+    }
+    
+    // For swipe actions, detect scroll
+    if (step.action === 'swipe' || step.action === 'scroll') {
+      let startX = 0;
+      const handleTouchStart = (e: TouchEvent) => {
+        startX = e.touches[0].clientX;
+      };
+      const handleTouchEnd = (e: TouchEvent) => {
+        const endX = e.changedTouches[0].clientX;
+        if (Math.abs(endX - startX) > 30) {
+          handleInteraction();
+        }
+      };
+      const handleScroll = () => {
+        handleInteraction();
+      };
+      
+      element.addEventListener('touchstart', handleTouchStart as EventListener);
+      element.addEventListener('touchend', handleTouchEnd as EventListener);
+      element.addEventListener('scroll', handleScroll);
+      
+      return () => {
+        element.removeEventListener('click', handleInteraction);
+        element.removeEventListener('touchend', handleInteraction as EventListener);
+        element.removeEventListener('touchstart', handleTouchStart as EventListener);
+        element.removeEventListener('scroll', handleScroll);
+      };
     }
 
     return () => {
@@ -126,56 +158,52 @@ export default function InteractiveTutorial({ steps, onComplete, onSkip }: Inter
   const showSpotlight = targetRect && step?.targetSelector;
 
   return (
-    <div className="fixed inset-0 z-[100] pointer-events-none">
-      {/* Dark overlay with cutout for target */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-auto" onClick={(e) => e.stopPropagation()}>
-        <defs>
-          <mask id="spotlight-mask">
-            <rect x="0" y="0" width="100%" height="100%" fill="white" />
-            {showSpotlight && (
-              <rect
-                x={targetRect.left - 8}
-                y={targetRect.top - 8}
-                width={targetRect.width + 16}
-                height={targetRect.height + 16}
-                rx="16"
-                fill="black"
-              />
-            )}
-          </mask>
-        </defs>
-        <rect
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          fill="rgba(0,0,0,0.75)"
-          mask="url(#spotlight-mask)"
-        />
-      </svg>
+    <div className="fixed inset-0 z-[100]">
+      {/* Dark overlay - 4 rectangles around the spotlight area */}
+      {showSpotlight ? (
+        <>
+          {/* Top */}
+          <div 
+            className="absolute bg-black/75 left-0 right-0 top-0"
+            style={{ height: targetRect.top - 12 }}
+          />
+          {/* Bottom */}
+          <div 
+            className="absolute bg-black/75 left-0 right-0 bottom-0"
+            style={{ top: targetRect.bottom + 12 }}
+          />
+          {/* Left */}
+          <div 
+            className="absolute bg-black/75 left-0"
+            style={{ 
+              top: targetRect.top - 12,
+              height: targetRect.height + 24,
+              width: targetRect.left - 12
+            }}
+          />
+          {/* Right */}
+          <div 
+            className="absolute bg-black/75 right-0"
+            style={{ 
+              top: targetRect.top - 12,
+              height: targetRect.height + 24,
+              left: targetRect.right + 12
+            }}
+          />
+        </>
+      ) : (
+        <div className="absolute inset-0 bg-black/75" />
+      )}
 
       {/* Highlight ring around target */}
       {showSpotlight && (
         <div
           className="absolute border-4 border-teal-400 rounded-2xl pointer-events-none animate-pulse-ring"
           style={{
-            left: targetRect.left - 8,
-            top: targetRect.top - 8,
-            width: targetRect.width + 16,
-            height: targetRect.height + 16,
-          }}
-        />
-      )}
-
-      {/* Make target element clickable through overlay */}
-      {showSpotlight && (
-        <div
-          className="absolute pointer-events-auto"
-          style={{
-            left: targetRect.left - 8,
-            top: targetRect.top - 8,
-            width: targetRect.width + 16,
-            height: targetRect.height + 16,
+            left: targetRect.left - 12,
+            top: targetRect.top - 12,
+            width: targetRect.width + 24,
+            height: targetRect.height + 24,
           }}
         />
       )}
