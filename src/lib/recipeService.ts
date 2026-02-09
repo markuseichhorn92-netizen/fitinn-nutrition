@@ -77,6 +77,79 @@ function extractNutrition(nutrients: SpoonacularNutrient[] = []) {
   };
 }
 
+// Translate units to German
+const unitTranslations: Record<string, string> = {
+  'tablespoon': 'EL',
+  'tablespoons': 'EL',
+  'Tbsp': 'EL',
+  'Tbsps': 'EL',
+  'tbsp': 'EL',
+  'teaspoon': 'TL',
+  'teaspoons': 'TL',
+  'tsp': 'TL',
+  'Tsp': 'TL',
+  'cup': 'Tasse',
+  'cups': 'Tassen',
+  'ounce': 'oz',
+  'ounces': 'oz',
+  'oz': 'oz',
+  'pound': 'Pfund',
+  'pounds': 'Pfund',
+  'lb': 'Pfund',
+  'lbs': 'Pfund',
+  'gram': 'g',
+  'grams': 'g',
+  'g': 'g',
+  'kilogram': 'kg',
+  'kilograms': 'kg',
+  'kg': 'kg',
+  'milliliter': 'ml',
+  'milliliters': 'ml',
+  'ml': 'ml',
+  'liter': 'l',
+  'liters': 'l',
+  'l': 'l',
+  'pinch': 'Prise',
+  'pinches': 'Prisen',
+  'clove': 'Zehe',
+  'cloves': 'Zehen',
+  'slice': 'Scheibe',
+  'slices': 'Scheiben',
+  'piece': 'Stück',
+  'pieces': 'Stück',
+  'serving': 'Portion',
+  'servings': 'Portionen',
+  'small': 'klein',
+  'medium': 'mittel',
+  'large': 'groß',
+  'bunch': 'Bund',
+  'can': 'Dose',
+  'cans': 'Dosen',
+  'package': 'Packung',
+  'packages': 'Packungen',
+  'bag': 'Beutel',
+  'bags': 'Beutel',
+  'head': 'Kopf',
+  'heads': 'Köpfe',
+  'stalk': 'Stange',
+  'stalks': 'Stangen',
+  'sprig': 'Zweig',
+  'sprigs': 'Zweige',
+  'handful': 'Handvoll',
+  'handfuls': 'Handvoll',
+  'dash': 'Spritzer',
+  'dashes': 'Spritzer',
+  'drop': 'Tropfen',
+  'drops': 'Tropfen',
+  '': 'Stück',
+};
+
+function translateUnit(unit: string): string {
+  if (!unit) return 'Stück';
+  const lower = unit.toLowerCase().trim();
+  return unitTranslations[lower] || unitTranslations[unit] || unit;
+}
+
 // Convert API response to our Recipe format
 function convertRecipe(spoon: SpoonacularRecipe, forceCategory?: 'breakfast' | 'lunch' | 'dinner' | 'snack'): Recipe {
   const dietaryFlags: string[] = [];
@@ -106,7 +179,7 @@ function convertRecipe(spoon: SpoonacularRecipe, forceCategory?: 'breakfast' | '
     ingredients: (spoon.extendedIngredients || []).map(ing => ({
       name: ing.name,
       amount: ing.amount,
-      unit: ing.unit || 'Stück',
+      unit: translateUnit(ing.unit),
       category: ing.aisle || 'Sonstiges',
     })),
     instructions,
