@@ -2,97 +2,108 @@
 
 import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { getSupabaseClient } from '@/lib/supabase';
 
 function AuthCallbackContent() {
-  const router = useRouter();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
-    const supabase = getSupabaseClient();
-    if (!supabase) {
-      setError('Supabase nicht konfiguriert');
-      setStatus('error');
-      return;
-    }
+    const handleAuth = async () => {
+      const supabase = getSupabaseClient();
+      if (!supabase) {
+        setError('Supabase nicht konfiguriert');
+        setStatus('error');
+        return;
+      }
 
-    console.log('Auth callback - waiting for session...');
-    console.log('Current URL:', window.location.href);
-
-    // Listen for auth state changes - Supabase will automatically
-    // detect and exchange the tokens from the URL hash
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session?.user?.email);
+      // Get the full URL including hash
+      const fullUrl = window.location.href;
+      const hash = window.location.hash;
       
-      if (event === 'SIGNED_IN' && session) {
-        console.log('Login successful!');
-        setStatus('success');
+      console.log('Auth callback - Full URL:', fullUrl);
+      console.log('Auth callback - Hash:', hash);
+      setDebugInfo(`URL: ${fullUrl.substring(0, 100)}...`);
+
+      // Check for error in URL
+      if (hash.includes('error=')) {
+        const params = new URLSearchParams(hash.replace('#', ''));
+        const errorMsg = params.get('error_description') || params.get('error') || 'Unbekannter Fehler';
+        setError(decodeURIComponent(errorMsg));
+        setStatus('error');
+        return;
+      }
+
+      // Try to extract tokens from hash
+      if (hash.includes('access_token=')) {
+        const params = new URLSearchParams(hash.replace('#', ''));
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
         
-        // Check if we came from native app
-        const isFromApp = typeof window !== 'undefined' && (
-          navigator.userAgent.includes('Capacitor') ||
-          window.location.href.includes('capacitor') ||
-          document.referrer.includes('capacitor')
-        );
-        
-        if (isFromApp) {
-          // Try to redirect back to app using custom URL scheme
-          const accessToken = session.access_token;
-          const refreshToken = session.refresh_token;
-          const deepLink = `naehrkraft://auth/callback?access_token=${accessToken}&refresh_token=${refreshToken}`;
-          
-          console.log('Redirecting to app via deep link...');
-          window.location.href = deepLink;
-          
-          // Fallback after 2 seconds if deep link didn't work
-          setTimeout(() => {
-            window.location.href = '/plan';
-          }, 2000);
-        } else {
-          // Web browser - just redirect
-          setTimeout(() => {
-            window.location.href = '/plan';
-          }, 500);
+        console.log('Tokens found in URL, setting session...');
+        setDebugInfo('Tokens gefunden, setze Session...');
+
+        if (accessToken && refreshToken) {
+          try {
+            const { data, error: sessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+
+            if (sessionError) {
+              console.error('Error setting session:', sessionError);
+              setError(sessionError.message);
+              setStatus('error');
+              return;
+            }
+
+            if (data.session) {
+              console.log('Session set successfully!', data.session.user?.email);
+              setDebugInfo(`Eingeloggt als: ${data.session.user?.email}`);
+              setStatus('success');
+              
+              // Clear the hash from URL
+              window.history.replaceState(null, '', window.location.pathname);
+              
+              // Redirect after short delay
+              setTimeout(() => {
+                window.location.href = '/plan';
+              }, 1500);
+              return;
+            }
+          } catch (err: any) {
+            console.error('Exception setting session:', err);
+            setError(err.message || 'Fehler beim Setzen der Session');
+            setStatus('error');
+            return;
+          }
         }
       }
-    });
 
-    // Fallback: Check if already logged in after 3 seconds
-    const timeoutId = setTimeout(async () => {
+      // No tokens in hash - check if already logged in
+      console.log('No tokens in URL, checking existing session...');
+      setDebugInfo('Prüfe bestehende Session...');
+      
       const { data } = await supabase.auth.getSession();
       if (data?.session) {
-        console.log('Session found via fallback check');
+        console.log('Already logged in!', data.session.user?.email);
+        setDebugInfo(`Bereits eingeloggt: ${data.session.user?.email}`);
         setStatus('success');
         setTimeout(() => {
           window.location.href = '/plan';
-        }, 500);
-      } else {
-        // Check URL for error
-        const hash = window.location.hash;
-        const params = new URLSearchParams(hash.replace('#', ''));
-        const errorDescription = params.get('error_description');
-        
-        if (errorDescription) {
-          setError(decodeURIComponent(errorDescription));
-        } else {
-          setError('Login fehlgeschlagen - keine Session erhalten');
-        }
-        setStatus('error');
+        }, 1000);
+        return;
       }
-    }, 3000);
 
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeoutId);
+      // No session found
+      setError('Keine Anmeldedaten gefunden. Bitte erneut versuchen.');
+      setStatus('error');
     };
-  }, [router]);
 
-  // Function to manually open app
-  const openApp = () => {
-    window.location.href = 'naehrkraft://plan';
-  };
+    // Small delay to ensure page is fully loaded
+    setTimeout(handleAuth, 100);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-teal-50 to-white p-6">
@@ -101,7 +112,7 @@ function AuthCallbackContent() {
           <>
             <div className="animate-spin w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full mx-auto mb-4" />
             <h1 className="text-xl font-semibold text-gray-900 mb-2">Anmeldung wird verarbeitet...</h1>
-            <p className="text-gray-500">Einen Moment bitte</p>
+            <p className="text-gray-500 text-sm">{debugInfo || 'Einen Moment bitte'}</p>
           </>
         )}
 
@@ -109,23 +120,8 @@ function AuthCallbackContent() {
           <>
             <div className="text-5xl mb-4">✅</div>
             <h1 className="text-xl font-semibold text-gray-900 mb-2">Erfolgreich angemeldet!</h1>
-            
-            {/* Button to open app */}
-            <button
-              onClick={openApp}
-              className="px-6 py-4 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors mb-4 w-full text-lg"
-            >
-              📱 Zurück zur App
-            </button>
-            
-            <p className="text-gray-400 text-sm mb-4">— oder —</p>
-            
-            <button
-              onClick={() => window.location.href = '/plan'}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium w-full"
-            >
-              Im Browser weitermachen
-            </button>
+            <p className="text-gray-500 mb-4">{debugInfo}</p>
+            <p className="text-sm text-gray-400">Weiterleitung...</p>
           </>
         )}
 
@@ -133,18 +129,19 @@ function AuthCallbackContent() {
           <>
             <div className="text-5xl mb-4">❌</div>
             <h1 className="text-xl font-semibold text-gray-900 mb-2">Anmeldung fehlgeschlagen</h1>
-            <p className="text-red-500 mb-6">{error}</p>
+            <p className="text-red-500 mb-2">{error}</p>
+            {debugInfo && <p className="text-xs text-gray-400 mb-4 break-all">{debugInfo}</p>}
             
             <div className="space-y-3">
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={() => window.location.href = '/login'}
                 className="px-6 py-3 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600 transition-colors w-full"
               >
                 Nochmal versuchen
               </button>
               
               <button
-                onClick={() => window.location.href = '/onboarding'}
+                onClick={() => window.location.href = '/plan'}
                 className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium w-full"
               >
                 Ohne Anmeldung starten

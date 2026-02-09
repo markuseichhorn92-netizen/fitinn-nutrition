@@ -22,7 +22,7 @@ export function getSupabaseClient(): SupabaseClient | null {
         persistSession: true,
         storageKey: 'fitinn-auth',
         autoRefreshToken: true,
-        detectSessionInUrl: true, // This should handle the hash params automatically
+        detectSessionInUrl: false, // We handle this manually in /auth/callback
       },
     });
   }
