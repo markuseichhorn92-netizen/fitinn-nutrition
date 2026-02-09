@@ -42,6 +42,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         apiKeySet: !!API_KEY,
         apiKeyLength: API_KEY?.length || 0,
+        apiKeyFirst4: API_KEY?.substring(0, 4) || 'none',
+        envKeySet: !!process.env.SPOONACULAR_API_KEY,
         action,
         type,
         number,
