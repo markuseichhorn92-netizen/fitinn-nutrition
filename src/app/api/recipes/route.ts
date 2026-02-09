@@ -295,6 +295,33 @@ function translateMeasure(measure: string): string {
   return measure;
 }
 
+// Parse measurement string like "200 g" or "2 tablespoons" into amount + unit
+function parseMeasure(measure: string): { amount: number; unit: string } {
+  if (!measure || !measure.trim()) {
+    return { amount: 1, unit: 'Stück' };
+  }
+  
+  const trimmed = measure.trim();
+  
+  // Try to extract number from beginning (handles "200 g", "2.5 cups", "1/2 tsp")
+  const fractionMatch = trimmed.match(/^(\d+)\s*\/\s*(\d+)\s*(.*)$/);
+  if (fractionMatch) {
+    const amount = parseInt(fractionMatch[1]) / parseInt(fractionMatch[2]);
+    const unit = fractionMatch[3]?.trim() || 'Stück';
+    return { amount, unit: translateMeasure(unit) };
+  }
+  
+  const numberMatch = trimmed.match(/^([\d.]+)\s*(.*)$/);
+  if (numberMatch) {
+    const amount = parseFloat(numberMatch[1]) || 1;
+    const unit = numberMatch[2]?.trim() || 'Stück';
+    return { amount, unit: translateMeasure(unit) };
+  }
+  
+  // No number found - might be "pinch", "to taste", etc.
+  return { amount: 1, unit: translateMeasure(trimmed) };
+}
+
 // Convert TheMealDB recipe to Spoonacular-like format
 function convertMealDBRecipe(meal: Record<string, string | null>): unknown {
   // Extract ingredients (TheMealDB has strIngredient1-20 and strMeasure1-20)
@@ -303,10 +330,11 @@ function convertMealDBRecipe(meal: Record<string, string | null>): unknown {
     const ingredient = meal[`strIngredient${i}`];
     const measure = meal[`strMeasure${i}`];
     if (ingredient && ingredient.trim()) {
+      const { amount, unit } = parseMeasure(measure || '');
       ingredients.push({
         name: ingredient.trim(),
-        amount: 1,
-        unit: translateMeasure(measure || ''),
+        amount,
+        unit,
         aisle: 'Sonstiges',
       });
     }
