@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@capacitor-community/barcode-scanner": "^4.0.1",
     "@capacitor/android": "^8.0.2",
     "@capacitor/cli": "^8.0.2",
     "@capacitor/core": "^8.0.2",
