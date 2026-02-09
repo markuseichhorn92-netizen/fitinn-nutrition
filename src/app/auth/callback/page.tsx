@@ -76,7 +76,16 @@ function AuthCallbackContent() {
           <>
             <div className="text-5xl mb-4">✅</div>
             <h1 className="text-xl font-semibold text-gray-900 mb-2">Erfolgreich angemeldet!</h1>
-            <p className="text-gray-500 mb-4">Du wirst weitergeleitet...</p>
+            
+            {/* App User Hint */}
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+              <p className="text-amber-800 font-medium text-sm mb-1">📱 App-Nutzer?</p>
+              <p className="text-amber-700 text-sm">
+                Tippe oben links auf <strong>✕</strong> um dieses Fenster zu schließen und zur App zurückzukehren.
+              </p>
+            </div>
+            
+            <p className="text-gray-500 mb-4">Oder hier weitermachen:</p>
             
             <button
               onClick={() => window.location.href = '/plan'}
