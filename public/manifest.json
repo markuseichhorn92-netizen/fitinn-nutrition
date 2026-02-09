@@ -1,7 +1,7 @@
 {
-  "name": "FIT-INN Ernährungsplan",
-  "short_name": "FIT-INN Essen",
-  "description": "Dein persönlicher Ernährungsplan von FIT-INN",
+  "name": "Nährkraft - FIT-INN Ernährungsplan",
+  "short_name": "Nährkraft",
+  "description": "Dein persönlicher Ernährungsplan powered by FIT-INN Trier",
   "start_url": "/plan",
   "display": "standalone",
   "background_color": "#020617",

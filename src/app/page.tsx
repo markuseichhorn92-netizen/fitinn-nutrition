@@ -76,7 +76,7 @@ export default function LandingPage() {
             height={40} 
             className="rounded-xl"
           />
-          <span className="font-bold text-lg text-gray-900 hidden sm:block">Mahlzeit!</span>
+          <span className="font-bold text-lg text-gray-900 hidden sm:block">Nährkraft</span>
         </div>
         <a 
           href="https://fitinn-trier.de" 
@@ -95,7 +95,7 @@ export default function LandingPage() {
           <div className="relative inline-block mb-6">
             <Image 
               src="/logo.png" 
-              alt="Mahlzeit!" 
+              alt="Nährkraft" 
               width={100} 
               height={100} 
               className="rounded-2xl shadow-xl"
@@ -103,7 +103,7 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-teal-500/20 blur-2xl rounded-full -z-10 scale-150" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-            <span className="text-teal-600">Mahlzeit!</span>
+            <span className="text-teal-600">Nährkraft</span>
           </h1>
           <p className="text-gray-500 text-lg max-w-md mx-auto">
             Dein persönlicher Ernährungsplan — powered by FIT-INN Trier

@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.fitinn.mahlzeit',
-  appName: 'Mahlzeit!',
+  appId: 'com.fitinn.naehrkraft',
+  appName: 'Nährkraft',
   webDir: 'out',
   
   // Server URL für Development & Production
@@ -16,7 +16,7 @@ const config: CapacitorConfig = {
     contentInset: 'automatic',
     allowsLinkPreview: false,
     scrollEnabled: true,
-    scheme: 'Mahlzeit',
+    scheme: 'Naehrkraft',
   },
   
   // Android-spezifische Einstellungen

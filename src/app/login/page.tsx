@@ -96,7 +96,7 @@ export default function LoginPage() {
         <div className="w-20 h-20 bg-teal-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
           <span className="text-4xl">🍽️</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Mahlzeit!</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Nährkraft</h1>
         <p className="text-gray-500 mt-1">powered by FIT-INN Trier</p>
       </div>
 
