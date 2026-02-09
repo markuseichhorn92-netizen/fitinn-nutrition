@@ -155,17 +155,26 @@ export default function BarcodeScannerModal({ isOpen, onClose, onAddItem }: Barc
     handleClose();
   };
 
+  // Start scanning only once when modal opens
+  const hasStartedRef = useRef(false);
+  
   useEffect(() => {
-    if (isOpen && step === 'scanner') {
+    if (isOpen && step === 'scanner' && !hasStartedRef.current) {
+      hasStartedRef.current = true;
       startScanning();
     }
     
+    // Reset when modal closes
+    if (!isOpen) {
+      hasStartedRef.current = false;
+    }
+    
     return () => {
-      if (isScanning) {
+      if (!isOpen && html5QrCodeRef.current) {
         stopScanning();
       }
     };
-  }, [isOpen, step, startScanning, stopScanning, isScanning]);
+  }, [isOpen, step]); // Removed startScanning, stopScanning, isScanning from deps
 
   if (!isOpen) return null;
 
