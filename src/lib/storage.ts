@@ -45,6 +45,12 @@ export function loadAllPlans(): Record<string, DayPlan> {
   return {};
 }
 
+export function clearAllPlans(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(PLAN_KEY);
+  }
+}
+
 export function saveWaterIntake(date: string, amount: number): void {
   if (typeof window !== 'undefined') {
     const water = loadAllWaterIntake();

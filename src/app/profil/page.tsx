@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
-import { loadProfile, saveProfile, clearAllData } from '@/lib/storage';
+import { loadProfile, saveProfile, clearAllData, clearAllPlans } from '@/lib/storage';
 import { saveUserProfile, loadUserProfile } from '@/lib/supabase-data';
 import { getGoalLabel, getDietLabel, calculateWaterGoal, calculateTDEE, calculateTargetCalories } from '@/lib/calculations';
 import { UserProfile } from '@/types';
@@ -313,6 +313,17 @@ export default function ProfilePage() {
                 className="w-full py-4 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
               >
                 📖 App-Anleitung anzeigen
+              </button>
+
+              <button
+                onClick={() => {
+                  clearAllPlans();
+                  alert('Pläne gelöscht! Die Seite wird neu geladen und frische Rezepte werden geholt.');
+                  window.location.href = '/plan';
+                }}
+                className="w-full py-4 rounded-xl bg-amber-100 text-amber-700 font-semibold hover:bg-amber-200 transition-colors flex items-center justify-center gap-2"
+              >
+                🔄 Rezepte aktualisieren (neu laden)
               </button>
 
               {user ? (
