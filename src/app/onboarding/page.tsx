@@ -6,16 +6,45 @@ import Image from 'next/image';
 import { UserProfile } from '@/types';
 import { saveProfile } from '@/lib/storage';
 import { saveOnboardingProgress, loadOnboardingProgress, clearOnboardingProgress } from '@/lib/database';
-import { calculateTDEE, calculateTargetCalories, calculateMacros, calculateWaterGoal } from '@/lib/calculations';
+import { calculateTDEE, calculateTargetCalories, calculateMacros, calculateWaterGoal, getGoalLabel, getDietLabel } from '@/lib/calculations';
 
-// Simplified to 6 easy steps
 const steps = [
-  { id: 0, name: 'Über dich', icon: '👤' },
-  { id: 1, name: 'Dein Ziel', icon: '🎯' },
-  { id: 2, name: 'Dein Alltag', icon: '🏃' },
-  { id: 3, name: 'Was du isst', icon: '🥗' },
-  { id: 4, name: 'Deine Mahlzeiten', icon: '🍽️' },
-  { id: 5, name: 'Fertig!', icon: '🎉' },
+  { id: 0, name: 'Persönliche Daten', required: true },
+  { id: 1, name: 'Dein Ziel', required: true },
+  { id: 2, name: 'Aktivitätslevel', required: true },
+  { id: 3, name: 'Ernährungsform', required: true },
+  { id: 4, name: 'Allergien', required: false },
+  { id: 5, name: 'Lebensmittel', required: false },
+  { id: 6, name: 'Alltagstauglichkeit', required: true },
+  { id: 7, name: 'Mahlzeiten', required: true },
+  { id: 8, name: 'Haushalt', required: true },
+  { id: 9, name: 'Zusammenfassung', required: true },
+];
+
+const allergiesOptions = [
+  { id: 'lactose', label: 'Laktoseintoleranz', emoji: '🥛' },
+  { id: 'gluten', label: 'Glutenunverträglichkeit', emoji: '🌾' },
+  { id: 'nuts', label: 'Nussallergie', emoji: '🥜' },
+  { id: 'soy', label: 'Sojaallergie', emoji: '🫘' },
+  { id: 'fish', label: 'Fischallergie', emoji: '🐟' },
+  { id: 'eggs', label: 'Eiallergie', emoji: '🥚' },
+  { id: 'histamine', label: 'Histaminintoleranz', emoji: '⚠️' },
+  { id: 'fructose', label: 'Fruktoseintoleranz', emoji: '🍎' },
+];
+
+const commonFoods = [
+  { id: 'brokkoli', label: 'Brokkoli', category: 'Gemüse' },
+  { id: 'spinat', label: 'Spinat', category: 'Gemüse' },
+  { id: 'pilze', label: 'Pilze', category: 'Gemüse' },
+  { id: 'innereien', label: 'Innereien', category: 'Fleisch' },
+  { id: 'oliven', label: 'Oliven', category: 'Gemüse' },
+  { id: 'aubergine', label: 'Aubergine', category: 'Gemüse' },
+  { id: 'rosenkohl', label: 'Rosenkohl', category: 'Gemüse' },
+  { id: 'huhn', label: 'Hähnchen', category: 'Fleisch' },
+  { id: 'lachs', label: 'Lachs', category: 'Fisch' },
+  { id: 'tofu', label: 'Tofu', category: 'Soja' },
+  { id: 'avocado', label: 'Avocado', category: 'Obst' },
+  { id: 'susskartoffel', label: 'Süßkartoffel', category: 'Gemüse' },
 ];
 
 const initialProfile: Partial<UserProfile> = {
@@ -41,7 +70,7 @@ const initialProfile: Partial<UserProfile> = {
     breakfast: true,
     morningSnack: false,
     lunch: true,
-    afternoonSnack: false,
+    afternoonSnack: true,
     dinner: true,
     lateSnack: false,
   },
@@ -50,51 +79,111 @@ const initialProfile: Partial<UserProfile> = {
   budget: 'normal',
 };
 
+// Validation functions
+const validateStep = (step: number, profile: Partial<UserProfile>): string | null => {
+  switch (step) {
+    case 0: // Personal Data
+      if (!profile.gender) return 'Bitte wähle dein Geschlecht';
+      if (!profile.age || profile.age < 14 || profile.age > 100) return 'Bitte gib ein gültiges Alter an (14-100)';
+      if (!profile.height || profile.height < 120 || profile.height > 230) return 'Bitte gib eine gültige Größe an (120-230 cm)';
+      if (!profile.weight || profile.weight < 40 || profile.weight > 250) return 'Bitte gib ein gültiges Gewicht an (40-250 kg)';
+      return null;
+    case 1: // Goal
+      if (!profile.goal) return 'Bitte wähle ein Ziel';
+      return null;
+    case 2: // Activity
+      if (!profile.occupation) return 'Bitte wähle deine berufliche Tätigkeit';
+      if (profile.sportsFrequency === undefined) return 'Bitte gib deine Trainingshäufigkeit an';
+      if (!profile.dailyActivity) return 'Bitte wähle dein Aktivitätslevel';
+      return null;
+    case 3: // Diet Type
+      if (!profile.dietType) return 'Bitte wähle eine Ernährungsform';
+      return null;
+    case 6: // Practicality
+      if (!profile.cookingEffort) return 'Bitte wähle deinen Kochaufwand';
+      if (!profile.workType) return 'Bitte wähle deinen Arbeitsplatz';
+      return null;
+    case 7: // Meals
+      const activeMeals = Object.values(profile.meals || {}).filter(v => v === true).length;
+      if (activeMeals < 2) return 'Bitte wähle mindestens 2 Mahlzeiten';
+      return null;
+    case 8: // Household
+      if (!profile.householdSize || profile.householdSize < 1) return 'Bitte gib die Haushaltsgröße an';
+      if (!profile.budget) return 'Bitte wähle dein Budget';
+      return null;
+    default:
+      return null;
+  }
+};
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<Partial<UserProfile>>(initialProfile);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showHelp, setShowHelp] = useState<string | null>(null);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [showTDEEAnimation, setShowTDEEAnimation] = useState(false);
 
-  // Load saved progress
+  // Load saved progress on mount
   useEffect(() => {
     const savedProgress = loadOnboardingProgress();
     if (savedProgress) {
       setProfile(prev => ({ ...prev, ...savedProgress.data }));
-      // Map old step numbers to new simplified steps
-      const oldStep = savedProgress.step;
-      if (oldStep <= 0) setStep(0);
-      else if (oldStep <= 1) setStep(1);
-      else if (oldStep <= 2) setStep(2);
-      else if (oldStep <= 5) setStep(3);
-      else if (oldStep <= 7) setStep(4);
-      else setStep(5);
+      setStep(savedProgress.step);
     }
   }, []);
 
-  // Save progress
+  // Save progress on step/profile change
   useEffect(() => {
-    if (step < 5) {
+    if (step < 9) { // Don't save on summary step
       saveOnboardingProgress(step, profile);
     }
   }, [step, profile]);
 
-  const updateProfile = useCallback((updates: Partial<UserProfile>) => {
-    setProfile(prev => ({ ...prev, ...updates }));
-  }, []);
-
-  const nextStep = useCallback(() => {
-    if (step < steps.length - 1) {
-      setStep(step + 1);
-      window.scrollTo(0, 0);
+  // Trigger TDEE animation on summary step
+  useEffect(() => {
+    if (step === 9) {
+      const timer = setTimeout(() => setShowTDEEAnimation(true), 300);
+      return () => clearTimeout(timer);
+    } else {
+      setShowTDEEAnimation(false);
     }
   }, [step]);
 
+  const updateProfile = useCallback((updates: Partial<UserProfile>) => {
+    setProfile(prev => ({ ...prev, ...updates }));
+    setValidationError(null);
+  }, []);
+
+  const nextStep = useCallback(() => {
+    // Validate current step
+    const error = validateStep(step, profile);
+    if (error && steps[step].required) {
+      setValidationError(error);
+      return;
+    }
+    
+    setValidationError(null);
+    if (step < steps.length - 1) {
+      setSlideDirection('left');
+      setStep(step + 1);
+    }
+  }, [step, profile]);
+
   const prevStep = useCallback(() => {
+    setValidationError(null);
     if (step > 0) {
+      setSlideDirection('right');
       setStep(step - 1);
-      window.scrollTo(0, 0);
+    }
+  }, [step]);
+
+  const skipStep = useCallback(() => {
+    if (!steps[step].required) {
+      setSlideDirection('left');
+      setStep(step + 1);
+      setValidationError(null);
     }
   }, [step]);
 
@@ -115,555 +204,807 @@ export default function OnboardingPage() {
     saveProfile(completeProfile);
     clearOnboardingProgress();
     
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(resolve, 500));
     router.push('/plan');
   };
 
   const progress = ((step + 1) / steps.length) * 100;
 
-  // Calculate preview values for summary
   const tdee = calculateTDEE(profile as UserProfile);
   const targetCalories = calculateTargetCalories(tdee, profile.goal || 'maintain');
   const macros = calculateMacros(targetCalories, profile.goal || 'maintain', profile.weight || 75);
+  const waterGoal = calculateWaterGoal(profile.weight || 75, profile.sportsFrequency || 3);
 
-  // Big number selector component
-  const BigNumberPicker = ({ 
-    value, 
-    onChange, 
-    min, 
-    max, 
-    step: stepSize = 1, 
-    unit,
-    helpText
-  }: {
+  // Number input with +/- buttons
+  const NumberInput = ({ value, onChange, min, max, step: inputStep = 1, unit }: {
     value: number;
     onChange: (v: number) => void;
     min: number;
     max: number;
     step?: number;
-    unit: string;
-    helpText?: string;
+    unit?: string;
   }) => (
-    <div className="bg-gray-50 rounded-3xl p-6">
-      {helpText && (
-        <p className="text-sm text-gray-500 text-center mb-4">{helpText}</p>
-      )}
-      <div className="flex items-center justify-center gap-6">
-        <button
-          type="button"
-          onClick={() => onChange(Math.max(min, value - stepSize))}
-          className="w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center text-3xl font-bold text-gray-600 active:scale-95 transition-transform touch-manipulation"
-        >
-          −
-        </button>
-        <div className="text-center min-w-[120px]">
-          <span className="text-5xl font-bold text-gray-900">{value}</span>
-          <span className="text-xl text-gray-500 ml-2">{unit}</span>
-        </div>
-        <button
-          type="button"
-          onClick={() => onChange(Math.min(max, value + stepSize))}
-          className="w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center text-3xl font-bold text-gray-600 active:scale-95 transition-transform touch-manipulation"
-        >
-          +
-        </button>
+    <div className="flex items-center gap-3">
+      <button
+        type="button"
+        onClick={() => onChange(Math.max(min, value - inputStep))}
+        className="w-14 h-14 touch-manipulation rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-600 transition-colors"
+      >
+        −
+      </button>
+      <div className="flex-1 text-center">
+        <span className="text-3xl font-bold text-gray-900">{value}</span>
+        {unit && <span className="text-lg text-gray-500 ml-1">{unit}</span>}
       </div>
+      <button
+        type="button"
+        onClick={() => onChange(Math.min(max, value + inputStep))}
+        className="w-14 h-14 touch-manipulation rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-600 transition-colors"
+      >
+        +
+      </button>
     </div>
-  );
-
-  // Big option button component
-  const OptionButton = ({ 
-    selected, 
-    onClick, 
-    emoji, 
-    title, 
-    subtitle 
-  }: {
-    selected: boolean;
-    onClick: () => void;
-    emoji: string;
-    title: string;
-    subtitle?: string;
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`w-full p-5 rounded-2xl text-left transition-all active:scale-[0.98] touch-manipulation ${
-        selected
-          ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
-          : 'bg-white border-2 border-gray-200 hover:border-gray-300'
-      }`}
-    >
-      <div className="flex items-center gap-4">
-        <span className="text-4xl">{emoji}</span>
-        <div>
-          <p className={`font-semibold text-lg ${selected ? 'text-teal-700' : 'text-gray-900'}`}>
-            {title}
-          </p>
-          {subtitle && (
-            <p className="text-sm text-gray-500">{subtitle}</p>
-          )}
-        </div>
-        {selected && (
-          <div className="ml-auto">
-            <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-        )}
-      </div>
-    </button>
   );
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header - Simple Progress */}
-      <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-gray-100 safe-area-top">
-        <div className="flex items-center justify-between mb-3">
-          {step > 0 && (
-            <button
-              onClick={prevStep}
-              className="p-2 -ml-2 text-gray-500 touch-manipulation"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-          )}
-          <div className="flex-1 text-center">
-            <span className="text-2xl">{steps[step].icon}</span>
+      {/* Progress Header */}
+      <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-gray-100 shadow-sm">
+        {/* Logo */}
+        <div className="flex items-center justify-center mb-3">
+          <div className="flex items-center gap-2">
+            <Image src="/logo.png" alt="FIT-INN" width={32} height={32} className="rounded-lg" />
+            <span className="font-bold text-gray-900">FIT-INN Nutrition</span>
           </div>
-          <div className="w-10" /> {/* Spacer */}
         </div>
         
-        {/* Progress Dots */}
-        <div className="flex items-center justify-center gap-2">
-          {steps.map((s, i) => (
+        {/* Progress Bar with Step Labels */}
+        <div className="relative mb-2">
+          <div className="flex justify-between mb-1">
+            {steps.map((s, i) => (
+              <div
+                key={i}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  i <= step ? 'bg-teal-500' : 'bg-gray-200'
+                } ${i === step ? 'scale-150' : ''}`}
+              />
+            ))}
+          </div>
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div
-              key={i}
-              className={`h-2 rounded-full transition-all ${
-                i === step ? 'w-8 bg-teal-500' : i < step ? 'w-2 bg-teal-300' : 'w-2 bg-gray-200'
-              }`}
+              className="h-full bg-gradient-to-r from-teal-400 to-teal-600 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
             />
-          ))}
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-500">Schritt {step + 1} von {steps.length}</span>
+          <span className="text-sm font-medium text-teal-600">{steps[step].name}</span>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 px-6 py-8 pb-32 overflow-y-auto">
-        
-        {/* Step 1: About You */}
-        {step === 0 && (
-          <div className="space-y-8 animate-fade-in-up">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Erzähl uns von dir</h1>
-              <p className="text-gray-500">Das hilft uns, deinen Plan zu berechnen</p>
+      {/* Content with Slide Animation */}
+      <div className="flex-1 px-6 py-6 pb-32 overflow-hidden">
+        <div 
+          className={`transition-all duration-300 ease-out transform ${
+            slideDirection === 'left' ? 'animate-slide-in-left' : 'animate-slide-in-right'
+          }`}
+          key={step}
+        >
+          {/* Validation Error */}
+          {validationError && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+              <span className="text-red-500 text-xl">⚠️</span>
+              <span className="text-red-700 text-sm">{validationError}</span>
             </div>
-            
-            {/* Gender - Big Buttons */}
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-3 px-1">Ich bin...</p>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { value: 'male', label: 'Mann', emoji: '👨' },
-                  { value: 'female', label: 'Frau', emoji: '👩' },
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => updateProfile({ gender: opt.value as UserProfile['gender'] })}
-                    className={`p-6 rounded-2xl text-center transition-all active:scale-[0.98] touch-manipulation ${
-                      profile.gender === opt.value
-                        ? 'bg-teal-50 border-2 border-teal-500'
-                        : 'bg-gray-50 border-2 border-transparent'
-                    }`}
-                  >
-                    <span className="text-5xl block mb-2">{opt.emoji}</span>
-                    <span className="font-semibold text-gray-900">{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+          )}
 
-            {/* Age */}
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-3 px-1">Mein Alter</p>
-              <BigNumberPicker
-                value={profile.age || 30}
-                onChange={(v) => updateProfile({ age: v })}
-                min={14}
-                max={100}
-                unit="Jahre"
-              />
-            </div>
-
-            {/* Height */}
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-3 px-1">Meine Größe</p>
-              <BigNumberPicker
-                value={profile.height || 175}
-                onChange={(v) => updateProfile({ height: v })}
-                min={120}
-                max={230}
-                unit="cm"
-              />
-            </div>
-
-            {/* Weight */}
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-3 px-1">Mein Gewicht</p>
-              <BigNumberPicker
-                value={profile.weight || 80}
-                onChange={(v) => updateProfile({ weight: v })}
-                min={40}
-                max={200}
-                unit="kg"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Goal */}
-        {step === 1 && (
-          <div className="space-y-6 animate-fade-in-up">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Was möchtest du erreichen?</h1>
-              <p className="text-gray-500">Wähle dein Hauptziel</p>
-            </div>
-            
-            <div className="space-y-3">
-              <OptionButton
-                selected={profile.goal === 'lose'}
-                onClick={() => updateProfile({ goal: 'lose' })}
-                emoji="🔥"
-                title="Abnehmen"
-                subtitle="Gewicht verlieren, fitter werden"
-              />
-              <OptionButton
-                selected={profile.goal === 'gain'}
-                onClick={() => updateProfile({ goal: 'gain' })}
-                emoji="💪"
-                title="Muskeln aufbauen"
-                subtitle="Stärker werden, Masse zulegen"
-              />
-              <OptionButton
-                selected={profile.goal === 'maintain'}
-                onClick={() => updateProfile({ goal: 'maintain' })}
-                emoji="⚖️"
-                title="Gewicht halten"
-                subtitle="Gesund essen, fit bleiben"
-              />
-            </div>
-
-            {/* Target Weight (only for lose/gain) */}
-            {(profile.goal === 'lose' || profile.goal === 'gain') && (
-              <div className="pt-4">
-                <p className="text-sm font-medium text-gray-700 mb-3 px-1">Mein Zielgewicht</p>
-                <BigNumberPicker
-                  value={profile.targetWeight || profile.weight || 75}
-                  onChange={(v) => updateProfile({ targetWeight: v })}
-                  min={40}
-                  max={200}
-                  unit="kg"
-                  helpText={profile.goal === 'lose' 
-                    ? `Aktuell: ${profile.weight} kg`
-                    : `Aktuell: ${profile.weight} kg`
-                  }
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Step 3: Activity */}
-        {step === 2 && (
-          <div className="space-y-6 animate-fade-in-up">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Wie aktiv bist du?</h1>
-              <p className="text-gray-500">Das bestimmt deinen Kalorienbedarf</p>
-            </div>
-            
-            {/* Job Type */}
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-3 px-1">Meine Arbeit ist...</p>
-              <div className="space-y-3">
-                <OptionButton
-                  selected={profile.occupation === 'sedentary'}
-                  onClick={() => updateProfile({ occupation: 'sedentary' })}
-                  emoji="💻"
-                  title="Hauptsächlich sitzend"
-                  subtitle="Büro, Computer, Schreibtisch"
-                />
-                <OptionButton
-                  selected={profile.occupation === 'standing'}
-                  onClick={() => updateProfile({ occupation: 'standing' })}
-                  emoji="🧍"
-                  title="Oft stehend"
-                  subtitle="Verkauf, Empfang, Beratung"
-                />
-                <OptionButton
-                  selected={profile.occupation === 'active' || profile.occupation === 'heavy'}
-                  onClick={() => updateProfile({ occupation: 'active' })}
-                  emoji="🚶"
-                  title="Körperlich aktiv"
-                  subtitle="Handwerk, Pflege, Lager"
-                />
-              </div>
-            </div>
-
-            {/* Sport Frequency - Simple */}
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-3 px-1">Ich trainiere...</p>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { value: 0, label: 'Gar nicht', emoji: '🛋️' },
-                  { value: 2, label: '1-2x pro Woche', emoji: '🏃' },
-                  { value: 4, label: '3-4x pro Woche', emoji: '💪' },
-                  { value: 6, label: '5x+ pro Woche', emoji: '🔥' },
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => updateProfile({ sportsFrequency: opt.value })}
-                    className={`p-5 rounded-2xl text-center transition-all active:scale-[0.98] touch-manipulation ${
-                      Math.abs((profile.sportsFrequency || 0) - opt.value) <= 1
-                        ? 'bg-teal-50 border-2 border-teal-500'
-                        : 'bg-gray-50 border-2 border-transparent'
-                    }`}
-                  >
-                    <span className="text-3xl block mb-2">{opt.emoji}</span>
-                    <span className="text-sm font-medium text-gray-700">{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: Diet Preferences */}
-        {step === 3 && (
-          <div className="space-y-6 animate-fade-in-up">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Was isst du?</h1>
-              <p className="text-gray-500">Wir passen die Rezepte an</p>
-            </div>
-            
-            <div className="space-y-3">
-              <OptionButton
-                selected={profile.dietType === 'mixed'}
-                onClick={() => updateProfile({ dietType: 'mixed' })}
-                emoji="🍖"
-                title="Alles"
-                subtitle="Fleisch, Fisch, Gemüse – alles dabei"
-              />
-              <OptionButton
-                selected={profile.dietType === 'vegetarian'}
-                onClick={() => updateProfile({ dietType: 'vegetarian' })}
-                emoji="🥬"
-                title="Vegetarisch"
-                subtitle="Kein Fleisch und Fisch"
-              />
-              <OptionButton
-                selected={profile.dietType === 'vegan'}
-                onClick={() => updateProfile({ dietType: 'vegan' })}
-                emoji="🌱"
-                title="Vegan"
-                subtitle="Nur pflanzliche Lebensmittel"
-              />
-              <OptionButton
-                selected={profile.dietType === 'lowcarb' || profile.dietType === 'keto'}
-                onClick={() => updateProfile({ dietType: 'lowcarb' })}
-                emoji="🥑"
-                title="Low Carb"
-                subtitle="Weniger Kohlenhydrate"
-              />
-            </div>
-
-            {/* Cooking Time */}
-            <div className="pt-4">
-              <p className="text-sm font-medium text-gray-700 mb-3 px-1">Wie viel Zeit hast du zum Kochen?</p>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { value: 'minimal', label: 'Wenig', time: '~10 min', emoji: '⚡' },
-                  { value: 'normal', label: 'Normal', time: '~20 min', emoji: '👍' },
-                  { value: 'elaborate', label: 'Viel', time: '~45 min', emoji: '👨‍🍳' },
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => updateProfile({ cookingEffort: opt.value as UserProfile['cookingEffort'] })}
-                    className={`p-4 rounded-2xl text-center transition-all active:scale-[0.98] touch-manipulation ${
-                      profile.cookingEffort === opt.value
-                        ? 'bg-teal-50 border-2 border-teal-500'
-                        : 'bg-gray-50 border-2 border-transparent'
-                    }`}
-                  >
-                    <span className="text-3xl block mb-1">{opt.emoji}</span>
-                    <span className="text-sm font-medium text-gray-700 block">{opt.label}</span>
-                    <span className="text-xs text-gray-500">{opt.time}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Step 5: Meals */}
-        {step === 4 && (
-          <div className="space-y-6 animate-fade-in-up">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Wann isst du?</h1>
-              <p className="text-gray-500">Tippe auf die Mahlzeiten, die du planst</p>
-            </div>
-            
-            <div className="space-y-3">
-              {[
-                { key: 'breakfast', label: 'Frühstück', time: 'morgens', emoji: '🌅' },
-                { key: 'lunch', label: 'Mittagessen', time: 'mittags', emoji: '☀️' },
-                { key: 'dinner', label: 'Abendessen', time: 'abends', emoji: '🌙' },
-                { key: 'morningSnack', label: 'Snack vormittags', time: 'optional', emoji: '🍎' },
-                { key: 'afternoonSnack', label: 'Snack nachmittags', time: 'optional', emoji: '🍌' },
-              ].map(meal => (
-                <button
-                  key={meal.key}
-                  type="button"
-                  onClick={() => {
-                    updateProfile({
-                      meals: {
-                        ...profile.meals!,
-                        [meal.key]: !profile.meals![meal.key as keyof typeof profile.meals],
-                      },
-                    });
-                  }}
-                  className={`w-full p-5 rounded-2xl flex items-center gap-4 transition-all active:scale-[0.98] touch-manipulation ${
-                    profile.meals![meal.key as keyof typeof profile.meals]
-                      ? 'bg-teal-50 border-2 border-teal-500'
-                      : 'bg-gray-50 border-2 border-transparent'
-                  }`}
-                >
-                  <span className="text-4xl">{meal.emoji}</span>
-                  <div className="flex-1 text-left">
-                    <p className="font-semibold text-gray-900">{meal.label}</p>
-                    <p className="text-sm text-gray-500">{meal.time}</p>
-                  </div>
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
-                    profile.meals![meal.key as keyof typeof profile.meals]
-                      ? 'bg-teal-500 border-teal-500'
-                      : 'border-gray-300'
-                  }`}>
-                    {profile.meals![meal.key as keyof typeof profile.meals] && (
-                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Quick tip */}
-            <div className="bg-amber-50 rounded-2xl p-4 flex items-start gap-3">
-              <span className="text-2xl">💡</span>
-              <p className="text-sm text-amber-800">
-                <strong>Tipp:</strong> Wähle mindestens Frühstück, Mittag und Abendessen für einen ausgewogenen Plan.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Step 6: Summary */}
-        {step === 5 && (
-          <div className="space-y-6 animate-fade-in-up">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Perfekt! 🎉</h1>
-              <p className="text-gray-500">Dein persönlicher Plan ist fertig</p>
-            </div>
-            
-            {/* Big Calorie Card */}
-            <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-3xl p-8 text-center text-white shadow-xl">
-              <p className="text-teal-100 mb-2">Dein tägliches Ziel</p>
-              <p className="text-6xl font-bold mb-2">{targetCalories}</p>
-              <p className="text-teal-100 text-xl">Kalorien pro Tag</p>
+          {/* Step 1: Personal Data */}
+          {step === 0 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold mb-2 text-gray-900">Erzähl uns von dir</h2>
+              <p className="text-gray-500 mb-6">Diese Daten helfen uns, deinen Kalorienbedarf zu berechnen.</p>
               
-              {/* Macros - Simple */}
-              <div className="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-teal-400/30">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Geschlecht</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'male', label: 'Männlich', emoji: '👨' },
+                    { value: 'female', label: 'Weiblich', emoji: '👩' },
+                    { value: 'other', label: 'Divers', emoji: '🧑' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => updateProfile({ gender: opt.value as UserProfile['gender'] })}
+                      className={`p-5 rounded-2xl text-center transition-all transform hover:scale-105 active:scale-95 touch-manipulation ${
+                        profile.gender === opt.value
+                          ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
+                          : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                      }`}
+                    >
+                      <span className="text-4xl mb-2 block">{opt.emoji}</span>
+                      <span className="text-sm font-medium text-gray-700">{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Alter</label>
+                <NumberInput
+                  value={profile.age || 30}
+                  onChange={(v) => updateProfile({ age: v })}
+                  min={14}
+                  max={100}
+                  unit="Jahre"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Größe</label>
+                <NumberInput
+                  value={profile.height || 175}
+                  onChange={(v) => updateProfile({ height: v })}
+                  min={120}
+                  max={230}
+                  unit="cm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-3xl font-bold">{macros.protein}g</p>
-                  <p className="text-sm text-teal-100">Eiweiß</p>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Aktuelles Gewicht</label>
+                  <NumberInput
+                    value={profile.weight || 80}
+                    onChange={(v) => updateProfile({ weight: v })}
+                    min={40}
+                    max={250}
+                    unit="kg"
+                  />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold">{macros.carbs}g</p>
-                  <p className="text-sm text-teal-100">Kohlenhydrate</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold">{macros.fat}g</p>
-                  <p className="text-sm text-teal-100">Fett</p>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Zielgewicht</label>
+                  <NumberInput
+                    value={profile.targetWeight || 75}
+                    onChange={(v) => updateProfile({ targetWeight: v })}
+                    min={40}
+                    max={200}
+                    unit="kg"
+                  />
                 </div>
               </div>
             </div>
+          )}
 
-            {/* What to expect */}
-            <div className="bg-gray-50 rounded-2xl p-5 space-y-4">
-              <p className="font-semibold text-gray-900">Das erwartet dich:</p>
+          {/* Step 2: Goal */}
+          {step === 1 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold mb-2 text-gray-900">Was ist dein Ziel?</h2>
+              <p className="text-gray-500 mb-6">Dein Ziel bestimmt deinen Kalorienplan.</p>
+              
               <div className="space-y-3">
                 {[
-                  { emoji: '📅', text: 'Tagesplan mit leckeren Rezepten' },
-                  { emoji: '🔄', text: 'Rezepte tauschen mit einem Klick' },
-                  { emoji: '🛒', text: 'Automatische Einkaufsliste' },
-                  { emoji: '💧', text: 'Wasser-Tracker' },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <span className="text-2xl">{item.emoji}</span>
-                    <span className="text-gray-700">{item.text}</span>
-                  </div>
+                  { value: 'lose', label: 'Abnehmen', emoji: '🔥', desc: 'Fett verbrennen, Gewicht reduzieren', color: 'from-orange-400 to-red-500' },
+                  { value: 'gain', label: 'Muskelaufbau', emoji: '💪', desc: 'Muskelmasse aufbauen', color: 'from-blue-400 to-indigo-500' },
+                  { value: 'maintain', label: 'Gewicht halten', emoji: '⚖️', desc: 'Gesund essen, Gewicht stabilisieren', color: 'from-green-400 to-teal-500' },
+                  { value: 'define', label: 'Definition', emoji: '🏋️', desc: 'Muskeln definieren, Fett reduzieren', color: 'from-purple-400 to-pink-500' },
+                  { value: 'performance', label: 'Leistung steigern', emoji: '🏃', desc: 'Energie für sportliche Ziele', color: 'from-yellow-400 to-orange-500' },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => updateProfile({ goal: opt.value as UserProfile['goal'] })}
+                    className={`w-full p-5 rounded-2xl flex items-center gap-4 text-left transition-all transform hover:scale-[1.02] ${
+                      profile.goal === opt.value
+                        ? 'bg-gradient-to-r ' + opt.color + ' text-white shadow-lg'
+                        : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                    }`}
+                  >
+                    <span className={`text-4xl ${profile.goal === opt.value ? 'animate-bounce' : ''}`}>{opt.emoji}</span>
+                    <div>
+                      <p className={`font-bold text-lg ${profile.goal === opt.value ? 'text-white' : 'text-gray-900'}`}>{opt.label}</p>
+                      <p className={`text-sm ${profile.goal === opt.value ? 'text-white/80' : 'text-gray-500'}`}>{opt.desc}</p>
+                    </div>
+                  </button>
                 ))}
               </div>
             </div>
+          )}
 
-            {/* FIT-INN Branding */}
-            <div className="text-center pt-4">
-              <div className="flex items-center justify-center gap-2">
-                <Image src="/logo.png" alt="FIT-INN" width={28} height={28} className="rounded" />
-                <span className="font-bold text-gray-700">FIT-INN Trier</span>
+          {/* Step 3: Activity Level */}
+          {step === 2 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold mb-2 text-gray-900">Wie aktiv bist du?</h2>
+              <p className="text-gray-500 mb-6">Dein Aktivitätslevel beeinflusst deinen Kalorienbedarf.</p>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Berufliche Tätigkeit</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { value: 'sedentary', label: 'Sitzend', emoji: '💻', desc: 'Büro, Schreibtisch' },
+                    { value: 'standing', label: 'Stehend', emoji: '🧍', desc: 'Verkauf, Beratung' },
+                    { value: 'active', label: 'Aktiv', emoji: '🚶', desc: 'Handwerk, Pflege' },
+                    { value: 'heavy', label: 'Körperlich', emoji: '🏗️', desc: 'Bau, Landwirtschaft' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => updateProfile({ occupation: opt.value as UserProfile['occupation'] })}
+                      className={`p-4 rounded-2xl text-center transition-all transform hover:scale-105 active:scale-95 touch-manipulation ${
+                        profile.occupation === opt.value
+                          ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
+                          : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                      }`}
+                    >
+                      <span className="text-3xl mb-2 block">{opt.emoji}</span>
+                      <span className="text-sm font-medium text-gray-700 block">{opt.label}</span>
+                      <span className="text-xs text-gray-500">{opt.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Wie oft trainierst du pro Woche?
+                </label>
+                <div className="bg-gray-50 rounded-2xl p-4">
+                  <input
+                    type="range"
+                    min={0}
+                    max={7}
+                    value={profile.sportsFrequency}
+                    onChange={(e) => updateProfile({ sportsFrequency: parseInt(e.target.value) })}
+                    className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                  />
+                  <div className="flex justify-between mt-2 text-xs text-gray-500">
+                    <span>0x</span>
+                    <span className="text-2xl font-bold text-teal-600">{profile.sportsFrequency}x / Woche</span>
+                    <span>7x</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Alltagsaktivität</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'low', label: 'Wenig', emoji: '🛋️', desc: '<5k Schritte' },
+                    { value: 'moderate', label: 'Moderat', emoji: '🚶', desc: '5-10k Schritte' },
+                    { value: 'high', label: 'Viel', emoji: '🏃', desc: '>10k Schritte' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => updateProfile({ dailyActivity: opt.value as UserProfile['dailyActivity'] })}
+                      className={`p-4 rounded-2xl text-center transition-all transform hover:scale-105 active:scale-95 touch-manipulation ${
+                        profile.dailyActivity === opt.value
+                          ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
+                          : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                      }`}
+                    >
+                      <span className="text-3xl mb-2 block">{opt.emoji}</span>
+                      <span className="text-sm font-medium text-gray-700 block">{opt.label}</span>
+                      <span className="text-xs text-gray-500">{opt.desc}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Step 4: Diet Type */}
+          {step === 3 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold mb-2 text-gray-900">Deine Ernährungsform</h2>
+              <p className="text-gray-500 mb-6">Wir passen die Rezepte an deine Präferenzen an.</p>
+              
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: 'mixed', label: 'Mischkost', emoji: '🥩🥬', desc: 'Alles erlaubt' },
+                  { value: 'vegetarian', label: 'Vegetarisch', emoji: '🥬', desc: 'Kein Fleisch/Fisch' },
+                  { value: 'vegan', label: 'Vegan', emoji: '🌱', desc: 'Rein pflanzlich' },
+                  { value: 'pescatarian', label: 'Pescetarisch', emoji: '🐟', desc: 'Fisch, kein Fleisch' },
+                  { value: 'lowcarb', label: 'Low Carb', emoji: '🥑', desc: 'Wenig Kohlenhydrate' },
+                  { value: 'highprotein', label: 'High Protein', emoji: '💪', desc: 'Proteinreich' },
+                  { value: 'keto', label: 'Ketogen', emoji: '🥓', desc: 'Sehr wenig Carbs' },
+                  { value: 'paleo', label: 'Paleo', emoji: '🦴', desc: 'Steinzeit-Ernährung' },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => updateProfile({ dietType: opt.value as UserProfile['dietType'] })}
+                    className={`p-4 rounded-2xl text-center transition-all transform hover:scale-105 active:scale-95 touch-manipulation ${
+                      profile.dietType === opt.value
+                        ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
+                        : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                    }`}
+                  >
+                    <span className="text-3xl mb-2 block">{opt.emoji}</span>
+                    <span className="text-sm font-medium text-gray-700 block">{opt.label}</span>
+                    <span className="text-xs text-gray-500">{opt.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 5: Allergies */}
+          {step === 4 && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2 text-gray-900">Allergien & Unverträglichkeiten</h2>
+                  <p className="text-gray-500">Wähle alles aus, was auf dich zutrifft</p>
+                </div>
+                <span className="px-3 py-1 bg-gray-100 text-gray-500 text-xs font-medium rounded-full">Optional</span>
+              </div>
+              
+              <div className="space-y-3">
+                {allergiesOptions.map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => {
+                      const allergies = profile.allergies || [];
+                      const updated = allergies.includes(opt.id)
+                        ? allergies.filter(a => a !== opt.id)
+                        : [...allergies, opt.id];
+                      updateProfile({ allergies: updated });
+                    }}
+                    className={`w-full p-4 rounded-2xl flex items-center gap-4 text-left transition-all transform hover:scale-[1.01] ${
+                      profile.allergies?.includes(opt.id)
+                        ? 'bg-red-50 border-2 border-red-400 shadow-md'
+                        : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                    }`}
+                  >
+                    <span className="text-3xl">{opt.emoji}</span>
+                    <span className="flex-1 text-gray-700 font-medium">{opt.label}</span>
+                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+                      profile.allergies?.includes(opt.id)
+                        ? 'bg-red-500 border-red-500'
+                        : 'border-gray-300'
+                    }`}>
+                      {profile.allergies?.includes(opt.id) && (
+                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 6: Food Preferences */}
+          {step === 5 && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2 text-gray-900">Lebensmittel-Präferenzen</h2>
+                  <p className="text-gray-500">Was magst du nicht?</p>
+                </div>
+                <span className="px-3 py-1 bg-gray-100 text-gray-500 text-xs font-medium rounded-full">Optional</span>
+              </div>
+              
+              <div className="flex flex-wrap gap-3">
+                {commonFoods.map(food => (
+                  <button
+                    key={food.id}
+                    type="button"
+                    onClick={() => {
+                      const excluded = profile.excludedFoods || [];
+                      const updated = excluded.includes(food.id)
+                        ? excluded.filter(f => f !== food.id)
+                        : [...excluded, food.id];
+                      updateProfile({ excludedFoods: updated });
+                    }}
+                    className={`px-5 py-3 rounded-full text-sm font-medium transition-all transform hover:scale-105 active:scale-95 touch-manipulation ${
+                      profile.excludedFoods?.includes(food.id)
+                        ? 'bg-red-100 text-red-600 border-2 border-red-300 shadow-md'
+                        : 'bg-gray-100 text-gray-600 border-2 border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    {food.label}
+                    {profile.excludedFoods?.includes(food.id) && ' ✕'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 7: Practicality */}
+          {step === 6 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold mb-2 text-gray-900">Alltagstauglichkeit</h2>
+              <p className="text-gray-500 mb-6">Wie viel Zeit hast du zum Kochen?</p>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Kochaufwand</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'minimal', label: 'Schnell', emoji: '⚡', desc: '<10 Min' },
+                    { value: 'normal', label: 'Normal', emoji: '👍', desc: '<20 Min' },
+                    { value: 'elaborate', label: 'Aufwendig', emoji: '👨‍🍳', desc: '<45 Min' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => updateProfile({ cookingEffort: opt.value as UserProfile['cookingEffort'] })}
+                      className={`p-4 rounded-2xl text-center transition-all transform hover:scale-105 active:scale-95 touch-manipulation ${
+                        profile.cookingEffort === opt.value
+                          ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
+                          : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                      }`}
+                    >
+                      <span className="text-3xl mb-2 block">{opt.emoji}</span>
+                      <span className="text-sm font-medium text-gray-700 block">{opt.label}</span>
+                      <span className="text-xs text-gray-500">{opt.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Meal Prep?</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => updateProfile({ mealPrep: true })}
+                    className={`p-5 rounded-2xl text-center transition-all transform hover:scale-105 active:scale-95 touch-manipulation ${
+                      profile.mealPrep
+                        ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
+                        : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                    }`}
+                  >
+                    <span className="text-3xl mb-2 block">📦</span>
+                    <span className="text-sm font-medium text-gray-700">Ja, vorkochen</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateProfile({ mealPrep: false })}
+                    className={`p-5 rounded-2xl text-center transition-all transform hover:scale-105 active:scale-95 touch-manipulation ${
+                      !profile.mealPrep
+                        ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
+                        : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                    }`}
+                  >
+                    <span className="text-3xl mb-2 block">🍳</span>
+                    <span className="text-sm font-medium text-gray-700">Täglich frisch</span>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Arbeitsplatz</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { value: 'homeoffice', label: 'Home Office', emoji: '🏠' },
+                    { value: 'office', label: 'Büro', emoji: '🏢' },
+                    { value: 'mobile', label: 'Unterwegs', emoji: '🚗' },
+                    { value: 'shift', label: 'Schichtarbeit', emoji: '🔄' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => updateProfile({ workType: opt.value as UserProfile['workType'] })}
+                      className={`p-4 rounded-2xl text-center transition-all transform hover:scale-105 active:scale-95 touch-manipulation ${
+                        profile.workType === opt.value
+                          ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
+                          : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                      }`}
+                    >
+                      <span className="text-2xl mb-2 block">{opt.emoji}</span>
+                      <span className="text-sm text-gray-700">{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 8: Meal Structure */}
+          {step === 7 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold mb-2 text-gray-900">Deine Mahlzeiten</h2>
+              <p className="text-gray-500 mb-6">Welche Mahlzeiten möchtest du planen?</p>
+              
+              <div className="space-y-3">
+                {[
+                  { key: 'breakfast', label: 'Frühstück', emoji: '🌅', time: '07:00 - 09:00' },
+                  { key: 'morningSnack', label: 'Vormittags-Snack', emoji: '🍎', time: '10:00 - 11:00' },
+                  { key: 'lunch', label: 'Mittagessen', emoji: '🍽️', time: '12:00 - 14:00' },
+                  { key: 'afternoonSnack', label: 'Nachmittags-Snack', emoji: '🍏', time: '15:00 - 16:00' },
+                  { key: 'dinner', label: 'Abendessen', emoji: '🌙', time: '18:00 - 20:00' },
+                  { key: 'lateSnack', label: 'Spät-Snack', emoji: '🌜', time: '21:00 - 22:00' },
+                ].map(meal => (
+                  <button
+                    key={meal.key}
+                    type="button"
+                    onClick={() => {
+                      updateProfile({
+                        meals: {
+                          ...profile.meals!,
+                          [meal.key]: !profile.meals![meal.key as keyof typeof profile.meals],
+                        },
+                      });
+                    }}
+                    className={`w-full p-4 rounded-2xl flex items-center gap-4 text-left transition-all transform hover:scale-[1.01] ${
+                      profile.meals![meal.key as keyof typeof profile.meals]
+                        ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
+                        : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                    }`}
+                  >
+                    <span className="text-3xl">{meal.emoji}</span>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{meal.label}</p>
+                      <p className="text-sm text-gray-500">{meal.time}</p>
+                    </div>
+                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+                      profile.meals![meal.key as keyof typeof profile.meals]
+                        ? 'bg-teal-500 border-teal-500'
+                        : 'border-gray-300'
+                    }`}>
+                      {profile.meals![meal.key as keyof typeof profile.meals] && (
+                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 9: Household */}
+          {step === 8 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold mb-2 text-gray-900">Dein Haushalt</h2>
+              <p className="text-gray-500 mb-6">Für wen kochst du?</p>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Für wie viele Personen kochst du?
+                </label>
+                <div className="bg-gray-50 rounded-2xl p-6">
+                  <div className="flex items-center justify-center gap-6">
+                    {[1, 2, 3, 4, 5, 6].map(n => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => updateProfile({ householdSize: n })}
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold transition-all transform hover:scale-110 ${
+                          profile.householdSize === n
+                            ? 'bg-teal-500 text-white shadow-lg'
+                            : 'bg-white text-gray-600 shadow-sm hover:shadow-md'
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-center mt-4 text-teal-600 font-medium">
+                    {profile.householdSize === 1 ? '1 Person' : `${profile.householdSize} Personen`}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Budget</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'cheap', label: 'Günstig', emoji: '💰', desc: 'Budget-freundlich' },
+                    { value: 'normal', label: 'Normal', emoji: '💵', desc: 'Ausgewogen' },
+                    { value: 'any', label: 'Egal', emoji: '💎', desc: 'Premium möglich' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => updateProfile({ budget: opt.value as UserProfile['budget'] })}
+                      className={`p-4 rounded-2xl text-center transition-all transform hover:scale-105 active:scale-95 touch-manipulation ${
+                        profile.budget === opt.value
+                          ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
+                          : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                      }`}
+                    >
+                      <span className="text-3xl mb-2 block">{opt.emoji}</span>
+                      <span className="text-sm font-medium text-gray-700 block">{opt.label}</span>
+                      <span className="text-xs text-gray-500">{opt.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 10: Summary */}
+          {step === 9 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold mb-2 text-gray-900">Dein Plan ist bereit! 🎉</h2>
+              <p className="text-gray-500 mb-6">Hier ist deine persönliche Zusammenfassung</p>
+              
+              {/* TDEE Calorie Card with Animation */}
+              <div className={`bg-gradient-to-br from-teal-500 via-teal-600 to-teal-700 rounded-3xl p-8 text-center text-white shadow-2xl transform transition-all duration-700 ${
+                showTDEEAnimation ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+              }`}>
+                <p className="text-teal-100 text-sm mb-2 uppercase tracking-wider">Dein tägliches Kalorienziel</p>
+                <div className="relative">
+                  <p className={`text-6xl font-black mb-2 transition-all duration-1000 ${
+                    showTDEEAnimation ? 'opacity-100' : 'opacity-0'
+                  }`} style={{ 
+                    textShadow: '0 4px 8px rgba(0,0,0,0.2)',
+                  }}>
+                    {showTDEEAnimation ? targetCalories : 0}
+                  </p>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className={`w-32 h-32 rounded-full border-4 border-teal-300/30 transition-all duration-1000 ${
+                      showTDEEAnimation ? 'scale-150 opacity-0' : 'scale-100 opacity-100'
+                    }`} />
+                  </div>
+                </div>
+                <p className="text-teal-100 text-lg">kcal pro Tag</p>
+                
+                <div className="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-teal-400/30">
+                  <div className={`transform transition-all duration-500 delay-300 ${
+                    showTDEEAnimation ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                  }`}>
+                    <p className="text-3xl font-bold">{macros.protein}g</p>
+                    <p className="text-xs text-teal-100 uppercase tracking-wider">Protein</p>
+                  </div>
+                  <div className={`transform transition-all duration-500 delay-500 ${
+                    showTDEEAnimation ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                  }`}>
+                    <p className="text-3xl font-bold">{macros.carbs}g</p>
+                    <p className="text-xs text-teal-100 uppercase tracking-wider">Kohlenhydrate</p>
+                  </div>
+                  <div className={`transform transition-all duration-500 delay-700 ${
+                    showTDEEAnimation ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                  }`}>
+                    <p className="text-3xl font-bold">{macros.fat}g</p>
+                    <p className="text-xs text-teal-100 uppercase tracking-wider">Fett</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className={`bg-gray-50 rounded-2xl p-5 space-y-3 transform transition-all duration-500 delay-500 ${
+                showTDEEAnimation ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+              }`}>
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="text-gray-500">Ziel</span>
+                  <span className="font-medium text-gray-900 flex items-center gap-2">
+                    {profile.goal === 'lose' && '🔥'}
+                    {profile.goal === 'gain' && '💪'}
+                    {profile.goal === 'maintain' && '⚖️'}
+                    {profile.goal === 'define' && '🏋️'}
+                    {profile.goal === 'performance' && '🏃'}
+                    {getGoalLabel(profile.goal || '')}
+                  </span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="text-gray-500">Ernährungsform</span>
+                  <span className="font-medium text-gray-900">{getDietLabel(profile.dietType || '')}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="text-gray-500">Grundumsatz (TDEE)</span>
+                  <span className="font-medium text-gray-900">{tdee} kcal</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-gray-500">Wasserziel</span>
+                  <span className="font-medium text-gray-900">💧 {waterGoal} L / Tag</span>
+                </div>
+              </div>
+              
+              {/* FIT-INN Branding */}
+              <div className={`text-center pt-4 transform transition-all duration-500 delay-700 ${
+                showTDEEAnimation ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+              }`}>
+                <p className="text-gray-400 text-sm">Powered by</p>
+                <div className="flex items-center justify-center gap-2 mt-1">
+                  <Image src="/logo.png" alt="FIT-INN" width={24} height={24} className="rounded" />
+                  <span className="font-bold text-gray-700">FIT-INN Trier</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Bottom Button - Always Visible */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-4 safe-area-bottom">
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-4 flex gap-3 shadow-lg">
+        {step > 0 && (
+          <button
+            type="button"
+            onClick={prevStep}
+            className="flex-1 py-4 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Zurück
+          </button>
+        )}
+        
+        {/* Skip button for optional steps */}
+        {!steps[step].required && step < steps.length - 1 && (
+          <button
+            type="button"
+            onClick={skipStep}
+            className="px-4 py-4 rounded-xl text-gray-500 font-medium hover:text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Überspringen
+          </button>
+        )}
+        
         {step < steps.length - 1 ? (
           <button
             type="button"
             onClick={nextStep}
-            className="w-full py-5 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 text-white font-bold text-xl shadow-lg shadow-teal-500/30 active:scale-[0.98] transition-transform touch-manipulation"
+            className="flex-1 py-4 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold hover:from-teal-600 hover:to-teal-700 transition-all transform hover:scale-[1.02] shadow-lg shadow-teal-500/25 flex items-center justify-center gap-2"
           >
-            Weiter →
+            Weiter
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         ) : (
           <button
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-full py-5 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-xl shadow-lg shadow-orange-500/30 disabled:opacity-50 active:scale-[0.98] transition-transform touch-manipulation"
+            className="flex-1 py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 transition-all transform hover:scale-[1.02] shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
-              <span className="flex items-center justify-center gap-3">
-                <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
+              <>
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
                 Plan wird erstellt...
-              </span>
+              </>
             ) : (
-              'Plan starten! 🚀'
+              <>
+                Plan erstellen
+                <span className="text-xl">🚀</span>
+              </>
             )}
           </button>
         )}
       </div>
+
+      {/* CSS for animations */}
+      <style jsx>{`
+        @keyframes slide-in-left {
+          from {
+            opacity: 0;
+            transform: translateX(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes slide-in-right {
+          from {
+            opacity: 0;
+            transform: translateX(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        .animate-slide-in-left {
+          animation: slide-in-left 0.3s ease-out forwards;
+        }
+        .animate-slide-in-right {
+          animation: slide-in-right 0.3s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }

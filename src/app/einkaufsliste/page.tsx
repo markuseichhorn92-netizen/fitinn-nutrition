@@ -16,13 +16,18 @@ const CHECKED_KEY = 'fitinn_shopping_checked';
 
 const categoryOrder = [
   'Obst', 'Gemüse', 'Fleisch', 'Fisch', 'Milchprodukte', 'Eier',
-  'Getreide', 'Hülsenfrüchte', 'Nüsse', 'Fette', 'Gewürze', 'Sonstiges',
+  'Getreide', 'Hülsenfrüchte', 'Nüsse', 'Samen', 'Fette', 'Gewürze',
+  'Kräuter', 'Saucen', 'Aufstriche', 'Süßungsmittel', 'Nahrungsergänzung',
+  'Backzutaten', 'Soja', 'Süßes', 'Sonstiges',
 ];
 
 const categoryEmojis: Record<string, string> = {
   'Obst': '🍎', 'Gemüse': '🥬', 'Fleisch': '🥩', 'Fisch': '🐟',
-  'Milchprodukte': '🥛', 'Eier': '🥚', 'Getreide': '🍞', 'Hülsenfrüchte': '🫘',
-  'Nüsse': '🥜', 'Fette': '🫒', 'Gewürze': '🧂', 'Sonstiges': '📦',
+  'Milchprodukte': '🥛', 'Eier': '🥚', 'Getreide': '🌾', 'Hülsenfrüchte': '🫘',
+  'Nüsse': '🥜', 'Samen': '🌱', 'Fette': '🫒', 'Gewürze': '🧂',
+  'Kräuter': '🌿', 'Saucen': '🥫', 'Aufstriche': '🍯', 'Süßungsmittel': '🍬',
+  'Nahrungsergänzung': '💊', 'Backzutaten': '🧁', 'Soja': '🫛', 'Süßes': '🍫',
+  'Sonstiges': '📦',
 };
 
 function loadCheckedItems(): Set<string> {
@@ -66,15 +71,20 @@ export default function ShoppingListPage() {
       return;
     }
     setProfile(storedProfile);
+
+    // Load saved checked items
     setCheckedItems(loadCheckedItems());
 
+    // Load all stored plans for this week
     const weekDates = getWeekDates();
     const storedPlans = loadAllPlans();
     const plans: DayPlan[] = [];
 
     for (const dateStr of weekDates) {
       const plan = storedPlans[dateStr];
-      if (plan) plans.push(plan);
+      if (plan) {
+        plans.push(plan);
+      }
     }
 
     if (plans.length === 0) {
@@ -118,148 +128,122 @@ export default function ShoppingListPage() {
     saveCheckedItems(newChecked);
   };
 
-  const clearAll = () => {
-    setCheckedItems(new Set());
-    saveCheckedItems(new Set());
-  };
-
   const groupByCategory = (items: ShoppingItem[]) => {
     return items.reduce((acc, item) => {
-      const cat = categoryOrder.includes(item.category) ? item.category : 'Sonstiges';
-      if (!acc[cat]) acc[cat] = [];
-      acc[cat].push(item);
+      if (!acc[item.category]) acc[item.category] = [];
+      acc[item.category].push(item);
       return acc;
     }, {} as Record<string, ShoppingItem[]>);
   };
 
+  const formatAmount = (amount: number): string => {
+    if (amount >= 1000) return (amount / 1000).toFixed(1) + 'kg';
+    return amount % 1 === 0 ? amount.toString() : amount.toFixed(1);
+  };
+
   if (isLoading || !profile) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-        <div className="animate-spin w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full mb-4" />
-        <p className="text-gray-500">Einkaufsliste wird geladen...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full" />
       </div>
     );
   }
 
   const groupedItems = groupByCategory(items);
   const uncheckedCount = items.length - checkedItems.size;
-  const progress = items.length > 0 ? (checkedItems.size / items.length) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 pb-24 lg:pb-8">
       {/* Header */}
-      <div className="sticky top-0 bg-white z-10 shadow-sm safe-area-top">
-        <div className="px-5 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">🛒</span>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Einkaufsliste</h1>
-                <p className="text-sm text-gray-500">Diese Woche</p>
-              </div>
-            </div>
-            {checkedItems.size > 0 && (
-              <button
-                onClick={clearAll}
-                className="text-sm text-gray-500 px-3 py-2 rounded-lg bg-gray-100 active:bg-gray-200 touch-manipulation"
-              >
-                Zurücksetzen
-              </button>
-            )}
-          </div>
-          
-          {/* Progress */}
-          {items.length > 0 && (
+      <div className="sticky top-0 bg-white z-10 px-4 lg:px-6 py-4 border-b border-gray-100 shadow-sm">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/plan" className="p-2 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors lg:block hidden">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </Link>
+            <span className="text-2xl">🛒</span>
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600">
-                  {progress === 100 ? '🎉 Alles erledigt!' : `${uncheckedCount} übrig`}
-                </span>
-                <span className="text-sm text-gray-500">{checkedItems.size}/{items.length}</span>
-              </div>
-              <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    progress === 100 ? 'bg-green-500' : 'bg-teal-500'
-                  }`}
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
+              <h1 className="text-xl font-bold text-gray-900">Einkaufsliste</h1>
+              <p className="text-sm text-gray-500">
+                Diese Woche • {items.length > 0 ? `${uncheckedCount} von ${items.length} offen` : 'Keine Pläne vorhanden'}
+              </p>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      <div className="px-4 py-4">
+      <div className="max-w-4xl mx-auto px-4 lg:px-6 py-4 lg:py-6">
         {items.length === 0 ? (
           <div className="text-center py-16">
-            <span className="text-6xl block mb-4">📋</span>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Noch keine Liste</h2>
-            <p className="text-gray-500 mb-6">Erstelle zuerst einen Ernährungsplan</p>
-            <Link 
-              href="/plan" 
-              className="inline-block px-6 py-4 bg-teal-600 text-white rounded-2xl font-semibold active:scale-[0.98] transition-transform touch-manipulation"
-            >
-              Zum Ernährungsplan →
+            <span className="text-5xl mb-4 block">📋</span>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Keine Einkaufsliste</h2>
+            <p className="text-gray-500 mb-6">Erstelle zuerst einen Ernährungsplan, damit die Einkaufsliste generiert werden kann.</p>
+            <Link href="/plan" className="px-6 py-3 bg-teal-600 text-white rounded-xl font-medium hover:bg-teal-700 transition-colors">
+              Zum Ernährungsplan
             </Link>
           </div>
         ) : (
-          <div className="space-y-6">
-            {categoryOrder.filter(cat => groupedItems[cat]).map((category) => (
-              <div key={category}>
-                {/* Category Header */}
-                <div className="flex items-center gap-2 mb-3 px-1">
-                  <span className="text-2xl">{categoryEmojis[category]}</span>
-                  <h2 className="font-semibold text-gray-700">{category}</h2>
-                  <span className="text-sm text-gray-400 ml-auto">
-                    {groupedItems[category].filter(i => checkedItems.has(i.name)).length}/{groupedItems[category].length}
-                  </span>
-                </div>
-                
-                {/* Items */}
-                <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-                  {groupedItems[category].map((item, index) => (
-                    <button
-                      key={item.name}
-                      onClick={() => toggleItem(item.name)}
-                      className={`w-full p-4 flex items-center gap-4 text-left active:bg-gray-50 transition-colors touch-manipulation ${
-                        index > 0 ? 'border-t border-gray-100' : ''
-                      }`}
-                    >
-                      {/* Checkbox */}
-                      <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${
-                        checkedItems.has(item.name) 
-                          ? 'bg-teal-500 border-teal-500' 
-                          : 'border-gray-300'
-                      }`}>
-                        {checkedItems.has(item.name) && (
-                          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
-                      
-                      {/* Name */}
-                      <span className={`flex-1 text-lg ${
-                        checkedItems.has(item.name) ? 'text-gray-400 line-through' : 'text-gray-900'
-                      }`}>
-                        {item.name}
-                      </span>
-                      
-                      {/* Amount */}
-                      <span className={`text-sm font-medium ${
-                        checkedItems.has(item.name) ? 'text-gray-300' : 'text-gray-500'
-                      }`}>
-                        {item.amount >= 1000 
-                          ? `${(item.amount / 1000).toFixed(1)} kg` 
-                          : `${item.amount} ${item.unit}`}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+          <>
+            {/* Progress */}
+            <div className="bg-white rounded-2xl p-4 shadow-sm mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Fortschritt</span>
+                <span className="text-sm text-gray-500">{checkedItems.size} von {items.length} erledigt</span>
               </div>
-            ))}
-          </div>
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-teal-400 to-teal-600 rounded-full transition-all duration-500"
+                  style={{ width: `${items.length > 0 ? (checkedItems.size / items.length) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Categories */}
+            <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+              {Object.entries(groupedItems).map(([category, categoryItems]) => (
+                <div key={category} className="mb-6 lg:mb-0">
+                  <div className="flex items-center gap-2 mb-3 px-2">
+                    <span className="text-xl">{categoryEmojis[category] || '📦'}</span>
+                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{category}</h2>
+                    <span className="text-xs text-gray-400 ml-auto">
+                      {categoryItems.filter(i => checkedItems.has(i.name)).length}/{categoryItems.length}
+                    </span>
+                  </div>
+                  <div className="bg-white rounded-2xl divide-y divide-gray-100 shadow-sm overflow-hidden">
+                    {categoryItems.map((item) => (
+                      <button
+                        key={item.name}
+                        onClick={() => toggleItem(item.name)}
+                        className={`w-full p-4 flex items-center justify-between text-left transition-all hover:bg-gray-50 ${
+                          checkedItems.has(item.name) ? 'bg-gray-50/50' : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+                            checkedItems.has(item.name) ? 'bg-teal-500 border-teal-500' : 'border-gray-300 hover:border-teal-400'
+                          }`}>
+                            {checkedItems.has(item.name) && (
+                              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </div>
+                          <span className={`text-gray-700 ${checkedItems.has(item.name) ? 'line-through text-gray-400' : ''}`}>
+                            {item.name}
+                          </span>
+                        </div>
+                        <span className="text-gray-400 text-sm font-medium">
+                          {formatAmount(item.amount)} {item.unit}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

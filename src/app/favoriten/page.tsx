@@ -1,18 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
-import { loadFavorites, removeFavorite } from '@/lib/storage';
+import { getFavorites, removeFavorite as removeSupabaseFavorite } from '@/lib/supabase-data';
 import { getRecipeById } from '@/lib/mealPlanGenerator';
 import { Recipe } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 
 export default function FavoritenPage() {
+  const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const favoriteIds = loadFavorites();
+  const loadFavoriteRecipes = async () => {
+    // Load favorites from Supabase (or localStorage if not authenticated)
+    const favoriteIds = await getFavorites();
     const favoriteRecipes: Recipe[] = [];
     for (const id of favoriteIds) {
       const recipe = getRecipeById(id);
@@ -20,82 +25,102 @@ export default function FavoritenPage() {
     }
     setRecipes(favoriteRecipes);
     setIsLoading(false);
-  }, []);
+  };
 
-  const handleRemove = (recipeId: string) => {
-    removeFavorite(recipeId);
+  useEffect(() => {
+    if (!authLoading) {
+      loadFavoriteRecipes();
+    }
+  }, [authLoading, user]);
+
+  const handleRemove = async (recipeId: string) => {
+    // Remove from Supabase (and localStorage)
+    await removeSupabaseFavorite(recipeId);
     setRecipes(prev => prev.filter(r => r.id !== recipeId));
   };
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-        <div className="animate-spin w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full mb-4" />
-        <p className="text-gray-500">Favoriten werden geladen...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full" />
       </div>
     );
   }
 
+  const categoryEmoji: Record<string, string> = {
+    breakfast: '🥣',
+    lunch: '🥗',
+    dinner: '🍲',
+    snack: '🥜',
+  };
+
+  const categoryColor: Record<string, string> = {
+    breakfast: 'bg-amber-50',
+    lunch: 'bg-emerald-50',
+    dinner: 'bg-indigo-50',
+    snack: 'bg-orange-50',
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 pb-24 lg:pb-8">
       {/* Header */}
-      <div className="sticky top-0 bg-white z-10 px-5 py-4 border-b border-gray-100 shadow-sm safe-area-top">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">❤️</span>
-          <div>
+      <div className="sticky top-0 bg-white z-10 px-4 lg:px-8 py-4 border-b border-gray-100 shadow-sm">
+        <div className="max-w-4xl mx-auto flex items-center gap-3">
+          <Link href="/profil" className="p-2 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <span className="text-2xl">❤️</span>
+          <div className="flex-1">
             <h1 className="text-xl font-bold text-gray-900">Meine Favoriten</h1>
             <p className="text-sm text-gray-500">
-              {recipes.length} {recipes.length === 1 ? 'Rezept' : 'Rezepte'}
+              {recipes.length} Rezept{recipes.length !== 1 ? 'e' : ''}
+              {user && <span className="text-teal-600 ml-1">• Synchronisiert</span>}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="px-5 py-5">
+      <div className="max-w-4xl mx-auto px-4 lg:px-6 py-4 lg:py-6">
         {recipes.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="text-center py-20 text-gray-400">
             <span className="text-6xl block mb-4">❤️</span>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Noch keine Favoriten</h2>
-            <p className="text-gray-500 mb-6">
-              Tippe auf das Herz bei einem Rezept,<br />um es hier zu speichern
-            </p>
-            <Link 
-              href="/plan" 
-              className="inline-block px-6 py-4 bg-teal-600 text-white rounded-2xl font-semibold active:scale-[0.98] transition-transform touch-manipulation"
-            >
-              Zum Tagesplan →
+            <p className="font-medium text-lg text-gray-600">Noch keine Favoriten</p>
+            <p className="text-sm mt-2">Markiere Rezepte mit ❤️ um sie hier zu speichern</p>
+            <Link href="/plan" className="inline-block mt-6 px-6 py-3 rounded-xl bg-teal-600 text-white font-medium hover:bg-teal-700 transition-colors">
+              Zum Wochenplan
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {recipes.map((recipe) => (
               <div key={recipe.id} className="bg-white rounded-2xl overflow-hidden shadow-sm">
-                <Link href={`/plan/recipe/${recipe.id}`} className="block p-4">
-                  <div className="flex items-center gap-4">
-                    {/* Icon */}
-                    <div className="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-3xl shrink-0">
-                      {recipe.category === 'breakfast' ? '🥣' :
-                       recipe.category === 'lunch' ? '🥗' :
-                       recipe.category === 'dinner' ? '🍲' : '🍎'}
-                    </div>
-                    
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">{recipe.name}</h3>
-                      <div className="flex items-center gap-3 mt-1 text-sm">
-                        <span className="text-orange-600 font-semibold">{recipe.nutrition.calories} kcal</span>
-                        <span className="text-gray-400">•</span>
-                        <span className="text-gray-500">{recipe.totalTime} min</span>
+                <Link href={`/plan/recipe/${recipe.id}`}>
+                  <div className={`flex items-center justify-between px-4 py-3 ${categoryColor[recipe.category] || 'bg-gray-50'}`}>
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{categoryEmoji[recipe.category] || '🍽'}</span>
+                      <div>
+                        <span className="text-sm font-semibold text-gray-800">{recipe.nutrition.calories} kcal</span>
+                        <span className="text-xs text-gray-500 ml-2">⏱ {recipe.totalTime} min</span>
                       </div>
                     </div>
                   </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 text-base mb-2 line-clamp-2 hover:text-teal-600 transition-colors">
+                      {recipe.name}
+                    </h3>
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <span>P: {recipe.nutrition.protein}g</span>
+                      <span>K: {recipe.nutrition.carbs}g</span>
+                      <span>F: {recipe.nutrition.fat}g</span>
+                    </div>
+                  </div>
                 </Link>
-                
-                {/* Remove Button */}
                 <div className="px-4 pb-4">
                   <button
                     onClick={() => handleRemove(recipe.id)}
-                    className="w-full py-3 rounded-xl border-2 border-red-200 text-red-500 font-semibold active:bg-red-50 transition-colors touch-manipulation"
+                    className="w-full py-2 rounded-lg border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 transition-colors"
                   >
                     ❤️ Entfernen
                   </button>

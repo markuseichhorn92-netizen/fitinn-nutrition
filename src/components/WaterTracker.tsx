@@ -5,8 +5,8 @@ import { useState, useEffect, useCallback } from 'react';
 const WATER_LOG_KEY = 'fitinn_water_log';
 
 interface WaterEntry {
-  time: string;
-  amount: number;
+  time: string; // HH:MM
+  amount: number; // in liters
 }
 
 interface WaterDayData {
@@ -35,14 +35,26 @@ function saveWaterLog(date: string, data: WaterDayData): void {
   } catch { /* ignore */ }
 }
 
+// Also update legacy storage for compatibility
+function syncLegacyStorage(date: string, total: number): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem('fitinn_water_intake');
+    const all = raw ? JSON.parse(raw) : {};
+    all[date] = total;
+    localStorage.setItem('fitinn_water_intake', JSON.stringify(all));
+  } catch { /* ignore */ }
+}
+
 interface WaterTrackerProps {
-  goal: number;
+  goal: number; // in liters
   date: string;
 }
 
 export default function WaterTracker({ goal, date }: WaterTrackerProps) {
   const [data, setData] = useState<WaterDayData>({ entries: [], total: 0 });
   const [animating, setAnimating] = useState(false);
+  const [lastAdded, setLastAdded] = useState<number | null>(null);
 
   useEffect(() => {
     setData(loadWaterLog(date));
@@ -59,10 +71,12 @@ export default function WaterTracker({ goal, date }: WaterTrackerProps) {
     };
     setData(newData);
     saveWaterLog(date, newData);
+    syncLegacyStorage(date, newTotal);
     
     // Animation
+    setLastAdded(amount * 1000);
     setAnimating(true);
-    setTimeout(() => setAnimating(false), 500);
+    setTimeout(() => setAnimating(false), 600);
   }, [data, date]);
 
   const removeWater = useCallback(() => {
@@ -73,18 +87,18 @@ export default function WaterTracker({ goal, date }: WaterTrackerProps) {
     const newData: WaterDayData = { entries, total: newTotal };
     setData(newData);
     saveWaterLog(date, newData);
+    syncLegacyStorage(date, newTotal);
   }, [data, date]);
 
   const percentage = Math.min((data.total / goal) * 100, 100);
   const isComplete = data.total >= goal;
-  const glasses = Math.floor(data.total / 0.25);
 
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <span className={`text-2xl transition-transform ${animating ? 'scale-125' : ''}`}>
+          <span className={`text-2xl transition-transform duration-300 ${animating ? 'scale-125' : ''}`}>
             {isComplete ? '✅' : '💧'}
           </span>
           <span className="font-semibold text-gray-900 text-lg">Wasser</span>
@@ -92,61 +106,91 @@ export default function WaterTracker({ goal, date }: WaterTrackerProps) {
         {data.entries.length > 0 && (
           <button
             onClick={removeWater}
-            className="text-sm text-gray-400 px-3 py-1.5 rounded-lg bg-gray-50 active:bg-gray-100 touch-manipulation"
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors px-2 py-1 rounded-lg hover:bg-gray-50"
           >
-            ↩️ Zurück
+            Rückgängig
           </button>
         )}
       </div>
 
-      {/* Big Display */}
-      <div className="text-center mb-4">
-        <p className={`text-4xl font-bold transition-all ${
-          animating ? 'scale-110 text-blue-500' : isComplete ? 'text-green-500' : 'text-blue-600'
-        }`}>
-          {data.total.toFixed(1)} L
+      {/* Prominent Display */}
+      <div className="text-center mb-3">
+        <p className={`text-3xl font-bold transition-all duration-300 ${animating ? 'scale-110 text-blue-500' : isComplete ? 'text-green-500' : 'text-blue-600'}`}>
+          {data.total.toFixed(1)}L
+          <span className="text-lg font-normal text-gray-400"> / {goal.toFixed(1)}L</span>
         </p>
-        <p className="text-gray-500 mt-1">
-          von {goal.toFixed(1)} L
-        </p>
-        {isComplete && (
-          <p className="text-green-600 font-medium mt-2">🎉 Geschafft!</p>
+        {animating && lastAdded && (
+          <span className="inline-block text-sm text-blue-400 animate-bounce mt-1">
+            +{lastAdded}ml 💧
+          </span>
         )}
       </div>
 
       {/* Progress Bar */}
-      <div className="h-4 bg-gray-100 rounded-full overflow-hidden mb-5">
+      <div className="h-4 bg-gray-100 rounded-full overflow-hidden mb-4 relative">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
-            isComplete ? 'bg-green-500' : 'bg-blue-500'
+            isComplete
+              ? 'bg-gradient-to-r from-green-400 to-emerald-500'
+              : 'bg-gradient-to-r from-cyan-400 to-blue-500'
           }`}
           style={{ width: `${percentage}%` }}
         />
+        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white drop-shadow-sm">
+          {Math.round(percentage)}%
+        </span>
       </div>
 
-      {/* Big Add Buttons */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Add Buttons */}
+      <div className="flex gap-2 mb-4">
         <button
           onClick={() => addWater(0.25)}
-          className="py-4 rounded-2xl bg-blue-50 text-blue-600 font-semibold text-lg active:scale-[0.98] transition-transform touch-manipulation"
+          className={`flex-1 py-3 rounded-xl font-medium text-sm transition-all ${
+            animating ? 'scale-95' : 'hover:scale-[1.02]'
+          } bg-blue-50 text-blue-600 hover:bg-blue-100 active:bg-blue-200`}
         >
-          🥤 +1 Glas
+          🥤 +250ml
         </button>
         <button
           onClick={() => addWater(0.5)}
-          className="py-4 rounded-2xl bg-blue-500 text-white font-semibold text-lg active:scale-[0.98] transition-transform touch-manipulation"
+          className={`flex-1 py-3 rounded-xl font-medium text-sm transition-all ${
+            animating ? 'scale-95' : 'hover:scale-[1.02]'
+          } bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700`}
         >
-          🍶 +½ Liter
+          🍶 +500ml
         </button>
       </div>
 
-      {/* Simple Glass Counter */}
-      {glasses > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <p className="text-sm text-gray-500 text-center">
-            {glasses} {glasses === 1 ? 'Glas' : 'Gläser'} getrunken heute
-          </p>
+      {/* Timeline */}
+      {data.entries.length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Tagesverlauf</p>
+          <div className="flex items-center gap-1 flex-wrap">
+            {data.entries.map((entry, i) => (
+              <div
+                key={i}
+                className="group relative flex flex-col items-center"
+                title={`${entry.time} — ${entry.amount * 1000}ml`}
+              >
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition-all ${
+                  entry.amount >= 0.5
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-blue-100 text-blue-500'
+                }`}>
+                  💧
+                </div>
+                <span className="text-[9px] text-gray-400 mt-0.5">{entry.time}</span>
+              </div>
+            ))}
+          </div>
         </div>
+      )}
+
+      {/* Goal info */}
+      {isComplete && (
+        <p className="text-center text-sm text-green-600 font-medium mt-3">
+          🎉 Tagesziel erreicht!
+        </p>
       )}
     </div>
   );
