@@ -6,7 +6,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
-import { isNativeApp, openOAuthInBrowser } from '@/lib/capacitorAuth';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -23,12 +22,29 @@ export default function LandingPage() {
     return null;
   }
 
+  // SIMPLE Google Login - just redirect, no separate browser
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setError('');
     
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      setError('Login nicht verfügbar');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      await openOAuthInBrowser('google');
+      // Simple OAuth redirect - stays in same WebView
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      
+      if (error) throw error;
+      // Supabase will redirect automatically
     } catch (err: any) {
       setError(err.message || 'Login fehlgeschlagen');
       setIsLoading(false);
