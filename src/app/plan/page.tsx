@@ -262,16 +262,8 @@ export default function PlanPage() {
         return;
       }
       
-      // Initialize recipes from Spoonacular API
-      if (!isApiRecipesLoaded()) {
-        const dietMap: Record<string, string> = {
-          vegetarian: 'vegetarian',
-          vegan: 'vegan',
-          pescatarian: 'pescatarian',
-        };
-        const diet = dietMap[storedProfile.dietType] || undefined;
-        await initializeRecipes(diet);
-      }
+      // Initialize local recipes
+      await initializeRecipes();
       
       setProfile(storedProfile);
     };

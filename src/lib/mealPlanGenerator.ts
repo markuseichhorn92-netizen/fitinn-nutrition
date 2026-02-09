@@ -1,11 +1,10 @@
 import { Recipe, UserProfile, DayPlan, MealPlan, Nutrition } from '@/types';
-import { getRecipesByCategory, prefetchAllRecipes } from './recipeService';
 
-// Fallback recipes (minimal set for offline/error cases)
+// Lokale deutsche Rezepte - keine externe API
 import recipesData from '@/data/recipes.json';
-const fallbackRecipes = recipesData as Recipe[];
+const allRecipes = recipesData as Recipe[];
 
-// Recipe cache for the current session
+// Recipe cache for the current session (optional, for filtered results)
 let cachedRecipes: {
   breakfast: Recipe[];
   lunch: Recipe[];
@@ -13,18 +12,18 @@ let cachedRecipes: {
   snack: Recipe[];
 } | null = null;
 
-// Initialize recipes from API
-export async function initializeRecipes(diet?: string): Promise<void> {
-  try {
-    cachedRecipes = await prefetchAllRecipes(diet);
-    console.log('Recipes loaded from Spoonacular API');
-  } catch (error) {
-    console.error('Failed to load recipes from API, using fallback:', error);
-    cachedRecipes = null;
-  }
+// Initialize recipes (now just categorizes local recipes)
+export async function initializeRecipes(): Promise<void> {
+  cachedRecipes = {
+    breakfast: allRecipes.filter(r => r.category === 'breakfast'),
+    lunch: allRecipes.filter(r => r.category === 'lunch'),
+    dinner: allRecipes.filter(r => r.category === 'dinner'),
+    snack: allRecipes.filter(r => r.category === 'snack'),
+  };
+  console.log(`Loaded ${allRecipes.length} local recipes`);
 }
 
-// Get recipes by category (from cache or fallback)
+// Get recipes by category (direct from local data)
 function getRecipesByCategorySync(category: string): Recipe[] {
   if (cachedRecipes) {
     const key = category as keyof typeof cachedRecipes;
@@ -32,8 +31,8 @@ function getRecipesByCategorySync(category: string): Recipe[] {
       return cachedRecipes[key];
     }
   }
-  // Fallback to local data
-  return fallbackRecipes.filter(r => r.category === category);
+  // Direct filter from local data
+  return allRecipes.filter(r => r.category === category);
 }
 
 // Filter recipes based on user preferences
@@ -269,28 +268,12 @@ export function generateDayPlan(date: string, profile: UserProfile): DayPlan {
 
 // Get recipe by ID
 export function getRecipeById(id: string): Recipe | undefined {
-  // Check cached API recipes first
-  if (cachedRecipes) {
-    for (const category of Object.values(cachedRecipes)) {
-      const found = category.find(r => r.id === id);
-      if (found) return found;
-    }
-  }
-  // Fallback to local data
-  return fallbackRecipes.find(r => r.id === id);
+  return allRecipes.find(r => r.id === id);
 }
 
 // Get all recipes
 export function getAllRecipes(): Recipe[] {
-  if (cachedRecipes) {
-    return [
-      ...cachedRecipes.breakfast,
-      ...cachedRecipes.lunch,
-      ...cachedRecipes.dinner,
-      ...cachedRecipes.snack,
-    ];
-  }
-  return fallbackRecipes;
+  return allRecipes;
 }
 
 // Generate shopping list for a week
@@ -318,7 +301,18 @@ export function generateShoppingList(plans: DayPlan[]): Map<string, { amount: nu
   return items;
 }
 
-// Check if recipes are loaded from API
+// Check if recipes are loaded (always true with local data)
 export function isApiRecipesLoaded(): boolean {
-  return cachedRecipes !== null;
+  return true;
+}
+
+// Get recipe count by category
+export function getRecipeStats(): Record<string, number> {
+  return {
+    total: allRecipes.length,
+    breakfast: allRecipes.filter(r => r.category === 'breakfast').length,
+    lunch: allRecipes.filter(r => r.category === 'lunch').length,
+    dinner: allRecipes.filter(r => r.category === 'dinner').length,
+    snack: allRecipes.filter(r => r.category === 'snack').length,
+  };
 }
