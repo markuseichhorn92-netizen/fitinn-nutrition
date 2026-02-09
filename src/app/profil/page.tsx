@@ -51,7 +51,7 @@ export default function ProfilePage() {
         setProfile(storedProfile);
         setWeightInput(storedProfile.weight.toString());
         setSelectedGoal(storedProfile.goal);
-        setSelectedActivity(storedProfile.sportsFrequency || 'moderate');
+        setSelectedActivity(String(storedProfile.sportsFrequency || 'moderate'));
         
         // Load streak
         const streakData = await getStreak();
