@@ -1,13 +1,13 @@
 App/build
 App/Pods
 App/output
-App/App/public
+# App/App/public  # Needed for Xcode Cloud
 DerivedData
 xcuserdata
 
 # Cordova plugins for Capacitor
 capacitor-cordova-ios-plugins
 
-# Generated Config files
-App/App/capacitor.config.json
-App/App/config.xml
+# Generated Config files - Needed for Xcode Cloud
+# App/App/capacitor.config.json
+# App/App/config.xml
