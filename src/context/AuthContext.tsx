@@ -3,7 +3,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase';
-import { syncLocalDataToSupabase } from '@/lib/supabase-data';
+import { syncLocalDataToSupabase, syncSupabaseToLocal } from '@/lib/supabase-data';
+import { syncFromCloud } from '@/lib/storage';
 
 interface AuthContextType {
   user: User | null;
@@ -68,9 +69,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(session?.user ?? null);
         setIsLoading(false);
 
-        // Sync local data to Supabase after login
+        // Sync data after login
         if (event === 'SIGNED_IN' && session?.user) {
+          console.log('User signed in, syncing data...');
+          // First push local data to cloud
           await syncLocalDataToSupabase();
+          // Then pull cloud data to local (to get data from other devices)
+          await syncFromCloud();
+          console.log('Data sync complete!');
         }
       }
     );

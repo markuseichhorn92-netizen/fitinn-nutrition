@@ -8,9 +8,24 @@ const WATER_KEY = 'fitinn_water_intake';
 const FAVORITES_KEY = 'fitinn_favorites';
 const SCANNED_ITEMS_KEY = 'fitinn_scanned_items';
 
+// Import Supabase sync functions dynamically to avoid circular deps
+let supabaseData: any = null;
+async function getSupabaseData() {
+  if (!supabaseData) {
+    supabaseData = await import('./supabase-data');
+  }
+  return supabaseData;
+}
+
+// =============================================================================
+// PROFILE
+// =============================================================================
+
 export function saveProfile(profile: UserProfile): void {
   if (typeof window !== 'undefined') {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+    // Also sync to Supabase (async, fire and forget)
+    getSupabaseData().then(sb => sb.saveUserProfile(profile)).catch(console.error);
   }
 }
 
@@ -22,11 +37,17 @@ export function loadProfile(): UserProfile | null {
   return null;
 }
 
+// =============================================================================
+// DAY PLANS
+// =============================================================================
+
 export function saveDayPlan(date: string, plan: DayPlan): void {
   if (typeof window !== 'undefined') {
     const plans = loadAllPlans();
     plans[date] = plan;
     localStorage.setItem(PLAN_KEY, JSON.stringify(plans));
+    // Also sync to Supabase
+    getSupabaseData().then(sb => sb.saveDayPlan(date, plan)).catch(console.error);
   }
 }
 
@@ -36,6 +57,25 @@ export function loadDayPlan(date: string): DayPlan | null {
     return plans[date] || null;
   }
   return null;
+}
+
+// Async version that checks Supabase first
+export async function loadDayPlanAsync(date: string): Promise<DayPlan | null> {
+  try {
+    const sb = await getSupabaseData();
+    const cloudPlan = await sb.loadDayPlan(date);
+    if (cloudPlan) {
+      // Update local cache
+      const plans = loadAllPlans();
+      plans[date] = cloudPlan;
+      localStorage.setItem(PLAN_KEY, JSON.stringify(plans));
+      return cloudPlan;
+    }
+  } catch (e) {
+    console.error('Error loading from cloud:', e);
+  }
+  // Fallback to local
+  return loadDayPlan(date);
 }
 
 export function loadAllPlans(): Record<string, DayPlan> {
@@ -52,11 +92,17 @@ export function clearAllPlans(): void {
   }
 }
 
+// =============================================================================
+// WATER INTAKE
+// =============================================================================
+
 export function saveWaterIntake(date: string, amount: number): void {
   if (typeof window !== 'undefined') {
     const water = loadAllWaterIntake();
     water[date] = amount;
     localStorage.setItem(WATER_KEY, JSON.stringify(water));
+    // Also sync to Supabase
+    getSupabaseData().then(sb => sb.saveWaterIntake(date, amount, 8)).catch(console.error);
   }
 }
 
@@ -76,12 +122,18 @@ export function loadAllWaterIntake(): Record<string, number> {
   return {};
 }
 
+// =============================================================================
+// FAVORITES
+// =============================================================================
+
 export function saveFavorite(recipeId: string): void {
   if (typeof window !== 'undefined') {
     const favorites = loadFavorites();
     if (!favorites.includes(recipeId)) {
       favorites.push(recipeId);
       localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+      // Also sync to Supabase
+      getSupabaseData().then(sb => sb.addFavorite(recipeId)).catch(console.error);
     }
   }
 }
@@ -90,9 +142,11 @@ export function removeFavorite(recipeId: string): void {
   if (typeof window !== 'undefined') {
     const favorites = loadFavorites();
     const index = favorites.indexOf(recipeId);
-    if (index > -1) {
+    if (index !== -1) {
       favorites.splice(index, 1);
       localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+      // Also sync to Supabase
+      getSupabaseData().then(sb => sb.removeFavorite(recipeId)).catch(console.error);
     }
   }
 }
@@ -109,63 +163,37 @@ export function isFavorite(recipeId: string): boolean {
   return loadFavorites().includes(recipeId);
 }
 
-export function clearAllData(): void {
+// =============================================================================
+// SCANNED ITEMS
+// =============================================================================
+
+export function saveScannedItem(date: string, item: ScannedItem): void {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem(PROFILE_KEY);
-    localStorage.removeItem(PLAN_KEY);
-    localStorage.removeItem(WATER_KEY);
-    localStorage.removeItem(FAVORITES_KEY);
-    localStorage.removeItem(SCANNED_ITEMS_KEY);
+    const items = loadScannedItems(date);
+    items.push(item);
+    const key = `${SCANNED_ITEMS_KEY}_${date}`;
+    localStorage.setItem(key, JSON.stringify(items));
+    // Also sync to Supabase
+    getSupabaseData().then(sb => sb.saveScannedExtras(date, items)).catch(console.error);
   }
 }
 
-export function hasCompletedOnboarding(): boolean {
-  return loadProfile() !== null;
-}
-
-// Scanned Items Storage
 export function loadScannedItems(date: string): ScannedItem[] {
   if (typeof window !== 'undefined') {
-    const data = localStorage.getItem(SCANNED_ITEMS_KEY);
-    const allItems: Record<string, ScannedItem[]> = data ? JSON.parse(data) : {};
-    return allItems[date] || [];
+    const key = `${SCANNED_ITEMS_KEY}_${date}`;
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : [];
   }
   return [];
 }
 
-export function saveScannedItem(date: string, item: ScannedItem): void {
-  if (typeof window !== 'undefined') {
-    const data = localStorage.getItem(SCANNED_ITEMS_KEY);
-    const allItems: Record<string, ScannedItem[]> = data ? JSON.parse(data) : {};
-    if (!allItems[date]) {
-      allItems[date] = [];
-    }
-    allItems[date].push(item);
-    localStorage.setItem(SCANNED_ITEMS_KEY, JSON.stringify(allItems));
-  }
-}
-
 export function removeScannedItem(date: string, itemId: string): void {
   if (typeof window !== 'undefined') {
-    const data = localStorage.getItem(SCANNED_ITEMS_KEY);
-    const allItems: Record<string, ScannedItem[]> = data ? JSON.parse(data) : {};
-    if (allItems[date]) {
-      allItems[date] = allItems[date].filter(item => item.id !== itemId);
-      localStorage.setItem(SCANNED_ITEMS_KEY, JSON.stringify(allItems));
-    }
-  }
-}
-
-export function updateScannedItem(date: string, itemId: string, updates: Partial<ScannedItem>): void {
-  if (typeof window !== 'undefined') {
-    const data = localStorage.getItem(SCANNED_ITEMS_KEY);
-    const allItems: Record<string, ScannedItem[]> = data ? JSON.parse(data) : {};
-    if (allItems[date]) {
-      allItems[date] = allItems[date].map(item => 
-        item.id === itemId ? { ...item, ...updates } : item
-      );
-      localStorage.setItem(SCANNED_ITEMS_KEY, JSON.stringify(allItems));
-    }
+    const items = loadScannedItems(date).filter(item => item.id !== itemId);
+    const key = `${SCANNED_ITEMS_KEY}_${date}`;
+    localStorage.setItem(key, JSON.stringify(items));
+    // Also sync to Supabase
+    getSupabaseData().then(sb => sb.saveScannedExtras(date, items)).catch(console.error);
   }
 }
 
@@ -173,11 +201,81 @@ export function getScannedItemsTotal(date: string): { calories: number; protein:
   const items = loadScannedItems(date);
   return items.reduce(
     (acc, item) => ({
-      calories: acc.calories + item.nutrition.calories,
-      protein: acc.protein + item.nutrition.protein,
-      carbs: acc.carbs + item.nutrition.carbs,
-      fat: acc.fat + item.nutrition.fat,
+      calories: acc.calories + (item.nutrition?.calories || 0),
+      protein: acc.protein + (item.nutrition?.protein || 0),
+      carbs: acc.carbs + (item.nutrition?.carbs || 0),
+      fat: acc.fat + (item.nutrition?.fat || 0),
     }),
     { calories: 0, protein: 0, carbs: 0, fat: 0 }
   );
+}
+
+// =============================================================================
+// CLEAR ALL DATA
+// =============================================================================
+
+export function clearAllData(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(PROFILE_KEY);
+    localStorage.removeItem(PLAN_KEY);
+    localStorage.removeItem(WATER_KEY);
+    localStorage.removeItem(FAVORITES_KEY);
+    // Clear scanned items for all dates
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith(SCANNED_ITEMS_KEY)) {
+        localStorage.removeItem(key);
+      }
+    });
+  }
+}
+
+// =============================================================================
+// INITIAL SYNC (call on app start when user is logged in)
+// =============================================================================
+
+export async function syncFromCloud(): Promise<void> {
+  try {
+    const sb = await getSupabaseData();
+    
+    // Sync profile
+    const cloudProfile = await sb.loadUserProfile();
+    if (cloudProfile) {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(cloudProfile));
+    }
+    
+    // Sync favorites
+    const cloudFavorites = await sb.getFavorites();
+    if (cloudFavorites.length > 0) {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(cloudFavorites));
+    }
+    
+    // Sync recent meal plans (last 7 days)
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const cloudPlan = await sb.loadDayPlan(dateStr);
+      if (cloudPlan) {
+        const plans = loadAllPlans();
+        plans[dateStr] = cloudPlan;
+        localStorage.setItem(PLAN_KEY, JSON.stringify(plans));
+      }
+    }
+    
+    console.log('Cloud sync complete!');
+  } catch (e) {
+    console.error('Error syncing from cloud:', e);
+  }
+}
+
+export async function syncToCloud(): Promise<void> {
+  try {
+    const sb = await getSupabaseData();
+    await sb.syncLocalDataToSupabase();
+    console.log('Sync to cloud complete!');
+  } catch (e) {
+    console.error('Error syncing to cloud:', e);
+  }
 }
