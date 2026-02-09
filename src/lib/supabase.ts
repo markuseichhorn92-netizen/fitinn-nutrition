@@ -1,9 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Check if Supabase is configured
+export function isSupabaseConfigured(): boolean {
+  return !!(supabaseUrl && supabaseAnonKey && supabaseUrl !== 'https://your-project.supabase.co');
+}
+
+// Singleton instance
+let supabaseInstance: SupabaseClient | null = null;
+
+export function getSupabaseClient(): SupabaseClient | null {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+  
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl!, supabaseAnonKey!);
+  }
+  
+  return supabaseInstance;
+}
+
+// Legacy export for compatibility
+export const supabase = isSupabaseConfigured() 
+  ? createClient(supabaseUrl!, supabaseAnonKey!) 
+  : null as any;
 
 // Type definitions for database
 export interface Profile {
@@ -39,3 +62,7 @@ export interface ScannedExtraRecord {
   products: any[];
   created_at: string;
 }
+
+// Aliases for compatibility with existing code
+export type DbProfile = Profile;
+export type DbMealPlan = MealPlanRecord;

@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function UserMenu() {
-  const { user, profile, signOut, loading } = useAuth();
+  const { user, signOut, isLoading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
     );
@@ -29,7 +29,7 @@ export default function UserMenu() {
   }
 
   const initials = user.email?.slice(0, 2).toUpperCase() || '??';
-  const displayName = profile?.email || user.email || 'Benutzer';
+  const displayName = user.email || 'Benutzer';
 
   return (
     <div className="relative">

@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signInWithGoogle, signInWithApple, signInWithEmail, signUpWithEmail, user } = useAuth();
+  const { signIn, signUp, user, isConfigured } = useAuth();
   
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
@@ -42,14 +42,14 @@ export default function LoginPage() {
           return;
         }
         
-        const { error } = await signUpWithEmail(email, password);
+        const { error } = await signUp(email, password);
         if (error) {
           setError(error.message);
         } else {
           setSuccess('Registrierung erfolgreich! Bitte bestätige deine E-Mail.');
         }
       } else {
-        const { error } = await signInWithEmail(email, password);
+        const { error } = await signIn(email, password);
         if (error) {
           setError('Ungültige E-Mail oder Passwort');
         } else {
@@ -64,23 +64,13 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
-    try {
-      setLoading(true);
-      await signInWithGoogle();
-    } catch (err: any) {
-      setError(err.message);
-      setLoading(false);
-    }
+    // Google Sign In - requires Supabase OAuth setup
+    setError('Google Login wird bald verfügbar sein. Nutze vorerst E-Mail.');
   };
 
   const handleAppleLogin = async () => {
-    try {
-      setLoading(true);
-      await signInWithApple();
-    } catch (err: any) {
-      setError(err.message);
-      setLoading(false);
-    }
+    // Apple Sign In - requires Supabase OAuth setup
+    setError('Apple Login wird bald verfügbar sein. Nutze vorerst E-Mail.');
   };
 
   return (
