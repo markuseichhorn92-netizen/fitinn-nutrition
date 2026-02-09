@@ -6,17 +6,8 @@ export function isNativeApp(): boolean {
   return !!(window as any).Capacitor?.isNativePlatform?.();
 }
 
-// Check if a Capacitor plugin is available
-async function isPluginAvailable(pluginName: string): Promise<boolean> {
-  try {
-    const { Capacitor } = await import('@capacitor/core');
-    return Capacitor.isPluginAvailable(pluginName);
-  } catch {
-    return false;
-  }
-}
-
-// Open OAuth in Capacitor Browser (for native apps)
+// Open OAuth - ALWAYS use redirect (not separate browser)
+// This ensures session cookies are shared with the WebView
 export async function openOAuthInBrowser(provider: 'google' | 'apple'): Promise<void> {
   const supabase = getSupabaseClient();
   if (!supabase) {
@@ -27,96 +18,34 @@ export async function openOAuthInBrowser(provider: 'google' | 'apple'): Promise<
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      skipBrowserRedirect: true,
+      // DON'T skip browser redirect - let it happen in the WebView
+      skipBrowserRedirect: false,
       redirectTo: `${window.location.origin}/auth/callback`,
     },
   });
 
   if (error) throw error;
-  if (!data.url) throw new Error('Keine OAuth URL erhalten');
-
-  if (isNativeApp()) {
-    // Check if Browser plugin is available
-    const browserAvailable = await isPluginAvailable('Browser');
-    
-    if (browserAvailable) {
-      try {
-        const { Browser } = await import('@capacitor/browser');
-        
-        // Check if App plugin is available for state change listener
-        const appAvailable = await isPluginAvailable('App');
-        
-        if (appAvailable) {
-          try {
-            const { App } = await import('@capacitor/app');
-            
-            // Add listener for when app resumes (user comes back from browser)
-            const resumeListener = await App.addListener('appStateChange', async ({ isActive }) => {
-              if (isActive) {
-                // Check if we have a session now
-                const { data: sessionData } = await supabase.auth.getSession();
-                if (sessionData.session) {
-                  // We're logged in! Close the browser and navigate
-                  await Browser.close();
-                  window.location.href = '/plan';
-                }
-                // Remove listener after handling
-                resumeListener.remove();
-              }
-            });
-          } catch (e) {
-            console.warn('App plugin not available, skipping state listener:', e);
-          }
-        }
-
-        // Open the OAuth URL in the in-app browser
-        await Browser.open({ 
-          url: data.url,
-          presentationStyle: 'popover',
-        });
-      } catch (e) {
-        console.error('Browser plugin error:', e);
-        // Fallback: open in system browser
-        window.open(data.url, '_blank');
-      }
-    } else {
-      // Fallback: open in system browser
-      window.open(data.url, '_blank');
-    }
-  } else {
-    // Web: just redirect
+  
+  // The signInWithOAuth with skipBrowserRedirect: false 
+  // will automatically redirect, but just in case:
+  if (data.url) {
     window.location.href = data.url;
   }
 }
 
-// Alternative: Handle OAuth with URL listener (setup on app start)
-export async function setupOAuthListener(): Promise<void> {
-  if (!isNativeApp()) return;
+// Alternative function that returns URL instead of redirecting
+export async function getOAuthUrl(provider: 'google' | 'apple'): Promise<string | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
 
-  const appAvailable = await isPluginAvailable('App');
-  if (!appAvailable) {
-    console.warn('App plugin not available, OAuth deep link listener not set up');
-    return;
-  }
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      skipBrowserRedirect: true,
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
+  });
 
-  try {
-    const { App } = await import('@capacitor/app');
-    
-    // Listen for deep links / URL opens
-    App.addListener('appUrlOpen', async ({ url }) => {
-      // Check if this is our OAuth callback
-      if (url.includes('/auth/callback') || url.includes('access_token')) {
-        const supabase = getSupabaseClient();
-        if (supabase) {
-          // Try to get session from URL
-          const { data } = await supabase.auth.getSession();
-          if (data.session) {
-            window.location.href = '/plan';
-          }
-        }
-      }
-    });
-  } catch (e) {
-    console.warn('Failed to setup OAuth listener:', e);
-  }
+  if (error || !data.url) return null;
+  return data.url;
 }
